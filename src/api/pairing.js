@@ -25,6 +25,7 @@ const pairing = {
       layover_stn: 'HND',
       hotel: 'The Westin Tokyo HND DT',
       layover_expenses: { B: 1, L: 1, D: 2, S: 1 },
+      layover_expenses_total: '127.89',
       layover_length: '24:45',
     },
     {
