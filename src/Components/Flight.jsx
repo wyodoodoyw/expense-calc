@@ -1,17 +1,17 @@
 /* eslint-disable react/prop-types */
 function Flight(props) {
+  let flight = props.flight;
+
   const handleTimeChange = (e) => {
-    let dept_time = 0;
-    let arrival_time = 0;
     if (e.target.id === 'dept_time') {
-      dept_time = e.target.value;
-      arrival_time = document.getElementById('arrival_time').value;
+      flight.dept_time = e.target.value;
+      flight.arrival_time = document.getElementById('arrival_time').value;
     } else if (e.target.id === 'arrival_time') {
-      arrival_time = e.target.value;
-      dept_time = document.getElementById('dept_time').value;
+      flight.arrival_time = e.target.value;
+      flight.dept_time = document.getElementById('dept_time').value;
     }
 
-    console.log(`!${dept_time}, ${arrival_time}`);
+    console.log(`!${flight.dept_time}, ${flight.arrival_time}`);
   };
 
   return (
@@ -19,9 +19,9 @@ function Flight(props) {
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
         <form>
           <div className="mb-3">
-            <lable htmlFor="flight_no" className="form-no">
+            <label htmlFor="flight_no" className="form-no">
               Flight Number / Numéro du vol:
-            </lable>
+            </label>
             <div className="input-group mb-3" id="flight_info">
               <span className="input-group-text">AC</span>
               <input
@@ -34,9 +34,9 @@ function Flight(props) {
             </div>
           </div>
           <div className="form-group">
-            <lable htmlFor="flight_no" className="form-no">
+            <label htmlFor="flight_no" className="form-no">
               Departure Station:
-            </lable>
+            </label>
             <div className="input-group">
               <span className="input-group-text">🛫</span>
               <input
@@ -59,9 +59,9 @@ function Flight(props) {
           </div>
           <div className="text-center">↓</div>
           <div className="form-group">
-            <lable htmlFor="flight_no" className="form-no">
+            <label htmlFor="flight_no" className="form-no">
               Arrival Station:
-            </lable>
+            </label>
             <div className="input-group">
               <span className="input-group-text">🛬</span>
               <input
@@ -84,34 +84,36 @@ function Flight(props) {
           </div>
         </form>
         <table className="table table-striped table-bordered mt-3 text-center">
-          <tr>
-            <th>Breakfast</th>
-            <th>Lunch</th>
-            <th>Dinner</th>
-            <th>Snack</th>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>1</td>
-            <td>1</td>
-            <td>1</td>
-            <td className="colspan"></td>
-          </tr>
-          <tr>
-            <td>$29.91</td>
-            <td>$49.96</td>
-            <td>$57.26</td>
-            <td>$20.36</td>
-          </tr>
-          <tr>
-            <td>$29.91</td>
-            <td>$49.96</td>
-            <td>$57.26</td>
-            <td>$20.36</td>
-          </tr>
+          <tbody>
+            <tr>
+              <th>Breakfast</th>
+              <th>Lunch</th>
+              <th>Dinner</th>
+              <th>Snack</th>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td>1</td>
+              <td className="colspan"></td>
+            </tr>
+            <tr>
+              <td>$29.91</td>
+              <td>$49.96</td>
+              <td>$57.26</td>
+              <td>$20.36</td>
+            </tr>
+            <tr>
+              <td>$29.91</td>
+              <td>$49.96</td>
+              <td>$57.26</td>
+              <td>$20.36</td>
+            </tr>
+          </tbody>
           <tfoot className="table-success">
-            <th>Total:</th>
-            <th colSpan={3}>$$$$$</th>
+            <td>Total:</td>
+            <td colSpan={3}>$$$$$</td>
           </tfoot>
         </table>
       </div>

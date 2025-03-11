@@ -22,8 +22,7 @@ function App() {
       display.push(
         <Layover
           index={pairing.sequence[i].index}
-          layover_stn={pairing.sequence[i].layover_stn}
-          layover_expenses={pairing.sequence[i].layover_expenses}
+          layover={pairing.sequence[i]}
         />
       );
     }
