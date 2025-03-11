@@ -1,10 +1,9 @@
 /* eslint-disable react/prop-types */
-import expenses from '../api/expense';
+import expenses from '../api/expenses';
+
 function Layover(props) {
   let layover = props.layover;
-  let layover_expenses = props.layover_expenses; //{ breakfast: 1, lunch: 1, dinner: 2, snack: 1, cico: 1}
-  let layover_expenses_total = props.layover_expenses_total; //$127.89
-  let layover_length = props.layover_length; // 24:45
+  let new_layover = props.layover;
   let location_expenses = expenses.expenses; // { breakfast: 29.91, lunch: 49.96, dinner: 57.26, snack: 20.36, day: 157.49 }
 
   const calculateDays = (layover_length) => {
@@ -12,76 +11,58 @@ function Layover(props) {
     return Math.floor(days);
   };
 
-  const calculateFirstExpenses = () => {
+  const calculateFirstDayExpenses = () => {
+    console.log(`!${layover.layover_start}`);
     if (layover.layover_start < '12:30') {
       // B L D S
-      return { breakfast: 1, lunch: 1, dinner: 1, snack: 1 };
+      return 'BLDS';
     } else if (
       layover.layover_start >= '12:30' &&
       layover.layover_start < '13:30'
     ) {
       // L D S
-      return { breakfast: 0, lunch: 1, dinner: 1, snack: 1 };
+      return 'LDS';
     } else if (layover.layover_start >= '13:30') {
       // D S
-      return { breakfast: 0, lunch: 0, dinner: 1, snack: 1 };
+      return 'DS';
     } else {
       // error
       console.log('!error');
     }
   };
 
-  const calculateLastExpenses = () => {
+  const calculateLastDayExpenses = () => {
     if (layover.layover_end >= '7:00' && layover.layover_end < '12:00') {
       // B
-      return { breakfast: 1, lunch: 0, dinner: 0, snack: 0 };
+      return 'B';
     } else if (
       layover.layover_end >= '11:30' &&
       layover.layover_end < '17:00'
     ) {
       // B L
-      return { breakfast: 1, lunch: 1, dinner: 0, snack: 0 };
+      return 'BL';
     } else if (
       layover.layover_end >= '17:00' &&
       layover.layover_end < '22:00'
     ) {
       // B L D
-      return { breakfast: 1, lunch: 1, dinner: 1, snack: 0 };
+      return 'BLD';
     } else if (layover.layover_end >= '22:00' && layover.layover_end < '1:00') {
       // B L D S
-      return { breakfast: 1, lunch: 1, dinner: 1, snack: 1 };
+      return 'BLDS';
     } else {
       //error, or no further allowance
     }
   };
 
-  let new_expenses = {
-    breakfast: 0,
-    lunch: 0,
-    dinner: 0,
-    snack: 0,
-    cico: 0,
-  };
-
   const calculateNewExpenses = () => {
-    const new_expensesDayOne = calculateFirstExpenses();
-    const new_expensesDayLast = calculateLastExpenses();
-
-    new_expenses.breakfast =
-      new_expensesDayOne.breakfast + new_expensesDayLast.breakfast;
-    new_expenses.lunch = new_expensesDayOne.lunch + new_expensesDayLast.lunch;
-    new_expenses.dinner =
-      new_expensesDayOne.dinner + new_expensesDayLast.dinner;
-    new_expenses.snack = new_expensesDayOne.snack + new_expensesDayLast.snack;
-
-    for (const [key, value] of Object.entries(new_expenses)) {
-      console.log(key, value);
-    }
-    // for (const [key, value] of Object.entries(new_expensesDayLast)) {
-    //   console.log(key, value);
-    // }
+    new_layover.layover_expenses = '';
+    new_layover.layover_expenses += calculateFirstDayExpenses();
+    new_layover.layover_expenses += calculateLastDayExpenses();
+    console.log(`!${new_layover.layover_expenses}`);
   };
-  const handleTimeChange = (e) => {
+
+  const handleTimeChange = () => {
     calculateNewExpenses();
     // if (e.target.id === 'layover_end') {
     //   //const old_layover_end = layover.layover_end;
@@ -92,6 +73,48 @@ function Layover(props) {
     //   layover.layover_start = e.target.value;
     //   layover.layover_end = document.getElementById('layover_end').value;
     // }
+  };
+
+  const calculateNumBreakfasts = () => {
+    return (new_layover.layover_expenses.match(/B/g) || []).length;
+  };
+
+  const calculateNumLunches = () => {
+    return (new_layover.layover_expenses.match(/L/g) || []).length;
+  };
+
+  const calculateNumDinners = () => {
+    return (new_layover.layover_expenses.match(/D/g) || []).length;
+  };
+
+  const calculateNumSnacks = () => {
+    return (new_layover.layover_expenses.match(/S/g) || []).length;
+  };
+
+  const calculateDisplayBreakfastTotal = () => {
+    return calculateNumBreakfasts() * location_expenses.breakfast;
+  };
+
+  const calculateDisplayLunchTotal = () => {
+    return calculateNumLunches() * location_expenses.lunch;
+  };
+
+  const calculateDisplayDinnerTotal = () => {
+    return calculateNumDinners() * location_expenses.dinner;
+  };
+
+  const calculateDisplaySnackTotal = () => {
+    return calculateNumSnacks() * location_expenses.snack;
+  };
+
+  const calculateDisplayTotal = () => {
+    return (
+      calculateDisplayBreakfastTotal() +
+      calculateDisplayLunchTotal() +
+      calculateDisplayDinnerTotal() +
+      calculateDisplaySnackTotal() +
+      new_layover.layover_cico * 5.05
+    );
   };
 
   return (
@@ -106,7 +129,7 @@ function Layover(props) {
                 type="text"
                 className="col-11 form-control"
                 placeholder="YUL"
-                value={props.layover_stn}
+                value={new_layover.layover_stn}
               />
             </div>
           </div>
@@ -119,7 +142,7 @@ function Layover(props) {
               type="time"
               className="form-control"
               placeholder="11:00"
-              value={layover.layover_start}
+              defaultValue={layover.layover_start}
               onChange={handleTimeChange}
             />
 
@@ -132,45 +155,46 @@ function Layover(props) {
               type="time"
               className="form-control"
               placeholder="12:18"
-              value={layover.layover_end}
+              defaultValue={layover.layover_end}
               onChange={handleTimeChange}
             />
           </div>
         </form>
         <table className="table table-striped table-bordered mt-3 text-center">
-          <tr>
-            <th>Breakfast</th>
-            <th>Lunch</th>
-            <th>Dinner</th>
-            <th>Snack</th>
-            <th>CI/CO</th>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>1</td>
-            <td>1</td>
-            <td>1</td>
-            <td>1</td>
-            <td className="colspan"></td>
-          </tr>
-          <tr>
-            <td>$29.91</td>
-            <td>$49.96</td>
-            <td>$57.26</td>
-            <td>$20.36</td>
-            <td>$5.05</td>
-          </tr>
-          <tr>
-            <td>$29.91</td>
-            <td>$49.96</td>
-            <td>$57.26</td>
-            <td>$20.36</td>
-            <td>$5.05</td>
-          </tr>
-          <tfoot className="table-success">
-            <td>Total:</td>
-            <td colSpan={4}>$$$$$</td>
-          </tfoot>
+          <tbody>
+            <tr>
+              <th>Breakfast</th>
+              <th>Lunch</th>
+              <th>Dinner</th>
+              <th>Snack</th>
+              <th>CI/CO</th>
+            </tr>
+            <tr>
+              <td>{calculateNumBreakfasts()}</td>
+              <td>{calculateNumLunches()}</td>
+              <td>{calculateNumDinners()}</td>
+              <td>{calculateNumSnacks()}</td>
+              <td>{new_layover.layover_cico}</td>
+            </tr>
+            <tr>
+              <td>${location_expenses.breakfast}</td>
+              <td>${location_expenses.lunch}</td>
+              <td>${location_expenses.dinner}</td>
+              <td>${location_expenses.snack}</td>
+              <td>$5.05</td>
+            </tr>
+            <tr>
+              <td>${calculateDisplayBreakfastTotal()}</td>
+              <td>${calculateDisplayLunchTotal()}</td>
+              <td>${calculateDisplayDinnerTotal()}</td>
+              <td>${calculateDisplaySnackTotal()}</td>
+              <td>${new_layover.layover_cico * 5.05}</td>
+            </tr>
+            <tr className="table-success">
+              <td>Total:</td>
+              <td colSpan={4}>${calculateDisplayTotal()}</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </>

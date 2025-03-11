@@ -29,7 +29,7 @@ function Flight(props) {
                 type="text"
                 className="col-11 form-control"
                 placeholder="0000"
-                value={props.flight_no}
+                defaultValue={flight.flight_no}
               />
             </div>
           </div>
@@ -43,15 +43,15 @@ function Flight(props) {
                 type="text"
                 className="form-control"
                 placeholder="AAA"
-                value={props.dept_stn}
+                defaultValue={flight.dept_stn}
               />
               <div className="form-group timepicker">
                 <input
                   type="time"
                   id="dept_time"
                   className="form-control"
-                  placeholder={props.dept_time}
-                  // value=
+                  placeholder={flight.dept_time}
+                  defaultValue={flight.dept_time}
                   onChange={handleTimeChange}
                 />
               </div>
@@ -68,15 +68,15 @@ function Flight(props) {
                 type="text"
                 className="form-control"
                 placeholder="YYY"
-                value={props.arrival_stn}
+                defaultValue={flight.arrival_stn}
               />
               <div className="form-group">
                 <input
                   id="arrival_time"
                   type="time"
                   className="form-control"
-                  placeholder={props.arrival_time}
-                  // value=
+                  placeholder={flight.arrival_time}
+                  defaultValue={flight.arrival_time}
                   onChange={handleTimeChange}
                 />
               </div>
@@ -96,7 +96,6 @@ function Flight(props) {
               <td>1</td>
               <td>1</td>
               <td>1</td>
-              <td className="colspan"></td>
             </tr>
             <tr>
               <td>$29.91</td>
@@ -109,12 +108,13 @@ function Flight(props) {
               <td>$49.96</td>
               <td>$57.26</td>
               <td>$20.36</td>
+            </tr>
+
+            <tr className="table-success">
+              <td>Total:</td>
+              <td colSpan={3}>$$$$$</td>
             </tr>
           </tbody>
-          <tfoot className="table-success">
-            <td>Total:</td>
-            <td colSpan={3}>$$$$$</td>
-          </tfoot>
         </table>
       </div>
     </>

@@ -8,23 +8,9 @@ function App() {
 
   for (let i = 0; i < pairing.sequence.length; i++) {
     if (pairing.sequence[i].type === 'flight') {
-      display.push(
-        <Flight
-          index={pairing.sequence[i].index}
-          flight_no={pairing.sequence[i].flight_no}
-          dept_stn={pairing.sequence[i].dept_stn}
-          arrival_stn={pairing.sequence[i].arrival_stn}
-          dept_time={pairing.sequence[i].dept_time}
-          arrival_time={pairing.sequence[i].arrival_time}
-        />
-      );
+      // display.push(<Flight key={i} flight={pairing.sequence[i]} />);
     } else if (pairing.sequence[i].type === 'layover') {
-      display.push(
-        <Layover
-          index={pairing.sequence[i].index}
-          layover={pairing.sequence[i]}
-        />
-      );
+      display.push(<Layover key={i} layover={pairing.sequence[i]} />);
     }
   }
 
