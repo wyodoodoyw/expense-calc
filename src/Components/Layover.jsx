@@ -1,15 +1,27 @@
 /* eslint-disable react/prop-types */
 import expenses from '../api/expenses';
+import { useState, useEffect } from 'react';
+import { TimePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 
 function Layover(props) {
   let layover = props.layover;
   let new_layover = props.layover;
   let location_expenses = expenses.expenses; // { breakfast: 29.91, lunch: 49.96, dinner: 57.26, snack: 20.36, day: 157.49 }
 
-  const calculateDays = (layover_length) => {
-    const days = layover_length.split(':')[0] / 24;
-    return Math.floor(days);
-  };
+  const [layoverStart, setLayoverStart] = useState(layover.layover_start);
+  const [layoverEnd, setLayoverEnd] = useState(layover.layover_end);
+  const [fullDays, setFullDays] = useState(0);
+
+  // useEffect(() => {
+  //   calculateFullDays();
+  // }, []);
+
+  // const calculateFullDays = () => {
+  //   const fullLength = layover.layover_end.diff(layover.layover_start);
+  //   console.log(`!${fullLength}`);
+  //   setFullDays(fullLength);
+  // };
 
   const calculateFirstDayExpenses = () => {
     console.log(`!${layover.layover_start}`);
@@ -62,17 +74,14 @@ function Layover(props) {
     console.log(`!${new_layover.layover_expenses}`);
   };
 
-  const handleTimeChange = () => {
+  const handleTimeChange = (e) => {
+    if (e.target.id === 'layover_start') {
+      setLayoverStart(dayjs(e.target.value));
+    } else if (e.target.id === 'layover_end') {
+      setLayoverEnd(e.target.value);
+    }
+    console.log(`!${layoverStart}`);
     calculateNewExpenses();
-    // if (e.target.id === 'layover_end') {
-    //   //const old_layover_end = layover.layover_end;
-    //   layover.layover_end = e.target.value;
-    //   layover.layover_start = document.getElementById('layover_start').value;
-    // } else if (e.target.id === 'layover_start') {
-    //   //const old_layover_start = layover.layover_start;
-    //   layover.layover_start = e.target.value;
-    //   layover.layover_end = document.getElementById('layover_end').value;
-    // }
   };
 
   const calculateNumBreakfasts = () => {
@@ -114,7 +123,23 @@ function Layover(props) {
       calculateDisplayDinnerTotal() +
       calculateDisplaySnackTotal() +
       new_layover.layover_cico * 5.05
-    );
+    ).toFixed(2);
+  };
+
+  const handleStepper = (e) => {
+    if (e.target.id === 'plus') {
+      setFullDays(fullDays + 1);
+      new_layover.layover_expenses += 'BLDS';
+      // console.log(`!${new_layover.layover_expenses}`);
+    } else if (fullDays > 0 && e.target.id === 'minus') {
+      setFullDays(fullDays - 1);
+
+      new_layover.layover_expenses = new_layover.layover_expenses.replace(
+        'BLDS',
+        ''
+      );
+      // console.log(`!${new_layover.layover_expenses}`);
+    }
   };
 
   return (
@@ -130,39 +155,77 @@ function Layover(props) {
                 className="col-11 form-control"
                 placeholder="YUL"
                 value={new_layover.layover_stn}
+                readOnly
               />
             </div>
           </div>
-          <div className="row form-group input-group">
-            <label htmlFor="layover_start_time" className="form-no">
-              Start Time:
-            </label>
-            <input
-              id="layover_start"
-              type="time"
-              className="form-control"
-              placeholder="11:00"
-              defaultValue={layover.layover_start}
-              onChange={handleTimeChange}
-            />
+          <div className="input-group">
+            <div className="input-group mb-3">
+              <span className="input-group-text">Start Time: </span>
 
-            <label htmlFor="layover_end_time" className="form-no">
-              End Time:
-            </label>
+              <TimePicker
+                id="layover_start"
+                value={dayjs(layoverStart)}
+                onChange={(e) => setLayoverStart(e.target.value)}
+              />
+              <div className="form-text ms-3" id="basic-addon1">
+                Layover starts 15 minutes after actual arrival time.
+              </div>
+            </div>
 
-            <input
-              id="layover_end"
-              type="time"
-              className="form-control"
-              placeholder="12:18"
-              defaultValue={layover.layover_end}
-              onChange={handleTimeChange}
-            />
+            <div className="input-group">
+              <span className="input-group-text">End Time: </span>
+              {/* <input
+                id="layover_end"
+                type="time"
+                className="form-control"
+                placeholder="12:18"
+                value={layoverEnd}
+                onChange={handleStepper}
+                //(e) => setLayoverEnd(e.target.value)
+              /> */}
+              <TimePicker
+                id="layover_end"
+                value={dayjs(layoverEnd)}
+                onChange={(e) => setLayoverEnd(e.target.value)}
+              />
+              <div className="form-text ms-3" id="basic-addon1">
+                Layover ends 1 hour before actual departure time.
+              </div>
+            </div>
+          </div>
+          <div
+            className="btn-group align-middle mt-3"
+            role="group"
+            aria-label="Stepper"
+          >
+            <button
+              id="minus"
+              type="button"
+              className="btn btn-outline-primary me-2"
+              onClick={handleStepper}
+            >
+              -
+            </button>
+            <span id="days-stepper">{fullDays}</span>
+            <button
+              id="plus"
+              type="button"
+              className="btn btn-outline-primary ms-2"
+              onClick={handleStepper}
+            >
+              +
+            </button>
+            <div className="form-text ms-3" id="basic-addon1">
+              Number of full days (00:00-23:59) on layover. Do not include the
+              first and last days.
+            </div>
           </div>
         </form>
         <table className="table table-striped table-bordered mt-3 text-center">
           <tbody>
             <tr>
+              <th></th>
               <th>Breakfast</th>
               <th>Lunch</th>
               <th>Dinner</th>
@@ -170,6 +233,7 @@ function Layover(props) {
               <th>CI/CO</th>
             </tr>
             <tr>
+              <td></td>
               <td>{calculateNumBreakfasts()}</td>
               <td>{calculateNumLunches()}</td>
               <td>{calculateNumDinners()}</td>
@@ -177,6 +241,7 @@ function Layover(props) {
               <td>{new_layover.layover_cico}</td>
             </tr>
             <tr>
+              <td>x</td>
               <td>${location_expenses.breakfast}</td>
               <td>${location_expenses.lunch}</td>
               <td>${location_expenses.dinner}</td>
@@ -184,6 +249,7 @@ function Layover(props) {
               <td>$5.05</td>
             </tr>
             <tr>
+              <td>=</td>
               <td>${calculateDisplayBreakfastTotal()}</td>
               <td>${calculateDisplayLunchTotal()}</td>
               <td>${calculateDisplayDinnerTotal()}</td>
@@ -192,7 +258,7 @@ function Layover(props) {
             </tr>
             <tr className="table-success">
               <td>Total:</td>
-              <td colSpan={4}>${calculateDisplayTotal()}</td>
+              <td colSpan={5}>${calculateDisplayTotal()}</td>
             </tr>
           </tbody>
         </table>
