@@ -2,6 +2,7 @@ import './App.css';
 import pairing from './api/pairing';
 import Flight from './Components/Flight';
 import Layover from './Components/Layover';
+import AddButton from './Components/AddButton';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
@@ -25,6 +26,7 @@ function App() {
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             {display}
           </LocalizationProvider>
+          {/* <AddButton /> */}
         </div>
       </div>
     </>

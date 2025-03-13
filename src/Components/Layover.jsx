@@ -1,87 +1,48 @@
 /* eslint-disable react/prop-types */
 import expenses from '../api/expenses';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
+
+dayjs.extend(isBetween);
 
 function Layover(props) {
   let layover = props.layover;
-  let new_layover = props.layover;
+  let new_layover = layover;
+  new_layover.layover_start = dayjs(`2000-01-01 ${new_layover.layover_start}`);
+  new_layover.layover_end = dayjs(`2000-01-01 ${new_layover.layover_end}`);
   let location_expenses = expenses.expenses; // { breakfast: 29.91, lunch: 49.96, dinner: 57.26, snack: 20.36, day: 157.49 }
 
   const [layoverStart, setLayoverStart] = useState(layover.layover_start);
   const [layoverEnd, setLayoverEnd] = useState(layover.layover_end);
+
   const [fullDays, setFullDays] = useState(0);
 
-  // useEffect(() => {
-  //   calculateFullDays();
-  // }, []);
-
-  // const calculateFullDays = () => {
-  //   const fullLength = layover.layover_end.diff(layover.layover_start);
-  //   console.log(`!${fullLength}`);
-  //   setFullDays(fullLength);
-  // };
-
   const calculateFirstDayExpenses = () => {
-    console.log(`!${layover.layover_start}`);
-    if (layover.layover_start < '12:30') {
-      // B L D S
+    const time = new_layover.layover_start;
+    if (time.isBefore('2000-01-01 12:30')) {
       return 'BLDS';
-    } else if (
-      layover.layover_start >= '12:30' &&
-      layover.layover_start < '13:30'
-    ) {
-      // L D S
+    } else if (time.isBetween('2000-01-01 12:30', dayjs('2000-01-01 13:30'))) {
       return 'LDS';
-    } else if (layover.layover_start >= '13:30') {
-      // D S
-      return 'DS';
     } else {
-      // error
-      console.log('!error');
+      return 'DS';
     }
   };
 
   const calculateLastDayExpenses = () => {
-    if (layover.layover_end >= '7:00' && layover.layover_end < '12:00') {
-      // B
+    const time = new_layover.layover_end;
+    if (time.isBetween('2000-01-01 7:00', dayjs('2000-01-01 11:29'))) {
       return 'B';
-    } else if (
-      layover.layover_end >= '11:30' &&
-      layover.layover_end < '17:00'
-    ) {
-      // B L
+    } else if (time.isBetween('2000-01-01 11:30', dayjs('2000-01-01 16:59'))) {
       return 'BL';
-    } else if (
-      layover.layover_end >= '17:00' &&
-      layover.layover_end < '22:00'
-    ) {
-      // B L D
+    } else if (time.isBetween('2000-01-01 17:00', dayjs('2000-01-01 21:59'))) {
       return 'BLD';
-    } else if (layover.layover_end >= '22:00' && layover.layover_end < '1:00') {
-      // B L D S
+    } else if (time.isBetween('2000-01-01 22:00', dayjs('2000-01-02 01:00'))) {
       return 'BLDS';
     } else {
-      //error, or no further allowance
+      console.log('!triggered else');
     }
-  };
-
-  const calculateNewExpenses = () => {
-    new_layover.layover_expenses = '';
-    new_layover.layover_expenses += calculateFirstDayExpenses();
-    new_layover.layover_expenses += calculateLastDayExpenses();
-    console.log(`!${new_layover.layover_expenses}`);
-  };
-
-  const handleTimeChange = (e) => {
-    if (e.target.id === 'layover_start') {
-      setLayoverStart(dayjs(e.target.value));
-    } else if (e.target.id === 'layover_end') {
-      setLayoverEnd(e.target.value);
-    }
-    console.log(`!${layoverStart}`);
-    calculateNewExpenses();
   };
 
   const calculateNumBreakfasts = () => {
@@ -126,11 +87,28 @@ function Layover(props) {
     ).toFixed(2);
   };
 
+  const handleStartTimeChange = (val) => {
+    new_layover.layover_start = dayjs(val);
+    new_layover.layover_end = dayjs(layoverEnd);
+    setLayoverStart(dayjs(val));
+    new_layover.layover_expenses = '';
+    new_layover.layover_expenses += calculateFirstDayExpenses();
+    new_layover.layover_expenses += calculateLastDayExpenses();
+  };
+
+  const handleEndTimeChange = (val) => {
+    new_layover.layover_start = dayjs(layoverStart);
+    new_layover.layover_end = dayjs(val);
+    setLayoverEnd(dayjs(val));
+    new_layover.layover_expenses = '';
+    new_layover.layover_expenses += calculateFirstDayExpenses();
+    new_layover.layover_expenses += calculateLastDayExpenses();
+  };
+
   const handleStepper = (e) => {
     if (e.target.id === 'plus') {
       setFullDays(fullDays + 1);
       new_layover.layover_expenses += 'BLDS';
-      // console.log(`!${new_layover.layover_expenses}`);
     } else if (fullDays > 0 && e.target.id === 'minus') {
       setFullDays(fullDays - 1);
 
@@ -138,7 +116,6 @@ function Layover(props) {
         'BLDS',
         ''
       );
-      // console.log(`!${new_layover.layover_expenses}`);
     }
   };
 
@@ -164,9 +141,12 @@ function Layover(props) {
               <span className="input-group-text">Start Time: </span>
 
               <TimePicker
-                id="layover_start"
-                value={dayjs(layoverStart)}
-                onChange={(e) => setLayoverStart(e.target.value)}
+                key="layover_start"
+                ampm={false}
+                format="HH:mm"
+                timeSteps={{ hours: 1, minutes: 1 }}
+                value={layoverStart}
+                onAccept={(val) => handleStartTimeChange(val)}
               />
               <div className="form-text ms-3" id="basic-addon1">
                 Layover starts 15 minutes after actual arrival time.
@@ -175,19 +155,13 @@ function Layover(props) {
 
             <div className="input-group">
               <span className="input-group-text">End Time: </span>
-              {/* <input
-                id="layover_end"
-                type="time"
-                className="form-control"
-                placeholder="12:18"
-                value={layoverEnd}
-                onChange={handleStepper}
-                //(e) => setLayoverEnd(e.target.value)
-              /> */}
               <TimePicker
                 id="layover_end"
-                value={dayjs(layoverEnd)}
-                onChange={(e) => setLayoverEnd(e.target.value)}
+                ampm={false}
+                format="HH:mm"
+                timeSteps={{ hours: 1, minutes: 1 }}
+                value={layoverEnd}
+                onAccept={(val) => handleEndTimeChange(val)}
               />
               <div className="form-text ms-3" id="basic-addon1">
                 Layover ends 1 hour before actual departure time.

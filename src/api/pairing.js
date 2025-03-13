@@ -24,8 +24,8 @@ const pairing = {
       type: 'layover',
       layover_stn: 'HND',
       hotel: 'The Westin Tokyo HND DT',
-      layover_start: '2024-08-01T15:55:00.000Z',
-      layover_end: '2024-08-03T16:40:00.000Z', //'2020-04-02T08:02:17-05:00'
+      layover_start: '15:55',
+      layover_end: '17:40',
       layover_expenses: 'DSBLD',
       layover_cico: 1,
       layover_expenses_total: '127.89',
