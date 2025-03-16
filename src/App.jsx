@@ -11,7 +11,7 @@ function App() {
 
   for (let i = 0; i < pairing.sequence.length; i++) {
     if (pairing.sequence[i].type === 'flight') {
-      // display.push(<Flight key={i} flight={pairing.sequence[i]} />);
+      display.push(<Flight key={i} flight={pairing.sequence[i]} />);
     } else if (pairing.sequence[i].type === 'layover') {
       display.push(<Layover key={i} layover={pairing.sequence[i]} />);
     }

@@ -1,39 +1,56 @@
 /* eslint-disable react/prop-types */
+import { useState } from 'react';
+import { TimePicker } from '@mui/x-date-pickers';
+import FlightExpenseTable from './FlightExpenseTable';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
+
 function Flight(props) {
   let flight = props.flight;
+  let new_flight = flight;
+  new_flight.dept_time = dayjs(`2000-01-01 ${new_flight.dept_time}`);
+  new_flight.arrival_time = dayjs(`2000-01-01 ${new_flight.arrival_time}`);
 
-  const handleTimeChange = (e) => {
-    if (e.target.id === 'dept_time') {
-      flight.dept_time = e.target.value;
-      flight.arrival_time = document.getElementById('arrival_time').value;
-    } else if (e.target.id === 'arrival_time') {
-      flight.arrival_time = e.target.value;
-      flight.dept_time = document.getElementById('dept_time').value;
-    }
+  const [departureTime, setDepartureTime] = useState(flight.dept_time);
+  const [arrivalTime, setArrivalTime] = useState(flight.arrival_time);
 
-    console.log(`!${flight.dept_time}, ${flight.arrival_time}`);
+  const handleDepartureTimeChange = (val) => {
+    new_flight.dept_time = dayjs(val);
+    new_flight.arrival_time = dayjs(arrivalTime);
+    onboard_meals: ['HB', 'HD', 'SS'], setDepartureTime(dayjs(val));
+    new_flight.flight_expenses = '';
+    // new_flight.layover_expenses += calculateFirstDayExpenses();
+    // new_flight.layover_expenses += calculateLastDayExpenses();
+  };
+
+  const handleArrivalTimeChange = (val) => {
+    new_flight.arrival_time = dayjs(val);
+    new_flight.dept_time = dayjs(departureTime);
+    setArrivalTime(dayjs(val));
+    new_flight.flight_expenses = '';
+    // new_flight.layover_expenses += calculateFirstDayExpenses();
+    // new_flight.layover_expenses += calculateLastDayExpenses();
   };
 
   return (
     <>
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
         <form>
-          <div className="mb-3">
-            <label htmlFor="flight_no" className="form-no">
-              Flight Number / Numéro du vol:
-            </label>
+          <div className="form-group mb-3">
+            <span className="">Flight Number: </span>
             <div className="input-group mb-3" id="flight_info">
-              <span className="input-group-text">AC</span>
+              <span className="input-group-text">AC </span>
               <input
                 id="flight_no"
                 type="text"
                 className="col-11 form-control"
-                placeholder="0000"
-                defaultValue={flight.flight_no}
+                placeholder="1234"
+                value={flight.flight_no}
+                readOnly
               />
             </div>
           </div>
-          <div className="form-group">
+          <div className="form-group col-6">
             <label htmlFor="flight_no" className="form-no">
               Departure Station:
             </label>
@@ -44,20 +61,24 @@ function Flight(props) {
                 className="form-control"
                 placeholder="AAA"
                 defaultValue={flight.dept_stn}
+                readOnly
               />
-              <div className="form-group timepicker">
-                <input
-                  type="time"
-                  id="dept_time"
-                  className="form-control"
-                  placeholder={flight.dept_time}
-                  defaultValue={flight.dept_time}
-                  onChange={handleTimeChange}
-                />
+              <div className="col-6 input-group">
+                <div className="input-group mb-3">
+                  <span className="input-group-text ">Departure Time: </span>
+
+                  <TimePicker
+                    key="departure_time"
+                    ampm={false}
+                    format="HH:mm"
+                    timeSteps={{ hours: 1, minutes: 1 }}
+                    value={departureTime}
+                    onAccept={(val) => handleDepartureTimeChange(val)}
+                  />
+                </div>
               </div>
             </div>
           </div>
-          <div className="text-center">↓</div>
           <div className="form-group">
             <label htmlFor="flight_no" className="form-no">
               Arrival Station:
@@ -69,53 +90,26 @@ function Flight(props) {
                 className="form-control"
                 placeholder="YYY"
                 defaultValue={flight.arrival_stn}
+                readOnly
               />
-              <div className="form-group">
-                <input
-                  id="arrival_time"
-                  type="time"
-                  className="form-control"
-                  placeholder={flight.arrival_time}
-                  defaultValue={flight.arrival_time}
-                  onChange={handleTimeChange}
-                />
+              <div className="input-group">
+                <div className="input-group mb-3">
+                  <span className="input-group-text">Arrival Time: </span>
+
+                  <TimePicker
+                    key="arrival_time"
+                    ampm={false}
+                    format="HH:mm"
+                    timeSteps={{ hours: 1, minutes: 1 }}
+                    value={arrivalTime}
+                    onAccept={(val) => handleArrivalTimeChange(val)}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </form>
-        <table className="table table-striped table-bordered mt-3 text-center">
-          <tbody>
-            <tr>
-              <th>Breakfast</th>
-              <th>Lunch</th>
-              <th>Dinner</th>
-              <th>Snack</th>
-            </tr>
-            <tr>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-              <td>1</td>
-            </tr>
-            <tr>
-              <td>$29.91</td>
-              <td>$49.96</td>
-              <td>$57.26</td>
-              <td>$20.36</td>
-            </tr>
-            <tr>
-              <td>$29.91</td>
-              <td>$49.96</td>
-              <td>$57.26</td>
-              <td>$20.36</td>
-            </tr>
-
-            <tr className="table-success">
-              <td>Total:</td>
-              <td colSpan={3}>$$$$$</td>
-            </tr>
-          </tbody>
-        </table>
+        {!new_flight.onboard_meals ? <FlightExpenseTable /> : ''}
       </div>
     </>
   );

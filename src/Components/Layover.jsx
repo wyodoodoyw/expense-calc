@@ -16,7 +16,6 @@ function Layover(props) {
 
   const [layoverStart, setLayoverStart] = useState(layover.layover_start);
   const [layoverEnd, setLayoverEnd] = useState(layover.layover_end);
-
   const [fullDays, setFullDays] = useState(0);
 
   const calculateFirstDayExpenses = () => {
@@ -131,7 +130,7 @@ function Layover(props) {
                 type="text"
                 className="col-11 form-control"
                 placeholder="YUL"
-                value={new_layover.layover_stn}
+                value={layover.layover_stn}
                 readOnly
               />
             </div>

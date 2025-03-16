@@ -15,6 +15,7 @@ const pairing = {
       arrival_time: '15:40',
       flight_credit: '13:25',
       duty: '14:55',
+      flight_expenses: '',
       days_operating: '1234567',
       equipment: '789',
       onboard_meals: ['HB', 'HD', 'SS'],
