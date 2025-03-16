@@ -50,10 +50,10 @@ function Flight(props) {
               />
             </div>
           </div>
-          <div className="form-group col-6">
-            <label htmlFor="flight_no" className="form-no">
+          <div className="form-inline">
+            {/* <label htmlFor="flight_no" className="form-no">
               Departure Station:
-            </label>
+            </label> */}
             <div className="input-group">
               <span className="input-group-text">🛫</span>
               <input
@@ -63,8 +63,8 @@ function Flight(props) {
                 defaultValue={flight.dept_stn}
                 readOnly
               />
-              <div className="col-6 input-group">
-                <div className="input-group mb-3">
+              <div className="ms-3">
+                <div className="input-group">
                   <span className="input-group-text ">Departure Time: </span>
 
                   <TimePicker
@@ -79,10 +79,10 @@ function Flight(props) {
               </div>
             </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="flight_no" className="form-no">
+          <div className="form-inline mt-3">
+            {/* <label htmlFor="flight_no" className="form-no">
               Arrival Station:
-            </label>
+            </label> */}
             <div className="input-group">
               <span className="input-group-text">🛬</span>
               <input
@@ -92,8 +92,8 @@ function Flight(props) {
                 defaultValue={flight.arrival_stn}
                 readOnly
               />
-              <div className="input-group">
-                <div className="input-group mb-3">
+              <div className="ms-3">
+                <div className="input-group">
                   <span className="input-group-text">Arrival Time: </span>
 
                   <TimePicker

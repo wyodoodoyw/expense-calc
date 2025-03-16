@@ -1,10 +1,11 @@
 import './App.css';
 import pairing from './api/pairing';
+import Accordian from './Components/Accordian';
 import Flight from './Components/Flight';
 import Layover from './Components/Layover';
-import AddButton from './Components/AddButton';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+// import AddButton from './Components/AddButton';
+// import { LocalizationProvider } from '@mui/x-date-pickers';
+// import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
   const display = [];
@@ -23,9 +24,11 @@ function App() {
         <div className="text-center pb-4">
           <h1 className="heading">Expense Calculator</h1>
           <h3>Pairing Number: {pairing.pairing_no}</h3>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
+
+          <Accordian />
+          {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
             {display}
-          </LocalizationProvider>
+          </LocalizationProvider> */}
           {/* <AddButton /> */}
         </div>
       </div>
