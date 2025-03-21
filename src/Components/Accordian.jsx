@@ -65,17 +65,17 @@ function Accordian(props) {
             </button>
             <ul className="dropdown-menu">
               <li>
-                <a class="dropdown-item" href="#">
+                <a className="dropdown-item" href="#">
                   A NA Sun Flight
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" href="#">
+                <a className="dropdown-item" href="#">
                   A layover at an international destination
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" href="#">
+                <a className="dropdown-item" href="#">
                   A domestic flight and layover before or after an international
                   flight. Ex. a layover in YUL before going to NRT.
                 </a>
