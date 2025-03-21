@@ -1,7 +1,9 @@
 const expenses = {
-  destination: 'Narita',
+  adjustmnent: 0,
   airport_codes: ['NRT', 'HND', 'KIX'],
+  bracelet_provided: false,
   country_codes: ['JP'],
+  destination: 'Narita',
   expenses: {
     breakfast: 29.91,
     lunch: 49.96,
@@ -9,10 +11,8 @@ const expenses = {
     snack: 20.36,
     day: 157.49,
   },
-  bracelet_provided: false,
-  previous_allowance: 157.49,
-  adjustmnent: 0,
   percent_change: 0,
+  previous_allowance: 157.49,
 };
 
 export default expenses;
