@@ -1,6 +1,6 @@
 import './App.css';
 import pairing from './api/pairing';
-import Accordian from './Components/Accordian';
+import Accordion from './Components/Accordion';
 import Flight from './Components/Flight';
 import Layover from './Components/Layover';
 // import AddButton from './Components/AddButton';
@@ -26,7 +26,7 @@ function App() {
           <h3>Pairing Number: {pairing.pairing_no}</h3>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Accordian />
+            <Accordion />
             {/* {display} */}
           </LocalizationProvider>
           {/* <AddButton /> */}

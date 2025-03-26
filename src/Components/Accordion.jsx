@@ -1,24 +1,13 @@
 import { useState } from 'react';
 import FileUploader from './FileUploader';
-import RadioButtons from './RadioButtons';
 
-function Accordian(props) {
-  const [calcMode, setCalcMode] = useState(null);
-
-  // const handleChange = (e) => {
-  //   const val = e.value;
-  //   const text = e.options[e.selectedIndex].text;
-  //   console.log(val);
-  //   console.log(text);
-  //   setCalcMode();
-  // };
-
-  // const handleSelect = (e) => {
-  //   console.log(e);
-  // };
+function Accordian() {
+  const [selectedValue, setSelectedValue] = useState();
 
   return (
     <div className="accordion" id="accordian">
+      {/* Panel #1 */}
+
       <div className="accordion-item">
         <h2 className="accordion-header">
           <button
@@ -39,19 +28,13 @@ function Accordian(props) {
           data-bs-parent="#accordian"
         >
           <div className="accordion-body">
-            {/* <div className="input-group mb-3">
-              <input type="file" className="form-control" id="fileInput" />
-              <label className="input-group-text" htmlFor="fileInput">
-                Upload
-              </label>
-              <div className="invalid-feedback">
-                Please make sure your are uploading the correct file.
-              </div>
-            </div> */}
             <FileUploader />
           </div>
         </div>
       </div>
+
+      {/* Panel #2 */}
+
       <div className="accordion-item">
         <h2 className="accordion-header">
           <button
@@ -70,65 +53,19 @@ function Accordian(props) {
           className="accordion-collapse collapse"
           data-bs-parent="#accordian"
         >
-          <div className="input-group mt-3 mb-3">
-            <button
-              className="btn btn-outline-secondary dropdown-toggle"
-              type="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              onChange={(e) => handleChange(e)}
-            >
-              Select
-            </button>
-            <ul className="dropdown-menu">
-              <li>
-                <a
-                  className="dropdown-item"
-                  id="dropdown-1"
-                  href="#"
-                  // onSelect={(e) => handleSelect(e)}
-                >
-                  A NA Sun Flight
-                </a>
-              </li>
-              <li>
-                <a
-                  className="dropdown-item"
-                  id="dropdown-2"
-                  href="#"
-                  // onSelect={(e) => handleSelect(e)}
-                >
-                  A layover at an international destination
-                </a>
-              </li>
-              <li>
-                <a
-                  className="dropdown-item"
-                  id="dropdown-3"
-                  href="#"
-                  // onSelect={(e) => handleSelect(e)}
-                >
-                  A domestic flight and layover before or after an international
-                  flight. Ex. a layover in YUL before going to NRT.
-                </a>
-              </li>
-            </ul>
-            <p>{calcMode}</p>
-          </div>
-
           <div className="accordion-body text-start">
-            <RadioButtons />
-            {/* <form>
+            <form>
               <div className="form-check">
                 <input
                   className="form-check-input"
                   type="radio"
                   name="flexRadioDefault"
                   id="radio1"
-                  onSelect={(e) => handleSelect(e)}
+                  value="value1"
+                  onChange={(e) => setSelectedValue(e.target.value)}
                 />
                 <label className="form-check-label" htmlFor="radio1">
-                  A North America/Sun flight.
+                  <strong>A North America/Sun flight.</strong>
                 </label>
               </div>
               <div className="form-check">
@@ -137,9 +74,11 @@ function Accordian(props) {
                   type="radio"
                   name="flexRadioDefault"
                   id="radio2"
+                  value="value2"
+                  onChange={(e) => setSelectedValue(e.target.value)}
                 />
                 <label className="form-check-label" htmlFor="radio2">
-                  A layover at an international destination.
+                  <strong>A layover at an international destination.</strong>
                 </label>
               </div>
               <div className="form-check">
@@ -148,16 +87,25 @@ function Accordian(props) {
                   type="radio"
                   name="flexRadioDefault"
                   id="radio3"
+                  value="value3"
+                  onChange={(e) => setSelectedValue(e.target.value)}
                 />
                 <label className="form-check-label" htmlFor="radio3">
-                  A domestic flight and layover before or after an international
-                  flight. Ex. a layover in YUL before going to NRT.
+                  <strong>
+                    A domestic flight and layover before or after an
+                    international flight.
+                  </strong>{' '}
+                  Example: a layover in YUL before going to NRT.
                 </label>
               </div>
-            </form> */}
+              {selectedValue && <p>{selectedValue}</p>}
+            </form>
           </div>
         </div>
       </div>
+
+      {/* Panel #3 */}
+
       <div className="accordion-item">
         <h2 className="accordion-header">
           <button
