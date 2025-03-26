@@ -135,10 +135,11 @@ const FileUploader = () => {
           const test1 = 'Barbados (BGI)   BB   BGI  ';
           const test2 = 'Cayo Coco (CCC)   CU   CCC  ';
           const test3 = 'Curaçao (CUR)   CW   CUR  ';
-          const test4 = 'Huatulco (HUX)   MX   HUX  ';
-          const test5 = 'Ixtapa (ZIH)   MX   ZIH  ';
+          const test4 = 'Huatulco (HUX)   MX   HUX  '; //#
+          const test5 = 'Ixtapa (ZIH)   MX   ZIH  '; //#
           const test6 = 'Liberia (LIR)   CR   ';
-          const test7 = 'Puerto Plata (POP)   DO   POP  '; //Puerto Vallarta (PV
+          const test7 =
+            'Puerto Plata (POP)   DO   POP  Puerto Vallarta (PVR)   MX  PVR'; //#
           const test8 = 'St. Lucia (UVF)   LC   UVF  ';
           const test9 = 'Santa Clara (SNU)   CU   SNU  ';
           const test10 = 'Varadero (VRA)   CU   VRA  '; //manually create entry for Cuba with all airport codes?
@@ -146,7 +147,7 @@ const FileUploader = () => {
             processedText.push(test1);
             processedText.push(preProcessedText[i].replace(test1, ''));
           } else if (preProcessedText[i].includes(test2)) {
-            processedText.push(test3);
+            // Cayo Coco
             processedText.push(preProcessedText[i].replace(test2, ''));
           } else if (preProcessedText[i].includes(test3)) {
             processedText.push(test3);
@@ -167,10 +168,10 @@ const FileUploader = () => {
             processedText.push(test8);
             processedText.push(preProcessedText[i].replace(test8, ''));
           } else if (preProcessedText[i].includes(test9)) {
-            processedText.push(test9);
+            // Santa Clara
             processedText.push(preProcessedText[i].replace(test9, ''));
           } else if (preProcessedText[i].includes(test10)) {
-            processedText.push(test10);
+            // Varadero
             processedText.push(preProcessedText[i].replace(test10, ''));
           } else {
             processedText.push(preProcessedText[i]);
@@ -209,6 +210,7 @@ const FileUploader = () => {
             parseLine(processedText[i]);
           }
         }
+        // Add Cuba, Mexico, POP and other bracelet destinations to DB here
       } catch (err) {
         console.error(`!Error: ${err}`);
       }

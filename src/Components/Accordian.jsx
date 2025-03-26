@@ -1,6 +1,22 @@
+import { useState } from 'react';
 import FileUploader from './FileUploader';
+import RadioButtons from './RadioButtons';
 
 function Accordian(props) {
+  const [calcMode, setCalcMode] = useState(null);
+
+  // const handleChange = (e) => {
+  //   const val = e.value;
+  //   const text = e.options[e.selectedIndex].text;
+  //   console.log(val);
+  //   console.log(text);
+  //   setCalcMode();
+  // };
+
+  // const handleSelect = (e) => {
+  //   console.log(e);
+  // };
+
   return (
     <div className="accordion" id="accordian">
       <div className="accordion-item">
@@ -54,43 +70,62 @@ function Accordian(props) {
           className="accordion-collapse collapse"
           data-bs-parent="#accordian"
         >
-          <div className="input-group mb-3">
+          <div className="input-group mt-3 mb-3">
             <button
               className="btn btn-outline-secondary dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
+              onChange={(e) => handleChange(e)}
             >
               Select
             </button>
             <ul className="dropdown-menu">
               <li>
-                <a className="dropdown-item" href="#">
+                <a
+                  className="dropdown-item"
+                  id="dropdown-1"
+                  href="#"
+                  // onSelect={(e) => handleSelect(e)}
+                >
                   A NA Sun Flight
                 </a>
               </li>
               <li>
-                <a className="dropdown-item" href="#">
+                <a
+                  className="dropdown-item"
+                  id="dropdown-2"
+                  href="#"
+                  // onSelect={(e) => handleSelect(e)}
+                >
                   A layover at an international destination
                 </a>
               </li>
               <li>
-                <a className="dropdown-item" href="#">
+                <a
+                  className="dropdown-item"
+                  id="dropdown-3"
+                  href="#"
+                  // onSelect={(e) => handleSelect(e)}
+                >
                   A domestic flight and layover before or after an international
                   flight. Ex. a layover in YUL before going to NRT.
                 </a>
               </li>
             </ul>
+            <p>{calcMode}</p>
           </div>
 
-          {/* <div className="accordion-body">
-            <form>
+          <div className="accordion-body text-start">
+            <RadioButtons />
+            {/* <form>
               <div className="form-check">
                 <input
                   className="form-check-input"
                   type="radio"
                   name="flexRadioDefault"
                   id="radio1"
+                  onSelect={(e) => handleSelect(e)}
                 />
                 <label className="form-check-label" htmlFor="radio1">
                   A North America/Sun flight.
@@ -119,8 +154,8 @@ function Accordian(props) {
                   flight. Ex. a layover in YUL before going to NRT.
                 </label>
               </div>
-            </form>
-          </div>*/}
+            </form> */}
+          </div>
         </div>
       </div>
       <div className="accordion-item">
@@ -143,16 +178,7 @@ function Accordian(props) {
           className="accordion-collapse collapse"
           data-bs-parent="#accordian"
         >
-          <div className="accordion-body">
-            <strong>This is the third accordion body.</strong> It is hidden by
-            default, until the collapse plugin adds the appropriate classes that
-            we use to style each element. These classes control the overall
-            appearance, as well as the showing and hiding via CSS transitions.
-            You can modify any of this with custom CSS or overriding our default
-            variables. also worth noting that just about any HTML can go within
-            the <code>.accordion-body</code>, though the transition does limit
-            overflow.
-          </div>
+          <div className="accordion-body">Lorem ipsum.</div>
         </div>
       </div>
     </div>
