@@ -2,7 +2,7 @@ const expenses = {
   adjustmnent: 0,
   airport_codes: ['NRT', 'HND', 'KIX'],
   bracelet_provided: false,
-  country_codes: ['JP'],
+  country_code: ['JP'],
   destination: 'Narita',
   expenses: {
     breakfast: 29.91,

@@ -1,14 +1,21 @@
-import { useState } from 'react';
-import FileUploader from './FileUploader';
+import { use, useState } from 'react';
+// import FileUploader from './FileUploader';
 
 function Accordian() {
   const [selectedValue, setSelectedValue] = useState();
+
+  // initial state ==> Canadian Expenses
+  const [expenseB, setExpenseB] = useState(17.95);
+  const [expenseL, setExpenseL] = useState(20.33);
+  const [expenseD, setExpenseD] = useState(40.27);
+  const [expenseS, setExpenseS] = useState(10.52);
+  const [expenseTotal, setExpenseT] = useState(89.07);
 
   return (
     <div className="accordion" id="accordian">
       {/* Panel #1 */}
 
-      <div className="accordion-item">
+      {/* <div className="accordion-item">
         <h2 className="accordion-header">
           <button
             className="accordion-button"
@@ -31,7 +38,7 @@ function Accordian() {
             <FileUploader />
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Panel #2 */}
 
@@ -117,7 +124,8 @@ function Accordian() {
             aria-controls="collapseThree"
           >
             <strong>
-              Adjust the times below for an updated expense calculation.
+              Input the expense amounts for the destination you'd like to
+              calculate.
             </strong>
           </button>
         </h2>
@@ -126,7 +134,110 @@ function Accordian() {
           className="accordion-collapse collapse"
           data-bs-parent="#accordian"
         >
-          <div className="accordion-body">Lorem ipsum.</div>
+          <div className="accordion-body">
+            <form>
+              <div className="form-group row">
+                <label
+                  htmlFor="inputDestination"
+                  className="col-sm-2 col-form-label"
+                >
+                  Destination
+                </label>
+                <div className="col-sm-10">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="inputDestination"
+                    placeholder="YYZ"
+                  />
+                </div>
+              </div>
+              <div className="form-group row">
+                <div className="form-group col-6">
+                  <label
+                    htmlFor="inputBreakfast"
+                    className="col-sm-2 col-form-label"
+                  >
+                    Breakfast
+                  </label>
+                  <div className="col-sm-10">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="inputBreakfast"
+                      placeholder="17.95"
+                    />
+                  </div>
+                </div>
+                <div className="form-group col-6">
+                  <label
+                    htmlFor="inputDestination"
+                    className="col-sm-2 col-form-label"
+                  >
+                    Lunch
+                  </label>
+                  <div className="col-sm-10">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="inputDestination"
+                      placeholder="20.33"
+                    />
+                  </div>
+                </div>
+                <div className="form-group col-6">
+                  <label
+                    htmlFor="inputDestination"
+                    className="col-sm-2 col-form-label"
+                  >
+                    Dinner
+                  </label>
+                  <div className="col-sm-10">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="inputDestination"
+                      placeholder="40.27"
+                    />
+                  </div>
+                </div>
+                <div className="form-group col-6">
+                  <label
+                    htmlFor="inputDestination"
+                    className="col-sm-2 col-form-label"
+                  >
+                    Snack
+                  </label>
+                  <div className="col-sm-10">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="inputDestination"
+                      placeholder="10.52"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="form-group row">
+                <div className="form-group col-6">
+                  <label
+                    htmlFor="inputDestination"
+                    className="col-sm-2 col-form-label"
+                  >
+                    Total
+                  </label>
+                  <div className="col-sm-10">
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="inputDestination"
+                      placeholder="89.07"
+                    />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

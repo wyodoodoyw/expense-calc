@@ -1,6 +1,58 @@
 import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
 
+// Create a DB
+let db;
+const request = window.indexedDB.open('ExpensesDB', 1);
+
+request.onupgradeneeded = (event) => {
+  const db = event.target.result;
+  const objectStore = db.createObjectStore('destination', {
+    keyPath: 'destination',
+  });
+  // objectStore.createIndex('destination', 'destination', { unique: false });
+  objectStore.createIndex('country_code', 'country_code', { unique: false });
+
+  objectStore.transaction.oncomplete = (event) => {
+    const destinationObjectStore = db
+      .transaction('expenses', 'readwrite')
+      .objectStore('expenses');
+    destinationObjectStore.add({
+      // adjustmnent: 0,
+      // airport_codes: ['NRT', 'HND', 'KIX'],
+      // bracelet_provided: false,
+      country_code: ['JP'],
+      destination: 'Narita',
+      // expenses: {
+      //   breakfast: 29.91,
+      //   lunch: 49.96,
+      //   dinner: 57.26,
+      //   snack: 20.36,
+      //   day: 157.49,
+      // },
+      // percent_change: 0,
+      // previous_allowance: 157.49,
+    });
+  };
+};
+
+request.onsuccess = (event) => {
+  db = event.target.result;
+  // DB opened successfully
+  console.log('!DB opened successfully.');
+};
+
+request.onerror = (event) => {
+  // error occurred while opening DB
+  console.error(`!Database error: ${event.target.error?.message}`);
+  // transaction.abort();
+};
+
+// const transaction = db.transaction('newExpenseStore', 'readwrite');
+// const objectStore = transaction.objectStore('newExpenseStore');
+
+//----- PARSER -----//
+
 const parseLineAsBracelet = (line) => {
   // New object
   let newExpense = {
@@ -31,7 +83,7 @@ const parseLineAsBracelet = (line) => {
   }
 
   newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
-  // to here
+  // reused to here
   console.log(newExpense);
   return newExpense;
 };
@@ -102,9 +154,14 @@ const parseLine = (line) => {
   newExpense.expenses.day = amounts[6];
   newExpense.percent_change = line.match(/-?\d{1,3}.\d{2}%/)[0];
 
-  console.log(newExpense);
+  // const addRequest = objectStore.add(newExpense);
+  // addRequest.onsuccess = (event) => {
+  //   console.log(`!Data added. ${event.target.result}`);
+  // };
   return newExpense;
 };
+
+//----- COMPONENT -----//
 
 const FileUploader = () => {
   const [file, setFile] = useState(null);
@@ -180,18 +237,15 @@ const FileUploader = () => {
 
         console.log(`!processedText.length: ${processedText.length}`);
 
-        // Prepare DB
+        // Open the DB
+        //const request = indexedDB.open("customers")
+        // handle onsuccess and onerror
 
-        // let db;
-        // const request = window.indexedDB.open('ExpensesDB');
+        // add data to DB
+        const transaction = db.transaction('myObjectStore', 'readwrite');
+        const objectStore = transaction.objectStore('myObjectStore');
 
-        // request.onerror = (event) => {
-        //   console.error(`Database error: ${event.target.error?.message}`);
-        // };
-
-        // request.onsuccess = (event) => {
-        //   db = event.target.result;
-        // };
+        // customerData.map((customer) => objectStore.add(customer));
 
         // Go through each line of processedText and parse according to conditionsd
         for (let i = 0; i < processedText.length; i++) {
