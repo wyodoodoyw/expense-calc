@@ -8,15 +8,14 @@ import isBetween from 'dayjs/plugin/isBetween';
 dayjs.extend(isBetween);
 
 function Layover({ layover, location_exp }) {
-  // let layover = props.layover;
-  // let location_expenses = location_exp;
-  // console.log(`!layover: ${JSON.stringify(props.layover)}`);
-  // let new_layover = [...props.layover];
-  // // console.log(`!new_layover: ${new_layover}`);
-  // new_layover.layover_start = dayjs(`2000-01-01 ${new_layover.layover_start}`);
-  // new_layover.layover_end = dayjs(`2000-01-01 ${new_layover.layover_end}`);
-  // console.log(`!layover_expenses: ${layover.layover_expenses}`);
-  // let location_exp  = expenses.expenses; // { breakfast: 29.91, lunch: 49.96, dinner: 57.26, snack: 20.36, day: 157.49 }
+  const [expense, setExpense] = useState({
+    breakfast: 17.95,
+    lunch: 20.33,
+    dinner: 40.27,
+    snack: 10.52,
+  });
+
+  const handleExpenseChange = (e) => {};
 
   const [layoverStart, setLayoverStart] = useState(
     dayjs(`2000-01-01 ${layover.layover_start}`)
@@ -185,7 +184,7 @@ function Layover({ layover, location_exp }) {
             >
               -
             </button>
-            <span id="days-stepper">{fullDays}</span>
+            <span id="days-stepper align-middle">{fullDays}</span>
             <button
               id="plus"
               type="button"
@@ -220,11 +219,47 @@ function Layover({ layover, location_exp }) {
             </tr>
             <tr>
               <td>x</td>
-              <td>${location_exp.breakfast}</td>
-              <td>${location_exp.lunch}</td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expense.breakfast}
+                  onChange={handleExpenseChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expense.lunch}
+                  onChange={handleExpenseChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expense.dinner}
+                  onChange={handleExpenseChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expense.snack}
+                  onChange={handleExpenseChange}
+                />
+              </td>
+              {/* <td>${location_exp.breakfast}</td> */}
+              {/* <td>${location_exp.lunch}</td>
               <td>${location_exp.dinner}</td>
-              <td>${location_exp.snack}</td>
-              <td>$5.05</td>
+              <td>${location_exp.snack}</td> */}
+              <td className="align-middle">$5.05</td>
             </tr>
             <tr>
               <td>=</td>

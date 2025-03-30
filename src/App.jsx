@@ -9,18 +9,18 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useState } from 'react';
 
 function App() {
-  const display = [];
+  // const display = [];
 
   // STATE
-  const [expenseB, setExpenseB] = useState(17.95);
+  // const [expenseB, setExpenseB] = useState(17.95);
 
   //Complex State
-  const [expense, setExpense] = useState({
-    breakfast: 17.95,
-    lunch: 20.33,
-    dinner: 40.27,
-    snack: 10.52,
-  });
+  // const [expense, setExpense] = useState({
+  //   breakfast: 17.95,
+  //   lunch: 20.33,
+  //   dinner: 40.27,
+  //   snack: 10.52,
+  // });
 
   // const handleChange(event) => {
   //   const {value, name} = event.target;
@@ -64,7 +64,10 @@ function App() {
       <div className="container">
         <div className="text-center pb-4">
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
-          {/* <h3>Pairing Number: {pairing.pairing_no}</h3> */}
+          <h4>
+            To be used for calculating expenses on a layover. More functionality
+            to come.
+          </h4>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             {/* <Accordion expenseB={expenseB} setExpenseB={setExpenseB} /> */}
@@ -73,6 +76,9 @@ function App() {
           {/* <AddButton /> */}
         </div>
       </div>
+      <footer className="text-center">
+        Copyright {'\u00A9'} Wu Mai {new Date().getFullYear()}
+      </footer>
     </>
   );
 }
