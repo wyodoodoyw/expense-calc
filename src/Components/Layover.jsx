@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-// import expenses from '../api/expenses';
 import { useState } from 'react';
 import { TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -15,7 +14,17 @@ function Layover({ layover, location_exp }) {
     snack: 10.52,
   });
 
-  const handleExpenseChange = (e) => {};
+  const handleExpenseChange = (e) => {
+    const { name, value } = e.target;
+
+    setExpense((prev) => {
+      console.log(`!{name, value}: ${name}, ${value}`);
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  };
 
   const [layoverStart, setLayoverStart] = useState(
     dayjs(`2000-01-01 ${layover.layover_start}`)
@@ -68,19 +77,19 @@ function Layover({ layover, location_exp }) {
   };
 
   const calculateDisplayBreakfastTotal = () => {
-    return calculateNumBreakfasts() * location_exp.breakfast;
+    return calculateNumBreakfasts() * expense.breakfast;
   };
 
   const calculateDisplayLunchTotal = () => {
-    return calculateNumLunches() * location_exp.lunch;
+    return calculateNumLunches() * expense.lunch;
   };
 
   const calculateDisplayDinnerTotal = () => {
-    return calculateNumDinners() * location_exp.dinner;
+    return calculateNumDinners() * expense.dinner;
   };
 
   const calculateDisplaySnackTotal = () => {
-    return calculateNumSnacks() * location_exp.snack;
+    return calculateNumSnacks() * expense.snack;
   };
 
   const calculateDisplayTotal = () => {
@@ -225,6 +234,7 @@ function Layover({ layover, location_exp }) {
                   className="form-control text-center"
                   id="inputExpenseB"
                   value={expense.breakfast}
+                  name="breakfast"
                   onChange={handleExpenseChange}
                 />
               </td>
@@ -234,6 +244,7 @@ function Layover({ layover, location_exp }) {
                   className="form-control text-center"
                   id="inputExpenseB"
                   value={expense.lunch}
+                  name="lunch"
                   onChange={handleExpenseChange}
                 />
               </td>
@@ -243,6 +254,7 @@ function Layover({ layover, location_exp }) {
                   className="form-control text-center"
                   id="inputExpenseB"
                   value={expense.dinner}
+                  name="dinner"
                   onChange={handleExpenseChange}
                 />
               </td>
@@ -252,21 +264,18 @@ function Layover({ layover, location_exp }) {
                   className="form-control text-center"
                   id="inputExpenseB"
                   value={expense.snack}
+                  name="snack"
                   onChange={handleExpenseChange}
                 />
               </td>
-              {/* <td>${location_exp.breakfast}</td> */}
-              {/* <td>${location_exp.lunch}</td>
-              <td>${location_exp.dinner}</td>
-              <td>${location_exp.snack}</td> */}
               <td className="align-middle">$5.05</td>
             </tr>
             <tr>
               <td>=</td>
-              <td>${calculateDisplayBreakfastTotal()}</td>
-              <td>${calculateDisplayLunchTotal()}</td>
-              <td>${calculateDisplayDinnerTotal()}</td>
-              <td>${calculateDisplaySnackTotal()}</td>
+              <td>${calculateDisplayBreakfastTotal().toFixed(2)}</td>
+              <td>${calculateDisplayLunchTotal().toFixed(2)}</td>
+              <td>${calculateDisplayDinnerTotal().toFixed(2)}</td>
+              <td>${calculateDisplaySnackTotal().toFixed(2)}</td>
               <td>${layover.layover_cico * 5.05}</td>
             </tr>
             <tr className="table-success">

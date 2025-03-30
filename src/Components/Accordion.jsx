@@ -127,7 +127,7 @@ function Accordian(props) {
             aria-controls="collapseThree"
           >
             <strong>
-              Input the expense amounts for the destination you'd like to
+              Input the expense amounts for the destination you&aposd like to
               calculate.
             </strong>
           </button>

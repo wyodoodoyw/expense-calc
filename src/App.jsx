@@ -1,46 +1,9 @@
 import './App.css';
-// import pairing from './api/pairing';
-import Accordion from './Components/Accordion';
-// import Flight from './Components/Flight';
 import Layover from './Components/Layover';
-// import AddButton from './Components/AddButton';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { useState } from 'react';
 
 function App() {
-  // const display = [];
-
-  // STATE
-  // const [expenseB, setExpenseB] = useState(17.95);
-
-  //Complex State
-  // const [expense, setExpense] = useState({
-  //   breakfast: 17.95,
-  //   lunch: 20.33,
-  //   dinner: 40.27,
-  //   snack: 10.52,
-  // });
-
-  // const handleChange(event) => {
-  //   const {value, name} = event.target;
-
-  //   setExpense(prev => {
-  //     return {
-  //       ...prev,
-  //     [breakfast]: value
-  //   };
-  //   });
-  // }
-
-  // for (let i = 0; i < pairing.sequence.length; i++) {
-  //   if (pairing.sequence[i].type === 'flight') {
-  //     display.push(<Flight key={i} flight={pairing.sequence[i]} />);
-  //   } else if (pairing.sequence[i].type === 'layover') {
-  //     display.push(<Layover key={i} layover={pairing.sequence[i]} />);
-  //   }
-  // }
-
   const layover = {
     layover_stn: 'HND',
     layover_start: '15:55',
@@ -70,10 +33,8 @@ function App() {
           </h4>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            {/* <Accordion expenseB={expenseB} setExpenseB={setExpenseB} /> */}
             <Layover layover={layover} location_exp={location_exp} />
           </LocalizationProvider>
-          {/* <AddButton /> */}
         </div>
       </div>
       <footer className="text-center">
