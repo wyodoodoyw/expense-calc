@@ -166,7 +166,7 @@ function Layover({ layover, location_exp }) {
                 onAccept={(val) => handleStartTimeChange(val)}
               />
               <div className="form-text ms-3" id="basic-addon1">
-                Layover starts 15 minutes after actual arrival time.
+                Actual arrival time.
               </div>
             </div>
 
@@ -181,7 +181,7 @@ function Layover({ layover, location_exp }) {
                 onAccept={(val) => handleEndTimeChange(val)}
               />
               <div className="form-text ms-3" id="basic-addon1">
-                Layover ends 1 hour before actual departure time.
+                Actual departure time.
               </div>
             </div>
           </div>

@@ -31,6 +31,15 @@ function App() {
             To be used for calculating expenses on a layover. More functionality
             to come.
           </h4>
+          <p>1. Change the layover destination in Layover in: (not required)</p>
+          <p>
+            2. Change the expense amount for each meal for that destination.
+          </p>
+          <p>3. Update the actual start and end times of the layover.</p>
+          <p>
+            4. If your layover includes a full calendar day (00:00-23:59), add
+            that in the stepper.
+          </p>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Layover layover={layover} location_exp={location_exp} />
