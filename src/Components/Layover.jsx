@@ -6,7 +6,7 @@ import isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(isBetween);
 
-function Layover({ layover, location_exp }) {
+function Layover({ layover }) {
   const [expense, setExpense] = useState({
     breakfast: 17.95,
     lunch: 20.33,
@@ -18,7 +18,6 @@ function Layover({ layover, location_exp }) {
     const { name, value } = e.target;
 
     setExpense((prev) => {
-      console.log(`!{name, value}: ${name}, ${value}`);
       return {
         ...prev,
         [name]: value,
