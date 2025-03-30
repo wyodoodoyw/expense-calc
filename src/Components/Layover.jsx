@@ -6,12 +6,12 @@ import isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(isBetween);
 
-function Layover({ layover }) {
+function Layover({ layover, location_exp }) {
   const [expense, setExpense] = useState({
-    breakfast: 17.95,
-    lunch: 20.33,
-    dinner: 40.27,
-    snack: 10.52,
+    breakfast: location_exp.breakfast,
+    lunch: location_exp.lunch,
+    dinner: location_exp.dinner,
+    snack: location_exp.snack,
   });
 
   const handleExpenseChange = (e) => {

@@ -33,7 +33,7 @@ function App() {
           </h4>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Layover layover={layover} />
+            <Layover layover={layover} location_exp={location_exp} />
           </LocalizationProvider>
         </div>
       </div>
