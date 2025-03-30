@@ -7,6 +7,7 @@ import isBetween from 'dayjs/plugin/isBetween';
 dayjs.extend(isBetween);
 
 function Layover({ layover, location_exp }) {
+  const [station, setStation] = useState(layover.layover_stn);
   const [expense, setExpense] = useState({
     breakfast: location_exp.breakfast,
     lunch: location_exp.lunch,
@@ -23,6 +24,11 @@ function Layover({ layover, location_exp }) {
         [name]: value,
       };
     });
+  };
+
+  const handleStationChange = (e) => {
+    const new_station = e.target.value;
+    setStation(new_station);
   };
 
   const [layoverStart, setLayoverStart] = useState(
@@ -142,8 +148,8 @@ function Layover({ layover, location_exp }) {
                 type="text"
                 className="col-11 form-control"
                 placeholder="YUL"
-                value={layover.layover_stn}
-                readOnly
+                value={station}
+                onChange={(val) => handleStationChange(val)}
               />
             </div>
           </div>
