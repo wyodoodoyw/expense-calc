@@ -1,15 +1,15 @@
-import { use, useState } from 'react';
+import { useState } from 'react';
 // import FileUploader from './FileUploader';
 
-function Accordian() {
+function Accordian(props) {
   const [selectedValue, setSelectedValue] = useState();
 
   // initial state ==> Canadian Expenses
-  const [expenseB, setExpenseB] = useState(17.95);
+  // const [expenseB, setExpenseB] = useState(17.95);
   const [expenseL, setExpenseL] = useState(20.33);
   const [expenseD, setExpenseD] = useState(40.27);
   const [expenseS, setExpenseS] = useState(10.52);
-  const [expenseTotal, setExpenseT] = useState(89.07);
+  const [expenseTotal, setExpenseTotal] = useState(89.07);
 
   return (
     <div className="accordion" id="accordian">
@@ -70,6 +70,7 @@ function Accordian() {
                   id="radio1"
                   value="value1"
                   onChange={(e) => setSelectedValue(e.target.value)}
+                  disabled
                 />
                 <label className="form-check-label" htmlFor="radio1">
                   <strong>A North America/Sun flight.</strong>
@@ -83,6 +84,7 @@ function Accordian() {
                   id="radio2"
                   value="value2"
                   onChange={(e) => setSelectedValue(e.target.value)}
+                  checked
                 />
                 <label className="form-check-label" htmlFor="radio2">
                   <strong>A layover at an international destination.</strong>
@@ -96,12 +98,13 @@ function Accordian() {
                   id="radio3"
                   value="value3"
                   onChange={(e) => setSelectedValue(e.target.value)}
+                  disabled
                 />
                 <label className="form-check-label" htmlFor="radio3">
                   <strong>
                     A domestic flight and layover before or after an
                     international flight.
-                  </strong>{' '}
+                  </strong>
                   Example: a layover in YUL before going to NRT.
                 </label>
               </div>
@@ -136,7 +139,7 @@ function Accordian() {
         >
           <div className="accordion-body">
             <form>
-              <div className="form-group row">
+              <div className="form-group row col-2 mx-auto">
                 <label
                   htmlFor="inputDestination"
                   className="col-sm-2 col-form-label"
@@ -146,13 +149,13 @@ function Accordian() {
                 <div className="col-sm-10">
                   <input
                     type="text"
-                    className="form-control"
+                    className="form-control  text-center"
                     id="inputDestination"
                     placeholder="YYZ"
                   />
                 </div>
               </div>
-              <div className="form-group row">
+              <div className="form-group row col-6 mx-auto">
                 <div className="form-group col-6">
                   <label
                     htmlFor="inputBreakfast"
@@ -163,15 +166,17 @@ function Accordian() {
                   <div className="col-sm-10">
                     <input
                       type="text"
-                      className="form-control"
+                      className="form-control  text-center"
                       id="inputBreakfast"
                       placeholder="17.95"
+                      value={props.expenseB}
+                      onChange={(val) => props.setExpenseB(val)}
                     />
                   </div>
                 </div>
                 <div className="form-group col-6">
                   <label
-                    htmlFor="inputDestination"
+                    htmlFor="inputLunch"
                     className="col-sm-2 col-form-label"
                   >
                     Lunch
@@ -179,15 +184,17 @@ function Accordian() {
                   <div className="col-sm-10">
                     <input
                       type="text"
-                      className="form-control"
-                      id="inputDestination"
+                      className="form-control  text-center"
+                      id="inputLunch"
                       placeholder="20.33"
+                      value={expenseL}
+                      onChange={(val) => setExpenseL(val)}
                     />
                   </div>
                 </div>
                 <div className="form-group col-6">
                   <label
-                    htmlFor="inputDestination"
+                    htmlFor="inputDinner"
                     className="col-sm-2 col-form-label"
                   >
                     Dinner
@@ -195,15 +202,17 @@ function Accordian() {
                   <div className="col-sm-10">
                     <input
                       type="text"
-                      className="form-control"
-                      id="inputDestination"
+                      className="form-control text-center"
+                      id="inputDinnet"
                       placeholder="40.27"
+                      value={expenseD}
+                      onChange={(val) => setExpenseD(val)}
                     />
                   </div>
                 </div>
                 <div className="form-group col-6">
                   <label
-                    htmlFor="inputDestination"
+                    htmlFor="inputSnack"
                     className="col-sm-2 col-form-label"
                   >
                     Snack
@@ -211,17 +220,19 @@ function Accordian() {
                   <div className="col-sm-10">
                     <input
                       type="text"
-                      className="form-control"
-                      id="inputDestination"
+                      className="form-control  text-center"
+                      id="inputSnack"
                       placeholder="10.52"
+                      value={expenseS}
+                      onChange={(val) => setExpenseS(val)}
                     />
                   </div>
                 </div>
               </div>
-              <div className="form-group row">
-                <div className="form-group col-6">
+              <div className="form-group mx-auto mt-3">
+                <div className="form-group row mx-auto">
                   <label
-                    htmlFor="inputDestination"
+                    htmlFor="inputTotal"
                     className="col-sm-2 col-form-label"
                   >
                     Total
@@ -229,9 +240,12 @@ function Accordian() {
                   <div className="col-sm-10">
                     <input
                       type="text"
-                      className="form-control"
-                      id="inputDestination"
+                      className="form-control  text-center"
+                      id="inputTotal"
                       placeholder="89.07"
+                      // value={Number(expenseB + expenseL + expenseD + expenseS)}
+                      disabled
+                      // onChange={(val) => setExpenseTotal(val)}
                     />
                   </div>
                 </div>

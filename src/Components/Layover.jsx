@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import expenses from '../api/expenses';
+// import expenses from '../api/expenses';
 import { useState } from 'react';
 import { TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
@@ -7,19 +7,27 @@ import isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(isBetween);
 
-function Layover(props) {
-  let layover = props.layover;
-  let new_layover = layover;
-  new_layover.layover_start = dayjs(`2000-01-01 ${new_layover.layover_start}`);
-  new_layover.layover_end = dayjs(`2000-01-01 ${new_layover.layover_end}`);
-  let location_expenses = expenses.expenses; // { breakfast: 29.91, lunch: 49.96, dinner: 57.26, snack: 20.36, day: 157.49 }
+function Layover({ layover, location_exp }) {
+  // let layover = props.layover;
+  // let location_expenses = location_exp;
+  // console.log(`!layover: ${JSON.stringify(props.layover)}`);
+  // let new_layover = [...props.layover];
+  // // console.log(`!new_layover: ${new_layover}`);
+  // new_layover.layover_start = dayjs(`2000-01-01 ${new_layover.layover_start}`);
+  // new_layover.layover_end = dayjs(`2000-01-01 ${new_layover.layover_end}`);
+  // console.log(`!layover_expenses: ${layover.layover_expenses}`);
+  // let location_exp  = expenses.expenses; // { breakfast: 29.91, lunch: 49.96, dinner: 57.26, snack: 20.36, day: 157.49 }
 
-  const [layoverStart, setLayoverStart] = useState(layover.layover_start);
-  const [layoverEnd, setLayoverEnd] = useState(layover.layover_end);
+  const [layoverStart, setLayoverStart] = useState(
+    dayjs(`2000-01-01 ${layover.layover_start}`)
+  );
+  const [layoverEnd, setLayoverEnd] = useState(
+    dayjs(`2000-01-01 ${layover.layover_end}`)
+  );
   const [fullDays, setFullDays] = useState(0);
 
   const calculateFirstDayExpenses = () => {
-    const time = new_layover.layover_start;
+    const time = layover.layover_start;
     if (time.isBefore('2000-01-01 12:30')) {
       return 'BLDS';
     } else if (time.isBetween('2000-01-01 12:30', dayjs('2000-01-01 13:30'))) {
@@ -30,7 +38,7 @@ function Layover(props) {
   };
 
   const calculateLastDayExpenses = () => {
-    const time = new_layover.layover_end;
+    const time = layover.layover_end;
     if (time.isBetween('2000-01-01 7:00', dayjs('2000-01-01 11:29'))) {
       return 'B';
     } else if (time.isBetween('2000-01-01 11:30', dayjs('2000-01-01 16:59'))) {
@@ -45,35 +53,35 @@ function Layover(props) {
   };
 
   const calculateNumBreakfasts = () => {
-    return (new_layover.layover_expenses.match(/B/g) || []).length;
+    return (layover.layover_expenses.match(/B/g) || []).length;
   };
 
   const calculateNumLunches = () => {
-    return (new_layover.layover_expenses.match(/L/g) || []).length;
+    return (layover.layover_expenses.match(/L/g) || []).length;
   };
 
   const calculateNumDinners = () => {
-    return (new_layover.layover_expenses.match(/D/g) || []).length;
+    return (layover.layover_expenses.match(/D/g) || []).length;
   };
 
   const calculateNumSnacks = () => {
-    return (new_layover.layover_expenses.match(/S/g) || []).length;
+    return (layover.layover_expenses.match(/S/g) || []).length;
   };
 
   const calculateDisplayBreakfastTotal = () => {
-    return calculateNumBreakfasts() * location_expenses.breakfast;
+    return calculateNumBreakfasts() * location_exp.breakfast;
   };
 
   const calculateDisplayLunchTotal = () => {
-    return calculateNumLunches() * location_expenses.lunch;
+    return calculateNumLunches() * location_exp.lunch;
   };
 
   const calculateDisplayDinnerTotal = () => {
-    return calculateNumDinners() * location_expenses.dinner;
+    return calculateNumDinners() * location_exp.dinner;
   };
 
   const calculateDisplaySnackTotal = () => {
-    return calculateNumSnacks() * location_expenses.snack;
+    return calculateNumSnacks() * location_exp.snack;
   };
 
   const calculateDisplayTotal = () => {
@@ -82,39 +90,36 @@ function Layover(props) {
       calculateDisplayLunchTotal() +
       calculateDisplayDinnerTotal() +
       calculateDisplaySnackTotal() +
-      new_layover.layover_cico * 5.05
+      layover.layover_cico * 5.05
     ).toFixed(2);
   };
 
   const handleStartTimeChange = (val) => {
-    new_layover.layover_start = dayjs(val);
-    new_layover.layover_end = dayjs(layoverEnd);
+    layover.layover_start = dayjs(val);
+    layover.layover_end = dayjs(layoverEnd);
     setLayoverStart(dayjs(val));
-    new_layover.layover_expenses = '';
-    new_layover.layover_expenses += calculateFirstDayExpenses();
-    new_layover.layover_expenses += calculateLastDayExpenses();
+    layover.layover_expenses = '';
+    layover.layover_expenses += calculateFirstDayExpenses();
+    layover.layover_expenses += calculateLastDayExpenses();
   };
 
   const handleEndTimeChange = (val) => {
-    new_layover.layover_start = dayjs(layoverStart);
-    new_layover.layover_end = dayjs(val);
+    layover.layover_start = dayjs(layoverStart);
+    layover.layover_end = dayjs(val);
     setLayoverEnd(dayjs(val));
-    new_layover.layover_expenses = '';
-    new_layover.layover_expenses += calculateFirstDayExpenses();
-    new_layover.layover_expenses += calculateLastDayExpenses();
+    layover.layover_expenses = '';
+    layover.layover_expenses += calculateFirstDayExpenses();
+    layover.layover_expenses += calculateLastDayExpenses();
   };
 
   const handleStepper = (e) => {
     if (e.target.id === 'plus') {
       setFullDays(fullDays + 1);
-      new_layover.layover_expenses += 'BLDS';
+      layover.layover_expenses += 'BLDS';
     } else if (fullDays > 0 && e.target.id === 'minus') {
       setFullDays(fullDays - 1);
 
-      new_layover.layover_expenses = new_layover.layover_expenses.replace(
-        'BLDS',
-        ''
-      );
+      layover.layover_expenses = layover.layover_expenses.replace('BLDS', '');
     }
   };
 
@@ -211,14 +216,14 @@ function Layover(props) {
               <td>{calculateNumLunches()}</td>
               <td>{calculateNumDinners()}</td>
               <td>{calculateNumSnacks()}</td>
-              <td>{new_layover.layover_cico}</td>
+              <td>{layover.layover_cico}</td>
             </tr>
             <tr>
               <td>x</td>
-              <td>${location_expenses.breakfast}</td>
-              <td>${location_expenses.lunch}</td>
-              <td>${location_expenses.dinner}</td>
-              <td>${location_expenses.snack}</td>
+              <td>${location_exp.breakfast}</td>
+              <td>${location_exp.lunch}</td>
+              <td>${location_exp.dinner}</td>
+              <td>${location_exp.snack}</td>
               <td>$5.05</td>
             </tr>
             <tr>
@@ -227,7 +232,7 @@ function Layover(props) {
               <td>${calculateDisplayLunchTotal()}</td>
               <td>${calculateDisplayDinnerTotal()}</td>
               <td>${calculateDisplaySnackTotal()}</td>
-              <td>${new_layover.layover_cico * 5.05}</td>
+              <td>${layover.layover_cico * 5.05}</td>
             </tr>
             <tr className="table-success">
               <td>Total:</td>
