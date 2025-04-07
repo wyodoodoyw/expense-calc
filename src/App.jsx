@@ -1,5 +1,6 @@
 import './App.css';
 import Layover from './Components/Layover';
+import Domestic from './Components/Domestic';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
@@ -27,11 +28,11 @@ function App() {
       <div className="container">
         <div className="text-center pb-4">
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
-          <h4>
+          {/* <h4>
             To be used for calculating expenses on a layover. More functionality
             to come.
           </h4>
-          <p>1. Change the layover destination in Layover in: (not required)</p>
+          <p>1. Change the layover destination. (not required)</p>
           <p>
             2. Change the expense amount for each meal for that destination.
           </p>
@@ -39,10 +40,11 @@ function App() {
           <p>
             4. If your layover includes a full calendar day (00:00-23:59), add
             that in the stepper.
-          </p>
+          </p> */}
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Layover layover={layover} location_exp={location_exp} />
+            {/* <Domestic layover={layover} location_exp={location_exp} /> */}
           </LocalizationProvider>
         </div>
       </div>
