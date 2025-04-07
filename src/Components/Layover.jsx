@@ -347,7 +347,7 @@ function Layover({ layover, location_exp }) {
               <td>${(meals.lunch * expenses.lunch).toFixed(2)}</td>
               <td>${(meals.dinner * expenses.dinner).toFixed(2)}</td>
               <td>${(meals.snack * expenses.snack).toFixed(2)}</td>
-              <td>${cico * (5.05).toFixed(2)}</td>
+              <td>${(cico * 5.05).toFixed(2)}</td>
             </tr>
             <tr className="table-success">
               <td>Total:</td>
