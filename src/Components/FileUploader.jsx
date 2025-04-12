@@ -1,55 +1,101 @@
 import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
+import { openDB } from 'idb';
 
-// Create a DB
-let db;
-const request = window.indexedDB.open('ExpensesDB', 1);
+// const obj = {
+//   id: 0,
+//   adjustmnent: 0,
+//   airport_codes: ['NRT', 'HND', 'KIX'],
+//   bracelet_provided: false,
+//   country_code: ['JP'],
+//   destination: 'Narita',
+//   expenses: {
+//     breakfast: 29.91,
+//     lunch: 49.96,
+//     dinner: 57.26,
+//     snack: 20.36,
+//     day: 157.49,
+//   },
+//   percent_change: 0,
+//   previous_allowance: 157.49,
+// };
 
-request.onupgradeneeded = (event) => {
-  const db = event.target.result;
-  const objectStore = db.createObjectStore('destination', {
-    keyPath: 'destination',
+// request.onupgradeneeded = (event) => {
+//   const db = event.target.result;
+//   const objectStore = db.createObjectStore('destination', {
+//     keyPath: 'destination',
+//   });
+//   // objectStore.createIndex('destination', 'destination', { unique: false });
+//   objectStore.createIndex('country_code', 'country_code', { unique: false });
+
+//   objectStore.transaction.oncomplete = (event) => {
+//     const destinationObjectStore = db
+//       .transaction('expenses', 'readwrite')
+//       .objectStore('expenses');
+//     destinationObjectStore.add({
+//       // adjustmnent: 0,
+//       // airport_codes: ['NRT', 'HND', 'KIX'],
+//       // bracelet_provided: false,
+//       country_code: ['JP'],
+//       destination: 'Narita',
+//       // expenses: {
+//       //   breakfast: 29.91,
+//       //   lunch: 49.96,
+//       //   dinner: 57.26,
+//       //   snack: 20.36,
+//       //   day: 157.49,
+//       // },
+//       // percent_change: 0,
+//       // previous_allowance: 157.49,
+//     });
+//   };
+// };
+
+// request.onsuccess = (event) => {
+//   db = event.target.result;
+//   // DB opened successfully
+//   console.log('!DB opened successfully.');
+// };
+
+// request.onerror = (event) => {
+//   // error occurred while opening DB
+//   console.error(`!Database error: ${event.target.error?.message}`);
+//   // transaction.abort();
+// };
+async function demo() {
+  const db = await openDB('expenses', 1, {
+    upgrade(db) {
+      //Create a store of objects
+      const store = db.createObjectStore('expenses', {
+        // The 'id' property of the object will be the key.
+        keyPath: 'id',
+        // If it isn't explicitly set, create a value by auto incrementing.
+        autoIncrement: true,
+      });
+      // Create an index on the 'destination' property of the objects
+      store.createIndex('destination', 'destination');
+    },
   });
-  // objectStore.createIndex('destination', 'destination', { unique: false });
-  objectStore.createIndex('country_code', 'country_code', { unique: false });
 
-  objectStore.transaction.oncomplete = (event) => {
-    const destinationObjectStore = db
-      .transaction('expenses', 'readwrite')
-      .objectStore('expenses');
-    destinationObjectStore.add({
-      // adjustmnent: 0,
-      // airport_codes: ['NRT', 'HND', 'KIX'],
-      // bracelet_provided: false,
-      country_code: ['JP'],
-      destination: 'Narita',
-      // expenses: {
-      //   breakfast: 29.91,
-      //   lunch: 49.96,
-      //   dinner: 57.26,
-      //   snack: 20.36,
-      //   day: 157.49,
-      // },
-      // percent_change: 0,
-      // previous_allowance: 157.49,
-    });
-  };
-};
-
-request.onsuccess = (event) => {
-  db = event.target.result;
-  // DB opened successfully
-  console.log('!DB opened successfully.');
-};
-
-request.onerror = (event) => {
-  // error occurred while opening DB
-  console.error(`!Database error: ${event.target.error?.message}`);
-  // transaction.abort();
-};
-
-// const transaction = db.transaction('newExpenseStore', 'readwrite');
-// const objectStore = transaction.objectStore('newExpenseStore');
+  // Add an object to the store
+  await db.add('expenses', {
+    id: 0,
+    adjustmnent: 0,
+    airport_codes: ['NRT', 'HND', 'KIX'],
+    bracelet_provided: false,
+    country_code: ['JP'],
+    destination: 'Narita',
+    expenses: {
+      breakfast: 29.91,
+      lunch: 49.96,
+      dinner: 57.26,
+      snack: 20.36,
+      day: 157.49,
+    },
+    percent_change: 0,
+    previous_allowance: 157.49,
+  });
+}
 
 //----- PARSER -----//
 
@@ -238,14 +284,6 @@ const FileUploader = () => {
         console.log(`!processedText.length: ${processedText.length}`);
 
         // Open the DB
-        //const request = indexedDB.open("customers")
-        // handle onsuccess and onerror
-
-        // add data to DB
-        const transaction = db.transaction('myObjectStore', 'readwrite');
-        const objectStore = transaction.objectStore('myObjectStore');
-
-        // customerData.map((customer) => objectStore.add(customer));
 
         // Go through each line of processedText and parse according to conditionsd
         for (let i = 0; i < processedText.length; i++) {
@@ -270,6 +308,8 @@ const FileUploader = () => {
       }
     }
   };
+
+  demo();
 
   return (
     <>

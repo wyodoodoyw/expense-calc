@@ -16,6 +16,7 @@
     "@mui/x-date-pickers": "^7.27.3",
     "bootstrap": "^5.3.3",
     "dayjs": "^1.11.13",
+    "idb": "^8.0.2",
     "pdf-parser-client-side": "^1.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
