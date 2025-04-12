@@ -1,6 +1,6 @@
 import './App.css';
-import Layover from './Components/Layover';
-// import Domestic from './Components/Domestic';
+// import Layover from './Components/Layover';
+import Domestic from './Components/Domestic';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
@@ -23,6 +23,24 @@ function App() {
     day: 157.49,
   };
 
+  const turn = {
+    turn_start: '06:30',
+    turn_stn: 'YVR',
+    turn_end: '18:31',
+    turn_expenses: 'BLD',
+    turn_cico: 0,
+    turn_expenses_total: 78.55,
+    turn_length: '13:16', //duty
+  };
+
+  const turn_expenses = {
+    breakfast: 17.95,
+    lunch: 20.33,
+    dinner: 40.27,
+    snack: 10.52,
+    day: 89.07,
+  };
+
   return (
     <>
       <div className="container">
@@ -43,8 +61,8 @@ function App() {
           </p> */}
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Layover layover={layover} location_exp={location_exp} />
-            {/* <Domestic layover={layover} location_exp={location_exp} /> */}
+            {/* <Layover layover={layover} location_exp={location_exp} /> */}
+            <Domestic turn={turn} location_exp={turn_expenses} />
           </LocalizationProvider>
         </div>
       </div>
