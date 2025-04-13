@@ -2,220 +2,144 @@ import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
 import { openDB } from 'idb';
 
-// const obj = {
-//   id: 0,
-//   adjustmnent: 0,
-//   airport_codes: ['NRT', 'HND', 'KIX'],
-//   bracelet_provided: false,
-//   country_code: ['JP'],
-//   destination: 'Narita',
-//   expenses: {
-//     breakfast: 29.91,
-//     lunch: 49.96,
-//     dinner: 57.26,
-//     snack: 20.36,
-//     day: 157.49,
-//   },
-//   percent_change: 0,
-//   previous_allowance: 157.49,
-// };
-
-// request.onupgradeneeded = (event) => {
-//   const db = event.target.result;
-//   const objectStore = db.createObjectStore('destination', {
-//     keyPath: 'destination',
-//   });
-//   // objectStore.createIndex('destination', 'destination', { unique: false });
-//   objectStore.createIndex('country_code', 'country_code', { unique: false });
-
-//   objectStore.transaction.oncomplete = (event) => {
-//     const destinationObjectStore = db
-//       .transaction('expenses', 'readwrite')
-//       .objectStore('expenses');
-//     destinationObjectStore.add({
-//       // adjustmnent: 0,
-//       // airport_codes: ['NRT', 'HND', 'KIX'],
-//       // bracelet_provided: false,
-//       country_code: ['JP'],
-//       destination: 'Narita',
-//       // expenses: {
-//       //   breakfast: 29.91,
-//       //   lunch: 49.96,
-//       //   dinner: 57.26,
-//       //   snack: 20.36,
-//       //   day: 157.49,
-//       // },
-//       // percent_change: 0,
-//       // previous_allowance: 157.49,
-//     });
-//   };
-// };
-
-// request.onsuccess = (event) => {
-//   db = event.target.result;
-//   // DB opened successfully
-//   console.log('!DB opened successfully.');
-// };
-
-// request.onerror = (event) => {
-//   // error occurred while opening DB
-//   console.error(`!Database error: ${event.target.error?.message}`);
-//   // transaction.abort();
-// };
-async function demo() {
-  const db = await openDB('expenses', 1, {
-    upgrade(db) {
-      //Create a store of objects
-      const store = db.createObjectStore('expenses', {
-        // The 'id' property of the object will be the key.
-        keyPath: 'id',
-        // If it isn't explicitly set, create a value by auto incrementing.
-        autoIncrement: true,
-      });
-      // Create an index on the 'destination' property of the objects
-      store.createIndex('destination', 'destination');
-    },
-  });
-
-  // Add an object to the store
-  await db.add('expenses', {
-    id: 0,
-    adjustmnent: 0,
-    airport_codes: ['NRT', 'HND', 'KIX'],
-    bracelet_provided: false,
-    country_code: ['JP'],
-    destination: 'Narita',
-    expenses: {
-      breakfast: 29.91,
-      lunch: 49.96,
-      dinner: 57.26,
-      snack: 20.36,
-      day: 157.49,
-    },
-    percent_change: 0,
-    previous_allowance: 157.49,
-  });
-}
-
-//----- PARSER -----//
-
-const parseLineAsBracelet = (line) => {
-  // New object
-  let newExpense = {
-    destination: '',
-    airport_codes: [],
-    country_code: '',
-    expenses: {
-      breakfast: null,
-      lunch: null,
-      dinner: null,
-      snack: null,
-      day: null,
-    },
-    bracelet_provided: true,
-    previous_allowance: null,
-    adjustment: null,
-    percent_change: null,
-  };
-
-  // below is reused code
-  const preDest = line.indexOf(')');
-  newExpense.destination = line.substring(0, preDest + 1);
-  newExpense.airport_codes = line.match(/\([A-Z]{3}\)/);
-  for (let i = 0; i < newExpense.airport_codes.length; i++) {
-    newExpense.airport_codes[i] = newExpense.airport_codes[i]
-      .replace('(', '')
-      .replace(')', '');
-  }
-
-  newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
-  // reused to here
-  console.log(newExpense);
-  return newExpense;
-};
-
-const parseLine = (line) => {
-  // New object
-  let newExpense = {
-    destination: '',
-    airport_codes: [],
-    country_code: '',
-    expenses: {
-      breakfast: null,
-      lunch: null,
-      dinner: null,
-      snack: null,
-      day: null,
-    },
-    bracelet_provided: false,
-    previous_allowance: null,
-    adjustment: null,
-    percent_change: null,
-  };
-
-  // catch special cases for destination (no airport code in brackets to detect)
-  const preDest = line.indexOf(')');
-  if (preDest != -1) {
-    newExpense.destination = line.substring(0, preDest + 1);
-  } else if (line.includes('Canada')) {
-    newExpense.destination = 'Canada';
-  } else if (line.includes('Mexico')) {
-    newExpense.destination = 'Mexico - Other';
-  } else if (line.includes('U.S.')) {
-    newExpense.destination = 'U.S.';
-  }
-
-  newExpense.airport_codes = line.match(/\([A-Z]{3}\)/);
-  if (newExpense.airport_codes) {
-    for (let i = 0; i < newExpense.airport_codes.length; i++) {
-      newExpense.airport_codes[i] = newExpense.airport_codes[i]
-        .replace('(', '')
-        .replace(')', '');
-    }
-  }
-
-  newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
-
-  const amounts = line.match(/-?\d{1,3}.\d{2}[^%]/gm);
-  for (let i = 0; i < amounts.length; i++) {
-    amounts[i] = amounts[i].replace(/ /g, '');
-  }
-
-  // Calculate expense amount for a full day 00:00-23:59
-  amounts.push(
-    (
-      Number(amounts[2]) +
-      Number(amounts[3]) +
-      Number(amounts[4]) +
-      Number(amounts[5])
-    ).toString()
-  );
-
-  newExpense.previous_allowance = amounts[0];
-  newExpense.adjustment = amounts[1];
-  newExpense.expenses.breakfast = amounts[2];
-  newExpense.expenses.lunch = amounts[3];
-  newExpense.expenses.dinner = amounts[4];
-  newExpense.expenses.snack = amounts[5];
-  newExpense.expenses.day = amounts[6];
-  newExpense.percent_change = line.match(/-?\d{1,3}.\d{2}%/)[0];
-
-  // const addRequest = objectStore.add(newExpense);
-  // addRequest.onsuccess = (event) => {
-  //   console.log(`!Data added. ${event.target.result}`);
-  // };
-  return newExpense;
-};
-
 //----- COMPONENT -----//
 
 const FileUploader = () => {
   const [file, setFile] = useState(null);
+  const [expensesList, setExpensesList] = useState([]);
 
   const handleFileChange = (e) => {
     if (e.target.files) {
       setFile(e.target.files[0]);
     }
+  };
+
+  async function addExpensetoDB(expense) {
+    const db = await openDB('expenses', 1, {
+      upgrade(db) {
+        //Create a store of objects
+        const store = db.createObjectStore('expenses', {
+          // The 'id' property of the object will be the key.
+          keyPath: 'id',
+          // If it isn't explicitly set, create a value by auto incrementing.
+          autoIncrement: true,
+        });
+        // Create an index on the 'destination' property of the objects
+        store.createIndex('destination', 'destination');
+      },
+    });
+
+    // Add an object to the store
+    await db.add('expenses', expense);
+
+    // Add multiple articles in one transaction:
+    // console.log(`!typeof: ${JSON.stringify(expensesList)}`);
+  }
+
+  //----- PARSER -----//
+
+  const parseLineAsBracelet = (line) => {
+    // New object
+    let newExpense = {
+      destination: '',
+      airport_codes: [],
+      country_code: '',
+      // expenses: {
+      //   breakfast: null,
+      //   lunch: null,
+      //   dinner: null,
+      //   snack: null,
+      //   day: null,
+      // },
+      bracelet_provided: true,
+      // previous_allowance: null,
+      // adjustment: null,
+      // percent_change: null,
+    };
+
+    // below is reused code
+    const preDest = line.indexOf(')');
+    newExpense.destination = line.substring(0, preDest + 1);
+    newExpense.airport_codes = line.match(/\([A-Z]{3}\)/);
+    for (let i = 0; i < newExpense.airport_codes.length; i++) {
+      newExpense.airport_codes[i] = newExpense.airport_codes[i]
+        .replace('(', '')
+        .replace(')', '');
+    }
+
+    newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
+    // reused to here
+
+    addExpensetoDB(newExpense);
+  };
+
+  const parseLine = (line) => {
+    // New object
+    let newExpense = {
+      destination: '',
+      airport_codes: [],
+      country_code: '',
+      expenses: {
+        breakfast: null,
+        lunch: null,
+        dinner: null,
+        snack: null,
+        day: null,
+      },
+      bracelet_provided: false,
+      previous_allowance: null,
+      adjustment: null,
+      percent_change: null,
+    };
+
+    // catch special cases for destination (no airport code in brackets to detect)
+    const preDest = line.indexOf(')');
+    if (preDest != -1) {
+      newExpense.destination = line.substring(0, preDest + 1);
+    } else if (line.includes('Canada')) {
+      newExpense.destination = 'Canada';
+    } else if (line.includes('Mexico')) {
+      newExpense.destination = 'Mexico - Other';
+    } else if (line.includes('U.S.')) {
+      newExpense.destination = 'U.S.';
+    }
+
+    newExpense.airport_codes = line.match(/\([A-Z]{3}\)/);
+    if (newExpense.airport_codes) {
+      for (let i = 0; i < newExpense.airport_codes.length; i++) {
+        newExpense.airport_codes[i] = newExpense.airport_codes[i]
+          .replace('(', '')
+          .replace(')', '');
+      }
+    }
+
+    newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
+
+    const amounts = line.match(/-?\d{1,3}.\d{2}[^%]/gm);
+    for (let i = 0; i < amounts.length; i++) {
+      amounts[i] = amounts[i].replace(/ /g, '');
+    }
+
+    // Calculate expense amount for a full day 00:00-23:59
+    amounts.push(
+      (
+        Number(amounts[2]) +
+        Number(amounts[3]) +
+        Number(amounts[4]) +
+        Number(amounts[5])
+      ).toString()
+    );
+
+    newExpense.previous_allowance = amounts[0];
+    newExpense.adjustment = amounts[1];
+    newExpense.expenses.breakfast = amounts[2];
+    newExpense.expenses.lunch = amounts[3];
+    newExpense.expenses.dinner = amounts[4];
+    newExpense.expenses.snack = amounts[5];
+    newExpense.expenses.day = amounts[6];
+    newExpense.percent_change = line.match(/-?\d{1,3}.\d{2}%/)[0];
+
+    addExpensetoDB(newExpense);
   };
 
   const handleUpload = async () => {
@@ -283,9 +207,7 @@ const FileUploader = () => {
 
         console.log(`!processedText.length: ${processedText.length}`);
 
-        // Open the DB
-
-        // Go through each line of processedText and parse according to conditionsd
+        // Go through each line of processedText and parse according to conditions
         for (let i = 0; i < processedText.length; i++) {
           if (i === 0) {
             // remove the headers
@@ -309,7 +231,13 @@ const FileUploader = () => {
     }
   };
 
-  demo();
+  // .then((db) => {
+  //   const tx = db.transaction('expenses', 'readwrite');
+  //   expensesList.map((exp) => {
+  //     tx.store.add(exp);
+  //   }),
+  //     tx.done;
+  // });
 
   return (
     <>

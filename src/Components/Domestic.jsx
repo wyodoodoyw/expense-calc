@@ -38,7 +38,11 @@ function Domestic({ turn, location_exp }) {
     snack: (turn.turn_expenses.match(/S/g) || []).length,
   });
 
-  const [turnLength, setTurnLength] = useState(turn.turn_length);
+  // const [turnLength, setTurnLength] = useState(
+  //   dayjs
+  //     .duration(dayjs('18:46', 'HH:mm').diff(dayjs('05:30', 'HH:mm')))
+  //     .format('HH:mm')
+  // );
   // console.log(
   //   `!Turn Length: ${JSON.stringify(
   //     dayjs
