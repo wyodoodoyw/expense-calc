@@ -6,7 +6,7 @@ import { openDB } from 'idb';
 
 const FileUploader = () => {
   const [file, setFile] = useState(null);
-  const [expensesList, setExpensesList] = useState([]);
+  // const [expensesList, setExpensesList] = useState([]);
 
   const handleFileChange = (e) => {
     if (e.target.files) {
@@ -61,10 +61,11 @@ const FileUploader = () => {
     const preDest = line.indexOf(')');
     newExpense.destination = line.substring(0, preDest + 1);
     newExpense.airport_codes = line.match(/\([A-Z]{3}\)/);
-    for (let i = 0; i < newExpense.airport_codes.length; i++) {
+    for (let i = 0; i < newExpense.airport_codes || 0; i++) {
       newExpense.airport_codes[i] = newExpense.airport_codes[i]
         .replace('(', '')
-        .replace(')', '');
+        .replace(')', '')
+        .replace(' ', '');
     }
 
     newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
@@ -95,28 +96,41 @@ const FileUploader = () => {
     // catch special cases for destination (no airport code in brackets to detect)
     const preDest = line.indexOf(')');
     if (preDest != -1) {
-      newExpense.destination = line.substring(0, preDest + 1);
+      newExpense.destination = line
+        .substring(0, preDest + 1)
+        .replace(' )', ')');
     } else if (line.includes('Canada')) {
       newExpense.destination = 'Canada';
     } else if (line.includes('Mexico')) {
       newExpense.destination = 'Mexico - Other';
     } else if (line.includes('U.S.')) {
       newExpense.destination = 'U.S.';
+    } else if (line.includes('Jamaica')) {
+      newExpense.destination = 'Jamaica - Other';
     }
 
-    newExpense.airport_codes = line.match(/\([A-Z]{3}\)/);
+    if (line.match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)) {
+      // capture (XXX, XXX, XXX)
+      newExpense.airport_codes = line
+        .match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)[0]
+        .match(/[A-Z]{3}/g);
+    } else {
+      // capture (XXX), (XXX )
+      newExpense.airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
+    }
     if (newExpense.airport_codes) {
-      for (let i = 0; i < newExpense.airport_codes.length; i++) {
+      for (let i = 0; i < newExpense.airport_codes.length || 0; i++) {
         newExpense.airport_codes[i] = newExpense.airport_codes[i]
           .replace('(', '')
-          .replace(')', '');
+          .replace(')', '')
+          .replace(' ', '');
       }
     }
 
     newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
 
     const amounts = line.match(/-?\d{1,3}.\d{2}[^%]/gm);
-    for (let i = 0; i < amounts.length; i++) {
+    for (let i = 0; i < amounts.length || 0; i++) {
       amounts[i] = amounts[i].replace(/ /g, '');
     }
 
@@ -127,7 +141,9 @@ const FileUploader = () => {
         Number(amounts[3]) +
         Number(amounts[4]) +
         Number(amounts[5])
-      ).toString()
+      )
+        .toFixed(2)
+        .toString()
     );
 
     newExpense.previous_allowance = amounts[0];
@@ -155,7 +171,7 @@ const FileUploader = () => {
         for (let i = 0; i < lines.length; i++) {
           lines[i] !== ' ' && preProcessedText.push(lines[i]);
         }
-        console.log(`!preprocessedText.length: ${preProcessedText.length}`);
+        // console.log(`!preprocessedText.length: ${preProcessedText.length}`);
 
         // Find and process Bracelet Only destinations
         for (let i = 0; i < preProcessedText.length; i++) {
@@ -205,7 +221,7 @@ const FileUploader = () => {
           }
         }
 
-        console.log(`!processedText.length: ${processedText.length}`);
+        // console.log(`!processedText.length: ${processedText.length}`);
 
         // Go through each line of processedText and parse according to conditions
         for (let i = 0; i < processedText.length; i++) {

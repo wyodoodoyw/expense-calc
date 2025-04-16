@@ -15,7 +15,7 @@ function Layover({ layover, location_exp }) {
     layover_start: dayjs(`${layover.layover_start}`, timeFormat),
     layover_end: dayjs(`${layover.layover_end}`, timeFormat),
   });
-  console.log(`!layover_times: ${JSON.stringify(layoverTimes)}`);
+  // console.log(`!layover_times: ${JSON.stringify(layoverTimes)}`);
   const [fullDays, setFullDays] = useState(0);
   // const [layoverLength, setLayoverLength] = useState(0);
 
