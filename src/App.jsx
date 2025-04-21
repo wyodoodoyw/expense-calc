@@ -16,8 +16,9 @@ function App() {
     layover_length: '24:45',
   };
 
+  // const location_exp = sessionStorage.getItem('AKL');
   const location_exp = {
-    breakfast: 29.91,
+    breakfast: Number(sessionStorage.getItem('ALG')),
     lunch: 49.96,
     dinner: 57.26,
     snack: 20.36,
@@ -62,7 +63,7 @@ function App() {
           </p> */}
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Accordion />
+            <Accordion location_exp={location_exp} />
             {/* <Layover layover={layover} location_exp={location_exp} /> */}
             {/* <Domestic turn={turn} location_exp={turn_expenses} /> */}
           </LocalizationProvider>

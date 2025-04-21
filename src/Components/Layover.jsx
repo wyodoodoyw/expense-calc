@@ -190,6 +190,22 @@ function Layover({ layover, location_exp }) {
     ).toFixed(2);
   };
 
+  const handleSearchClick = () => {
+    console.log(`!Clicked: ${station}`);
+    const db = openDB('expenses', 1);
+    const tx = db.transaction('expenses', 'readwrite');
+    const store = tx.objectStore('expenses');
+    const expenses = store.getAll();
+    // const expenses = store.get('expenses', 'airport_codes', [station]);
+    console.log('!expenses:', expenses);
+    // upgrade(db) {
+    //   const tx = db.transaction('expenses', 'readwrite');
+    //   const store = tx.objectStore('expenses');
+    //   const expenses = db.get('expenses', station);
+    //   console.log('!expenses:', expenses);
+    // },
+  };
+
   return (
     <>
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
@@ -206,6 +222,9 @@ function Layover({ layover, location_exp }) {
                 value={station}
                 onChange={(val) => handleStationChange(val)}
               />
+              <div className="btn" onClick={handleSearchClick}>
+                Search
+              </div>
             </div>
           </div>
           <div className="input-group">

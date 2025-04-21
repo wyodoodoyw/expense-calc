@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
-import { openDB } from 'idb';
-
+// import { openDB } from 'idb';
+// const request = window.indexedDB.open('ExpesnsesDB', 1);
 //----- COMPONENT -----//
 
 const FileUploader = () => {
@@ -14,29 +14,87 @@ const FileUploader = () => {
     }
   };
 
-  async function addExpensetoDB(expense) {
-    const db = await openDB('expenses', 1, {
-      upgrade(db) {
-        //Create a store of objects
-        const store = db.createObjectStore('expenses', {
-          // The 'id' property of the object will be the key.
-          keyPath: 'id',
-          // If it isn't explicitly set, create a value by auto incrementing.
-          autoIncrement: true,
-        });
-        // Create an index on the 'destination' property of the objects
-        store.createIndex('destination', 'destination');
-      },
-    });
+  // async function addExpensetoDB(expense) {
+  // const request = window.indexedDB.open('ExpesnsesDB', 1);
 
-    // Add an object to the store
-    await db.add('expenses', expense);
+  //   request.onerror = (event) => {
+  //     console.error('Error opening database: ', event.target.error?.message);
+  //   };
 
-    // Add multiple articles in one transaction:
-    // console.log(`!typeof: ${JSON.stringify(expensesList)}`);
-  }
+  //   request.onsuccess = (event) => {
+  //     console.log('Database opened successfully: ', request.result);
+  //     // db = event.target.result;
+  //   };
+
+  //   request.onupgradeneeded = (event) => {
+  //     const db = event.target.result;
+  //     const objectStore = db.createObjectStore('expenses', {
+  //       autoIncrement: true,
+  //     });
+  //     objectStore.createIndex('destination', 'destination', { unique: false });
+  //     objectStore.createIndex('airport_codes', 'airport_codes', {
+  //       unique: false,
+  //     });
+  //     objectStore.createIndex('country_code', 'country_code', {
+  //       unique: false,
+  //     });
+  //     objectStore.transaction.onccomplete = () => {
+  //       const expensesObjectStore = db
+  //         .transaction('expenses', 'readwrite')
+  //         .objectStore('expenses');
+  //       expensesObjectStore.add(expense);
+  //     };
+  //   };
+  // }
+  //   const db = openDB('expenses', 1, {
+  //     upgrade(db) {
+  //       //Create a store of objects
+  //       const store = db.createObjectStore('expenses', {
+  //         // The 'id' property of the object will be the key.
+  //         keyPath: 'id',
+  //         // If it isn't explicitly set, create a value by auto incrementing.
+  //         autoIncrement: true,
+  //       });
+  //       // Create an index on the 'destination' property of the objects
+  //       store.createIndex('destination', 'destination');
+  //       store.createIndex('airport_codes', 'airport_codes');
+  //     },
+  //   });
+
+  //   // Add an object to the store
+  //   await db.add('expenses', expense);
+
+  //   // Add multiple articles in one transaction:
+  //   // console.log(`!typeof: ${JSON.stringify(expensesList)}`);
+  // }
 
   //----- PARSER -----//
+
+  const parseAirportCodes = (line) => {
+    let airport_codes = [];
+    if (line.match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)) {
+      // capture (XXX, XXX, XXX)
+      airport_codes = line
+        // .match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)[0]
+        .match(/[A-Z]{3}/g);
+    } else if (line.match(/[A-Z]{3}\/[A-Z]{3}/)) {
+      airport_codes = line
+        // .match(/[A-Z]{3}\/[A-Z]{3}/)[0]
+        .match(/[A-Z]{3}/g);
+    } else {
+      // capture (XXX), (XXX )
+      airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
+    }
+    if (airport_codes) {
+      for (let i = 0; i < airport_codes.length || 0; i++) {
+        airport_codes[i] = airport_codes[i]
+          .replace('(', '')
+          .replace(')', '')
+          .replace(' ', '');
+      }
+    }
+    return airport_codes;
+  };
 
   const parseLineAsBracelet = (line) => {
     // New object
@@ -44,34 +102,22 @@ const FileUploader = () => {
       destination: '',
       airport_codes: [],
       country_code: '',
-      // expenses: {
-      //   breakfast: null,
-      //   lunch: null,
-      //   dinner: null,
-      //   snack: null,
-      //   day: null,
-      // },
       bracelet_provided: true,
-      // previous_allowance: null,
-      // adjustment: null,
-      // percent_change: null,
     };
 
     // below is reused code
     const preDest = line.indexOf(')');
     newExpense.destination = line.substring(0, preDest + 1);
-    newExpense.airport_codes = line.match(/\([A-Z]{3}\)/);
-    for (let i = 0; i < newExpense.airport_codes || 0; i++) {
-      newExpense.airport_codes[i] = newExpense.airport_codes[i]
-        .replace('(', '')
-        .replace(')', '')
-        .replace(' ', '');
-    }
+    newExpense.airport_codes = parseAirportCodes(line);
 
-    newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
+    newExpense.country_code = line.match(/ [A-Z]{2} /g)[0].replace(' ', '');
     // reused to here
 
-    addExpensetoDB(newExpense);
+    // addExpensetoDB(newExpense);
+    // sessionStorage.setItem(
+    //   newExpense.airport_codes[0],
+    //   newExpense.expenses.breakfast
+    // );
   };
 
   const parseLine = (line) => {
@@ -109,24 +155,7 @@ const FileUploader = () => {
       newExpense.destination = 'Jamaica - Other';
     }
 
-    if (line.match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)) {
-      // capture (XXX, XXX, XXX)
-      newExpense.airport_codes = line
-        .match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)[0]
-        .match(/[A-Z]{3}/g);
-    } else {
-      // capture (XXX), (XXX )
-      newExpense.airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
-    }
-    if (newExpense.airport_codes) {
-      for (let i = 0; i < newExpense.airport_codes.length || 0; i++) {
-        newExpense.airport_codes[i] = newExpense.airport_codes[i]
-          .replace('(', '')
-          .replace(')', '')
-          .replace(' ', '');
-      }
-    }
-
+    newExpense.airport_codes = parseAirportCodes(line);
     newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
 
     const amounts = line.match(/-?\d{1,3}.\d{2}[^%]/gm);
@@ -155,7 +184,11 @@ const FileUploader = () => {
     newExpense.expenses.day = amounts[6];
     newExpense.percent_change = line.match(/-?\d{1,3}.\d{2}%/)[0];
 
-    addExpensetoDB(newExpense);
+    // addExpensetoDB(newExpense);
+    // sessionStorage.setItem(
+    //   newExpense.airport_codes[0],
+    //   newExpense.expenses.breakfast
+    // );
   };
 
   const handleUpload = async () => {

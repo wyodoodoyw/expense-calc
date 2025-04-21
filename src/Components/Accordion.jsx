@@ -2,8 +2,10 @@ import { useState } from 'react';
 import Layover from './Layover';
 import FileUploader from './FileUploader';
 
-function Accordian(props) {
+function Accordian(location_exp) {
   const [selectedValue, setSelectedValue] = useState();
+
+  console.log(location_exp);
 
   // initial state ==> Canadian Expenses
   // const [expenseB, setExpenseB] = useState(17.95);
@@ -22,13 +24,13 @@ function Accordian(props) {
     layover_length: '24:45',
   };
 
-  const location_exp = {
-    breakfast: 29.91,
-    lunch: 49.96,
-    dinner: 57.26,
-    snack: 20.36,
-    day: 157.49,
-  };
+  // const location_exp = {
+  //   breakfast: 29.91,
+  //   lunch: 49.96,
+  //   dinner: 57.26,
+  //   snack: 20.36,
+  //   day: 157.49,
+  // };
 
   return (
     <div className="accordion" id="accordian">
