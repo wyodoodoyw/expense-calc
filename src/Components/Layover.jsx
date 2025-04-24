@@ -15,9 +15,7 @@ function Layover({ layover, location_exp }) {
     layover_start: dayjs(`${layover.layover_start}`, timeFormat),
     layover_end: dayjs(`${layover.layover_end}`, timeFormat),
   });
-  // console.log(`!layover_times: ${JSON.stringify(layoverTimes)}`);
   const [fullDays, setFullDays] = useState(0);
-  // const [layoverLength, setLayoverLength] = useState(0);
 
   // Amount of expenses earned for each type of meal
   const [expenses, setExpenses] = useState({
@@ -191,19 +189,29 @@ function Layover({ layover, location_exp }) {
   };
 
   const handleSearchClick = () => {
-    // console.log(`!Clicked: ${station}`);
-    // const db = openDB('expenses', 1);
-    // const tx = db.transaction('expenses', 'readwrite');
-    // const store = tx.objectStore('expenses');
-    // const expenses = store.getAll();
-    // // const expenses = store.get('expenses', 'airport_codes', [station]);
-    // console.log('!expenses:', expenses);
-    // upgrade(db) {
-    //   const tx = db.transaction('expenses', 'readwrite');
-    //   const store = tx.objectStore('expenses');
-    //   const expenses = db.get('expenses', station);
-    //   console.log('!expenses:', expenses);
-    // },
+    const request = window.indexedDB.open('ExpensesDB', 1);
+
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const tx = db.transaction(['expenses'], 'readonly');
+      const expensesStore = tx.objectStore('expenses');
+
+      const request = expensesStore.get(50);
+
+      request.onsuccess = () => {
+        setExpenses({
+          breakfast: request.result.expenses.breakfast,
+          lunch: request.result.expenses.lunch,
+          dinner: request.result.expenses.dinner,
+          snack: request.result.expenses.snack,
+        });
+        console.log(`!DB: ${JSON.stringify(request.result)}`);
+      };
+
+      request.onerror = (event) => {
+        console.log(`!DB Error: ${event.target.error}`);
+      };
+    };
   };
 
   return (

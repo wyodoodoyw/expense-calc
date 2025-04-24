@@ -173,6 +173,18 @@ const FileUploader = () => {
   };
 
   const handleUpload = async () => {
+    // delete existing DB
+    const request = window.indexedDB.deleteDatabase('ExpensesDB');
+    request.onsuccess = () => {
+      console.log('Database deleted successfully');
+    };
+    request.onerror = () => {
+      console.log('Error deleting database');
+    };
+    request.onblocked = () => {
+      console.log('Database deletion blocked');
+    };
+
     if (file) {
       try {
         // Read pdf file

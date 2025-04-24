@@ -1,4 +1,5 @@
 import './App.css';
+import Alert from './Components/Alert';
 import Accordion from './Components/Accordion';
 // import Layover from './Components/Layover';
 import Domestic from './Components/Domestic';
@@ -48,24 +49,11 @@ function App() {
       <div className="container">
         <div className="text-center pb-4">
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
-          {/* <h4>
-            To be used for calculating expenses on a layover. More functionality
-            to come.
-          </h4>
-          <p>1. Change the layover destination. (not required)</p>
-          <p>
-            2. Change the expense amount for each meal for that destination.
-          </p>
-          <p>3. Update the actual start and end times of the layover.</p>
-          <p>
-            4. If your layover includes a full calendar day (00:00-23:59), add
-            that in the stepper.
-          </p> */}
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <Accordion location_exp={location_exp} />
-            {/* <Layover layover={layover} location_exp={location_exp} /> */}
-            {/* <Domestic turn={turn} location_exp={turn_expenses} /> */}
+            {/* <Layover layover={layover} location_exp={location_exp} />
+      /* <Domestic turn={turn} location_exp={turn_expenses} /> */}
           </LocalizationProvider>
         </div>
       </div>
