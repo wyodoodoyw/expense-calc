@@ -191,13 +191,13 @@ function Layover({ layover, location_exp }) {
   };
 
   const handleSearchClick = () => {
-    console.log(`!Clicked: ${station}`);
-    const db = openDB('expenses', 1);
-    const tx = db.transaction('expenses', 'readwrite');
-    const store = tx.objectStore('expenses');
-    const expenses = store.getAll();
-    // const expenses = store.get('expenses', 'airport_codes', [station]);
-    console.log('!expenses:', expenses);
+    // console.log(`!Clicked: ${station}`);
+    // const db = openDB('expenses', 1);
+    // const tx = db.transaction('expenses', 'readwrite');
+    // const store = tx.objectStore('expenses');
+    // const expenses = store.getAll();
+    // // const expenses = store.get('expenses', 'airport_codes', [station]);
+    // console.log('!expenses:', expenses);
     // upgrade(db) {
     //   const tx = db.transaction('expenses', 'readwrite');
     //   const store = tx.objectStore('expenses');

@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
+import splitStringBefore from '../splitStringBefore';
+import splitStringAfter from '../splitStringAfter';
 // import { openDB } from 'idb';
 // const request = window.indexedDB.open('ExpesnsesDB', 1);
 //----- COMPONENT -----//
@@ -14,181 +16,160 @@ const FileUploader = () => {
     }
   };
 
-  // async function addExpensetoDB(expense) {
-  // const request = window.indexedDB.open('ExpesnsesDB', 1);
+  const addExpensetoDB = (newExpense) => {
+    const request = window.indexedDB.open('ExpensesDB', 1);
 
-  //   request.onerror = (event) => {
-  //     console.error('Error opening database: ', event.target.error?.message);
-  //   };
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const tx = db.transaction(['expenses'], 'readwrite');
+      const expensesStore = tx.objectStore('expenses');
 
-  //   request.onsuccess = (event) => {
-  //     console.log('Database opened successfully: ', request.result);
-  //     // db = event.target.result;
-  //   };
+      expensesStore.put(newExpense);
+    };
 
-  //   request.onupgradeneeded = (event) => {
-  //     const db = event.target.result;
-  //     const objectStore = db.createObjectStore('expenses', {
-  //       autoIncrement: true,
-  //     });
-  //     objectStore.createIndex('destination', 'destination', { unique: false });
-  //     objectStore.createIndex('airport_codes', 'airport_codes', {
-  //       unique: false,
-  //     });
-  //     objectStore.createIndex('country_code', 'country_code', {
-  //       unique: false,
-  //     });
-  //     objectStore.transaction.onccomplete = () => {
-  //       const expensesObjectStore = db
-  //         .transaction('expenses', 'readwrite')
-  //         .objectStore('expenses');
-  //       expensesObjectStore.add(expense);
-  //     };
-  //   };
-  // }
-  //   const db = openDB('expenses', 1, {
-  //     upgrade(db) {
-  //       //Create a store of objects
-  //       const store = db.createObjectStore('expenses', {
-  //         // The 'id' property of the object will be the key.
-  //         keyPath: 'id',
-  //         // If it isn't explicitly set, create a value by auto incrementing.
-  //         autoIncrement: true,
-  //       });
-  //       // Create an index on the 'destination' property of the objects
-  //       store.createIndex('destination', 'destination');
-  //       store.createIndex('airport_codes', 'airport_codes');
-  //     },
-  //   });
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      const expensesStore = db.createObjectStore('expenses', {
+        keyPath: 'id',
+        autoIncrement: true,
+      });
+      // expensesStore.put(newExpense);
+      // db.close();
+    };
 
-  //   // Add an object to the store
-  //   await db.add('expenses', expense);
-
-  //   // Add multiple articles in one transaction:
-  //   // console.log(`!typeof: ${JSON.stringify(expensesList)}`);
-  // }
+    request.onerror = (event) => {
+      console.log(`!DB Error: ${event.target.error}`);
+    };
+  };
 
   //----- PARSER -----//
 
   const parseAirportCodes = (line) => {
-    let airport_codes = [];
-    if (line.match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)) {
-      // capture (XXX, XXX, XXX)
-      airport_codes = line
-        // .match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)[0]
-        .match(/[A-Z]{3}/g);
-    } else if (line.match(/[A-Z]{3}\/[A-Z]{3}/)) {
-      airport_codes = line
-        // .match(/[A-Z]{3}\/[A-Z]{3}/)[0]
-        .match(/[A-Z]{3}/g);
-    } else {
-      // capture (XXX), (XXX )
-      airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
-    }
-    if (airport_codes) {
-      for (let i = 0; i < airport_codes.length || 0; i++) {
-        airport_codes[i] = airport_codes[i]
-          .replace('(', '')
-          .replace(')', '')
-          .replace(' ', '');
+    try {
+      let airport_codes = [];
+      if (line.match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)) {
+        // capture (XXX, XXX, XXX)
+        airport_codes = line
+          // .match(/\([A-Z]{3}, [A-Z]{3}, [A-Z]{3}\)/)[0]
+          .match(/[A-Z]{3}/g);
+      } else if (line.match(/[A-Z]{3}\/[A-Z]{3}/)) {
+        airport_codes = line
+          // .match(/[A-Z]{3}\/[A-Z]{3}/)[0]
+          .match(/[A-Z]{3}/g);
+      } else if (line.match('Canada')) {
+        airport_codes = ['YYZ', 'YUL', 'YVR', 'YOW', 'YEG', 'YHZ', 'YYC'];
+      } else if (line.match('U.S.')) {
+        airport_codes = ['ORD', 'JFK', 'LAX', 'MIA', 'DFW', 'IAH'];
+      } else if (line.match('BRACELET')) {
+        //console.log(`!Bracelelt: ${airport_codes.length}`);
+      } else {
+        // capture (XXX), (XXX )
+        airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
       }
+      if (airport_codes) {
+        for (let i = 0; i < airport_codes.length || 0; i++) {
+          airport_codes[i] = airport_codes[i]
+            .replace('(', '')
+            .replace(')', '')
+            .replace(' ', '');
+        }
+      }
+      return airport_codes;
+    } catch (err) {
+      console.log(`!Error in parseAirportCodes: ${err}`);
     }
-    return airport_codes;
   };
 
   const parseLineAsBracelet = (line) => {
-    // New object
-    let newExpense = {
-      destination: '',
-      airport_codes: [],
-      country_code: '',
-      bracelet_provided: true,
-    };
+    try {
+      // New object
+      let newExpense = {
+        destination: '',
+        airport_codes: [],
+        country_code: '',
+        bracelet_provided: true,
+      };
+      const preDest = line.indexOf(')');
+      newExpense.destination = line.substring(0, preDest + 1);
+      newExpense.airport_codes = parseAirportCodes(line);
 
-    // below is reused code
-    const preDest = line.indexOf(')');
-    newExpense.destination = line.substring(0, preDest + 1);
-    newExpense.airport_codes = parseAirportCodes(line);
-
-    newExpense.country_code = line.match(/ [A-Z]{2} /g)[0].replace(' ', '');
-    // reused to here
-
-    // addExpensetoDB(newExpense);
-    // sessionStorage.setItem(
-    //   newExpense.airport_codes[0],
-    //   newExpense.expenses.breakfast
-    // );
+      newExpense.country_code = line.match(/ [A-Z]{2} /g)[0].replace(' ', '');
+      addExpensetoDB(newExpense);
+    } catch (err) {
+      console.log(`!Error in parseLineAsBracelet: ${err}`);
+      return;
+    }
   };
 
   const parseLine = (line) => {
-    // New object
-    let newExpense = {
-      destination: '',
-      airport_codes: [],
-      country_code: '',
-      expenses: {
-        breakfast: null,
-        lunch: null,
-        dinner: null,
-        snack: null,
-        day: null,
-      },
-      bracelet_provided: false,
-      previous_allowance: null,
-      adjustment: null,
-      percent_change: null,
-    };
+    try {
+      // New object
+      let newExpense = {
+        destination: '',
+        airport_codes: [],
+        country_code: '',
+        expenses: {
+          breakfast: null,
+          lunch: null,
+          dinner: null,
+          snack: null,
+          day: null,
+        },
+        bracelet_provided: false,
+        previous_allowance: null,
+        adjustment: null,
+        percent_change: null,
+      };
 
-    // catch special cases for destination (no airport code in brackets to detect)
-    const preDest = line.indexOf(')');
-    if (preDest != -1) {
-      newExpense.destination = line
-        .substring(0, preDest + 1)
-        .replace(' )', ')');
-    } else if (line.includes('Canada')) {
-      newExpense.destination = 'Canada';
-    } else if (line.includes('Mexico')) {
-      newExpense.destination = 'Mexico - Other';
-    } else if (line.includes('U.S.')) {
-      newExpense.destination = 'U.S.';
-    } else if (line.includes('Jamaica')) {
-      newExpense.destination = 'Jamaica - Other';
+      // catch special cases for destination (no airport code in brackets to detect)
+      const preDest = line.indexOf(')');
+      if (preDest != -1) {
+        newExpense.destination = line
+          .substring(0, preDest + 1)
+          .replace(' )', ')');
+      } else if (line.includes('Canada')) {
+        newExpense.destination = 'Canada';
+      } else if (line.includes('Mexico')) {
+        newExpense.destination = 'Mexico - Other';
+      } else if (line.includes('U.S.')) {
+        newExpense.destination = 'U.S.';
+      } else if (line.includes('Jamaica')) {
+        newExpense.destination = 'Jamaica - Other';
+      }
+
+      newExpense.airport_codes = parseAirportCodes(line);
+      newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
+
+      const amounts = line.match(/-?\d{1,3}.\d{2}[^%]/gm);
+      for (let i = 0; i < amounts.length || 0; i++) {
+        amounts[i] = amounts[i].replace(/ /g, '');
+      }
+
+      // Calculate expense amount for a full day 00:00-23:59
+      amounts.push(
+        (
+          Number(amounts[2]) +
+          Number(amounts[3]) +
+          Number(amounts[4]) +
+          Number(amounts[5])
+        )
+          .toFixed(2)
+          .toString()
+      );
+
+      newExpense.previous_allowance = amounts[0];
+      newExpense.adjustment = amounts[1];
+      newExpense.expenses.breakfast = amounts[2];
+      newExpense.expenses.lunch = amounts[3];
+      newExpense.expenses.dinner = amounts[4];
+      newExpense.expenses.snack = amounts[5];
+      newExpense.expenses.day = amounts[6];
+      newExpense.percent_change = line.match(/-?\d{1,3}.\d{2}%/)[0];
+
+      addExpensetoDB(newExpense);
+    } catch (err) {
+      console.log(`!Error in parseLine: ${err}`);
     }
-
-    newExpense.airport_codes = parseAirportCodes(line);
-    newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
-
-    const amounts = line.match(/-?\d{1,3}.\d{2}[^%]/gm);
-    for (let i = 0; i < amounts.length || 0; i++) {
-      amounts[i] = amounts[i].replace(/ /g, '');
-    }
-
-    // Calculate expense amount for a full day 00:00-23:59
-    amounts.push(
-      (
-        Number(amounts[2]) +
-        Number(amounts[3]) +
-        Number(amounts[4]) +
-        Number(amounts[5])
-      )
-        .toFixed(2)
-        .toString()
-    );
-
-    newExpense.previous_allowance = amounts[0];
-    newExpense.adjustment = amounts[1];
-    newExpense.expenses.breakfast = amounts[2];
-    newExpense.expenses.lunch = amounts[3];
-    newExpense.expenses.dinner = amounts[4];
-    newExpense.expenses.snack = amounts[5];
-    newExpense.expenses.day = amounts[6];
-    newExpense.percent_change = line.match(/-?\d{1,3}.\d{2}%/)[0];
-
-    // addExpensetoDB(newExpense);
-    // sessionStorage.setItem(
-    //   newExpense.airport_codes[0],
-    //   newExpense.expenses.breakfast
-    // );
   };
 
   const handleUpload = async () => {
@@ -196,97 +177,102 @@ const FileUploader = () => {
       try {
         // Read pdf file
         let text = await extractTextFromPDF(file, 'custom');
+
+        // Split text into array of lines
         let lines = text.split(/\s{1}\$(\s)(?<!(?=\1)..)\1(?!\1)/gm); // .$.., but not .$... as line separator
+
         let preProcessedText = [];
         let processedText = [];
 
-        // Remove empty lines
+        // Remove header, empty lines, and unwanted lines
         for (let i = 0; i < lines.length; i++) {
-          lines[i] !== ' ' && preProcessedText.push(lines[i]);
+          if (lines[i].includes('AIR CANADA PILOT / FLIGHT ATTENDANT')) {
+            preProcessedText.push(splitStringAfter(lines[i], 'Algiers (ALG)'));
+          } else if (lines[i].includes('***BRACELET PROVIDED***')) {
+            // pass
+          } else if (lines[i] === ' ') {
+            // pass
+          } else {
+            preProcessedText.push(lines[i]);
+          }
         }
-        // console.log(`!preprocessedText.length: ${preProcessedText.length}`);
 
-        // Find and process Bracelet Only destinations
+        // Create line breaks for Bracelet destinations
         for (let i = 0; i < preProcessedText.length; i++) {
           const test1 = 'Barbados (BGI)   BB   BGI  ';
           const test2 = 'Cayo Coco (CCC)   CU   CCC  ';
           const test3 = 'Curaçao (CUR)   CW   CUR  ';
-          const test4 = 'Huatulco (HUX)   MX   HUX  '; //#
-          const test5 = 'Ixtapa (ZIH)   MX   ZIH  '; //#
-          const test6 = 'Liberia (LIR)   CR   ';
-          const test7 =
-            'Puerto Plata (POP)   DO   POP  Puerto Vallarta (PVR)   MX  PVR'; //#
-          const test8 = 'St. Lucia (UVF)   LC   UVF  ';
-          const test9 = 'Santa Clara (SNU)   CU   SNU  ';
-          const test10 = 'Varadero (VRA)   CU   VRA  '; //manually create entry for Cuba with all airport codes?
+          const test4 = 'Huatulco (HUX)   MX   HUX  ';
+          const test5 = 'Ixtapa (ZIH)   MX   ZIH  ';
+          const test6 = 'Liberia (LIR)   CR   LIR  ';
+          const test7 = 'Puerto Plata (POP)   DO   POP';
+          const test8 = 'Puerto Vallarta (PVR)   MX  PVR '; // ##
+          const test9 = 'St. Lucia (UVF)   LC   UVF  ';
+          const test10 = 'Santa Clara (SNU)   CU   SNU  ';
+          const test11 = 'Varadero (VRA)   CU   VRA  ';
+
           if (preProcessedText[i].includes(test1)) {
+            // Barbados
             processedText.push(test1);
             processedText.push(preProcessedText[i].replace(test1, ''));
           } else if (preProcessedText[i].includes(test2)) {
             // Cayo Coco
+            processedText.push(test2);
             processedText.push(preProcessedText[i].replace(test2, ''));
           } else if (preProcessedText[i].includes(test3)) {
+            // Curaçao
             processedText.push(test3);
             processedText.push(preProcessedText[i].replace(test3, ''));
           } else if (preProcessedText[i].includes(test4)) {
+            // Huatulco
             processedText.push(test4);
             processedText.push(preProcessedText[i].replace(test4, ''));
           } else if (preProcessedText[i].includes(test5)) {
+            // Ixtapa
             processedText.push(test5);
             processedText.push(preProcessedText[i].replace(test5, ''));
           } else if (preProcessedText[i].includes(test6)) {
+            //Liberia
             processedText.push(test6);
             processedText.push(preProcessedText[i].replace(test6, ''));
           } else if (preProcessedText[i].includes(test7)) {
+            // Puerto Plata and Puerto Vallarta
             processedText.push(test7);
-            processedText.push(preProcessedText[i].replace(test7, ''));
-          } else if (preProcessedText[i].includes(test8)) {
             processedText.push(test8);
-            processedText.push(preProcessedText[i].replace(test8, ''));
+            processedText.push(
+              splitStringAfter(preProcessedText[i], 'Punta Cana')
+            );
           } else if (preProcessedText[i].includes(test9)) {
-            // Santa Clara
+            // St. Lucia
+            processedText.push(test9);
             processedText.push(preProcessedText[i].replace(test9, ''));
           } else if (preProcessedText[i].includes(test10)) {
-            // Varadero
+            // Santa Clara
+            processedText.push(test10);
             processedText.push(preProcessedText[i].replace(test10, ''));
+          } else if (preProcessedText[i].includes(test11)) {
+            // Varadero
+            processedText.push(test11);
+            processedText.push(preProcessedText[i].replace(test11, ''));
           } else {
             processedText.push(preProcessedText[i]);
           }
         }
 
-        // console.log(`!processedText.length: ${processedText.length}`);
-
         // Go through each line of processedText and parse according to conditions
         for (let i = 0; i < processedText.length; i++) {
-          if (i === 0) {
-            // remove the headers
-            processedText[i] = processedText[i].replace(
-              'AIR CANADA PILOT / FLIGHT ATTENDANT  Location   Country   Station   Previous  Allowance   Adjustment *   Status   % Change   Breakfast   Lunch   Dinner   Snack   Total  ',
-              ''
-            );
-            parseLine(processedText[i]);
-          } else if (!processedText[i].includes('$')) {
+          // console.log(processedText[i]);
+          if (!processedText[i].includes('$')) {
             parseLineAsBracelet(processedText[i]);
-          } else if (processedText[i].includes('BRACELET')) {
-            // pass
           } else {
             parseLine(processedText[i]);
           }
         }
-        // Add Cuba, Mexico, POP and other bracelet destinations to DB here
       } catch (err) {
         console.error(`!Error: ${err}`);
       }
     }
   };
-
-  // .then((db) => {
-  //   const tx = db.transaction('expenses', 'readwrite');
-  //   expensesList.map((exp) => {
-  //     tx.store.add(exp);
-  //   }),
-  //     tx.done;
-  // });
 
   return (
     <>

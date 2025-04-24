@@ -5,7 +5,7 @@ import FileUploader from './FileUploader';
 function Accordian(location_exp) {
   const [selectedValue, setSelectedValue] = useState();
 
-  console.log(location_exp);
+  // console.log(location_exp);
 
   // initial state ==> Canadian Expenses
   // const [expenseB, setExpenseB] = useState(17.95);
