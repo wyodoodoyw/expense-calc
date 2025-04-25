@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
-import splitStringBefore from '../splitStringBefore';
+// import splitStringBefore from '../splitStringBefore';
 import splitStringAfter from '../splitStringAfter';
-// import { openDB } from 'idb';
-// const request = window.indexedDB.open('ExpesnsesDB', 1);
-//----- COMPONENT -----//
+import american_airport_codes from '../data/american_airport_codes';
+import canadian_airport_codes from '../data/canadian_airport_codes';
 
-const FileUploader = () => {
+const FileUploader = ({ setUploaded }) => {
   const [file, setFile] = useState(null);
   // const [expensesList, setExpensesList] = useState([]);
 
@@ -25,6 +24,7 @@ const FileUploader = () => {
       const expensesStore = tx.objectStore('expenses');
       // const destinationIndex = expensesStore.index('destination');
       const airportCodesIndex = expensesStore.index('airport_codes');
+      const countryIndex = expensesStore.index('country_code');
 
       expensesStore.put(newExpense);
     };
@@ -35,12 +35,10 @@ const FileUploader = () => {
         keyPath: 'id',
         autoIncrement: true,
       });
-      // expensesStore.createIndex('desitnation', 'destination', { unique: true });
       expensesStore.createIndex('airport_codes', 'airport_codes', {
         multiEntry: true,
       });
-      // expensesStore.put(newExpense);
-      // db.close();
+      expensesStore.createIndex('country_code', 'country_code');
     };
 
     request.onerror = (event) => {
@@ -63,11 +61,13 @@ const FileUploader = () => {
           // .match(/[A-Z]{3}\/[A-Z]{3}/)[0]
           .match(/[A-Z]{3}/g);
       } else if (line.match('Canada')) {
-        airport_codes = ['YYZ', 'YUL', 'YVR', 'YOW', 'YEG', 'YHZ', 'YYC'];
+        airport_codes = canadian_airport_codes;
       } else if (line.match('U.S.')) {
-        airport_codes = ['ORD', 'JFK', 'LAX', 'MIA', 'DFW', 'IAH'];
+        airport_codes = american_airport_codes;
       } else if (line.match('BRACELET')) {
         //console.log(`!Bracelelt: ${airport_codes.length}`);
+      } else if (line.match('Jamaica - Other')) {
+        airport_codes = ['KIN', 'MBJ'];
       } else {
         // capture (XXX), (XXX )
         airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
@@ -128,7 +128,7 @@ const FileUploader = () => {
       };
 
       // catch special cases for destination (no airport code in brackets to detect)
-      const preDest = line.indexOf(')');
+      const preDest = line.lastIndexOf(')');
       if (preDest != -1) {
         newExpense.destination = line
           .substring(0, preDest + 1)
@@ -195,10 +195,11 @@ const FileUploader = () => {
       try {
         // Read pdf file
         let text = await extractTextFromPDF(file, 'custom');
+        text && setUploaded(true);
 
         // Split text into array of lines
         let lines = text.split(/\s{1}\$(\s)(?<!(?=\1)..)\1(?!\1)/gm); // .$.., but not .$... as line separator
-
+        // console.log(lines);
         let preProcessedText = [];
         let processedText = [];
 
@@ -213,6 +214,9 @@ const FileUploader = () => {
           } else {
             preProcessedText.push(lines[i]);
           }
+        }
+        for (const line of preProcessedText) {
+          console.log(line);
         }
 
         // Create line breaks for Bracelet destinations
@@ -279,7 +283,7 @@ const FileUploader = () => {
 
         // Go through each line of processedText and parse according to conditions
         for (let i = 0; i < processedText.length; i++) {
-          // console.log(processedText[i]);
+          console.log(processedText[i]);
           if (!processedText[i].includes('$')) {
             parseLineAsBracelet(processedText[i]);
           } else {

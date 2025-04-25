@@ -9,36 +9,67 @@ dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
 const timeFormat = 'HH:mm';
 
-function Layover({ layover, location_exp }) {
-  const [station, setStation] = useState(layover.layover_stn);
+function Layover() {
+  const [station, setStation] = useState('YUL');
   const [layoverTimes, setLayoverTimes] = useState({
-    layover_start: dayjs(`${layover.layover_start}`, timeFormat),
-    layover_end: dayjs(`${layover.layover_end}`, timeFormat),
+    layover_start: dayjs('15:55', timeFormat),
+    layover_end: dayjs('17:40', timeFormat),
   });
   const [fullDays, setFullDays] = useState(0);
 
   // Amount of expenses earned for each type of meal
   const [expenses, setExpenses] = useState({
-    breakfast: location_exp.breakfast,
-    lunch: location_exp.lunch,
-    dinner: location_exp.dinner,
-    snack: location_exp.snack,
+    breakfast: 17.95,
+    lunch: 20.33,
+    dinner: 40.27,
+    snack: 10.52,
   });
 
   // Number of each type of meal
   const [meals, setMeals] = useState({
-    breakfast: (layover.layover_expenses.match(/B/g) || []).length,
-    lunch: (layover.layover_expenses.match(/L/g) || []).length,
-    dinner: (layover.layover_expenses.match(/D/g) || []).length,
-    snack: (layover.layover_expenses.match(/S/g) || []).length,
+    breakfast: 1,
+    lunch: 1,
+    dinner: 2,
+    snack: 1,
   });
 
   // Number of CICO paid
-  const [cico, setCico] = useState(layover.layover_cico);
+  const [cico, setCico] = useState(1);
 
   const handleStationChange = (e) => {
     const new_station = e.target.value;
     setStation(new_station);
+
+    const request = window.indexedDB.open('ExpensesDB', 1);
+
+    request.onsuccess = (event) => {
+      const db = event.target.result;
+      const tx = db.transaction(['expenses'], 'readonly');
+      const expensesStore = tx.objectStore('expenses');
+      // const airportCodesIndex = expensesStore.index('airport_codes');
+      const request = expensesStore.getAll();
+
+      request.onsuccess = () => {
+        const filtered = request.result.filter((item) => {
+          if (item['airport_codes']) {
+            for (let i = 0; i < item['airport_codes'].length; i++) {
+              if (item['airport_codes'][i].includes(new_station)) {
+                return true;
+              }
+            }
+          }
+        });
+        console.log(filtered);
+      };
+
+      request.onerror = (event) => {
+        console.log(`!DB Error: ${event.target.error}`);
+      };
+
+      tx.oncomplete = () => {
+        db.close();
+      };
+    };
   };
 
   const handleExpensesChange = (e) => {
@@ -83,7 +114,6 @@ function Layover({ layover, location_exp }) {
         dinner: prev.dinner + 1,
         snack: prev.snack + 1,
       }));
-      // layover.layover_expenses += 'BLDS';
       setCico((prev) => prev + 1);
     } else if (fullDays > 0 && e.target.id === 'minus') {
       setFullDays(fullDays - 1);
@@ -93,14 +123,12 @@ function Layover({ layover, location_exp }) {
         dinner: prev.dinner - 1,
         snack: prev.snack - 1,
       }));
-      // layover.layover_expenses = layover.layover_expenses.replace('BLDS', '');
       setCico((prev) => prev - 1);
     }
   };
 
   const calculateFirstDayExpenses = () => {
     const time = layoverTimes.layover_start;
-    // console.log(`!start time: ${time}`);
     if (dayjs(time).isBefore(dayjs('12:30', timeFormat), 'minute')) {
       return 'BLDS';
     } else if (
@@ -119,7 +147,7 @@ function Layover({ layover, location_exp }) {
 
   const calculateLastDayExpenses = () => {
     const time = layoverTimes.layover_end;
-    // console.log(`!end time: ${time}`);
+
     if (
       time.isBetween(
         dayjs('7:00', timeFormat),
@@ -196,7 +224,6 @@ function Layover({ layover, location_exp }) {
       const tx = db.transaction(['expenses'], 'readonly');
       const expensesStore = tx.objectStore('expenses');
       const airportCodesIndex = expensesStore.index('airport_codes');
-      console.log(station);
       const request = airportCodesIndex.get(station);
 
       request.onsuccess = () => {
@@ -206,7 +233,7 @@ function Layover({ layover, location_exp }) {
           dinner: request.result.expenses.dinner,
           snack: request.result.expenses.snack,
         });
-        console.log(`!DB: ${JSON.stringify(request.result)}`);
+        // console.log(`!DB: ${JSON.stringify(request.result)}`);
       };
 
       request.onerror = (event) => {
@@ -222,7 +249,7 @@ function Layover({ layover, location_exp }) {
   return (
     <>
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
-        <p>International</p>
+        <p>For calculating international layovers only.</p>
         <form>
           <div className="mb-3">
             <div className="input-group mb-3" id="flight_info">
