@@ -124,7 +124,7 @@ function Layover() {
         dinner: prev.dinner + 1,
         snack: prev.snack + 1,
       }));
-      setCico((prev) => prev + 1);
+      // setCico((prev) => prev + 1);
     } else if (fullDays > 0 && e.target.id === 'minus') {
       setFullDays(fullDays - 1);
       setMeals((prev) => ({
@@ -133,7 +133,7 @@ function Layover() {
         dinner: prev.dinner - 1,
         snack: prev.snack - 1,
       }));
-      setCico((prev) => prev - 1);
+      // setCico((prev) => prev - 1);
     }
   };
 
