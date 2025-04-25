@@ -65,9 +65,11 @@ const FileUploader = ({ setUploaded }) => {
       } else if (line.match('U.S.')) {
         airport_codes = american_airport_codes;
       } else if (line.match('BRACELET')) {
-        //console.log(`!Bracelelt: ${airport_codes.length}`);
+        //console.log(`!Bracelet: ${airport_codes.length}`);
       } else if (line.match('Jamaica - Other')) {
         airport_codes = ['KIN', 'MBJ'];
+      } else if (line.match('Mexico - Other')) {
+        airport_codes = ['MTY', 'TQO', 'OAX', 'GDL', 'MID'];
       } else {
         // capture (XXX), (XXX )
         airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
@@ -215,9 +217,9 @@ const FileUploader = ({ setUploaded }) => {
             preProcessedText.push(lines[i]);
           }
         }
-        for (const line of preProcessedText) {
-          console.log(line);
-        }
+        // for (const line of preProcessedText) {
+        //   console.log(line);
+        // }
 
         // Create line breaks for Bracelet destinations
         for (let i = 0; i < preProcessedText.length; i++) {
@@ -283,7 +285,7 @@ const FileUploader = ({ setUploaded }) => {
 
         // Go through each line of processedText and parse according to conditions
         for (let i = 0; i < processedText.length; i++) {
-          console.log(processedText[i]);
+          //console.log(processedText[i]);
           if (!processedText[i].includes('$')) {
             parseLineAsBracelet(processedText[i]);
           } else {

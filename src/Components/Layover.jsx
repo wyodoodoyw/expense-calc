@@ -16,6 +16,7 @@ function Layover() {
     layover_end: dayjs('17:40', timeFormat),
   });
   const [fullDays, setFullDays] = useState(0);
+  const [filtered, setFiltered] = useState([]);
 
   // Amount of expenses earned for each type of meal
   const [expenses, setExpenses] = useState({
@@ -60,6 +61,15 @@ function Layover() {
           }
         });
         console.log(filtered);
+        setFiltered(filtered);
+        if (filtered.length === 1) {
+          setExpenses({
+            breakfast: filtered[0].expenses.breakfast,
+            lunch: filtered[0].expenses.lunch,
+            dinner: filtered[0].expenses.dinner,
+            snack: filtered[0].expenses.snack,
+          });
+        }
       };
 
       request.onerror = (event) => {
@@ -252,16 +262,29 @@ function Layover() {
         <p>For calculating international layovers only.</p>
         <form>
           <div className="mb-3">
-            <div className="input-group mb-3" id="flight_info">
+            <div className="input-group mb-3" id="airport_code">
               <span className="input-group-text">Layover in: </span>
               <input
-                id="flight_no"
-                type="text"
+                list="airport_codes"
+                id="airport_code"
+                name="airport_code"
+                // type="text"
                 className="col-11 form-control"
                 placeholder="YUL"
                 value={station}
                 onChange={(val) => handleStationChange(val)}
               />
+              {/* <ul className="list-group" id="airport_codes">
+                {filtered.map((item) => {
+                  <li
+                    className="list-group-item"
+                    key={filtered.indexOf(item)}
+                    value={item}
+                  >
+                    {item['airport_codes']}
+                  </li>;
+                })}
+              </ul> */}
               <div className="btn" onClick={handleSearchClick}>
                 Search
               </div>
@@ -341,7 +364,7 @@ function Layover() {
         <table className="table table-striped table-bordered mt-3 text-center">
           <tbody>
             <tr>
-              <th></th>
+              <th>{station}</th>
               <th>Breakfast</th>
               <th>Lunch</th>
               <th>Dinner</th>
