@@ -7,19 +7,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
-  const layover = {
-    layover_stn: 'HND',
-    layover_start: '15:55',
-    layover_end: '17:40',
-    layover_expenses: 'DSBLD',
-    layover_cico: 1,
-    layover_expenses_total: 127.89,
-    layover_length: '24:45',
-  };
-
   // const location_exp = sessionStorage.getItem('AKL');
   const location_exp = {
-    breakfast: Number(sessionStorage.getItem('ALG')),
+    breakfast: 29.91,
     lunch: 49.96,
     dinner: 57.26,
     snack: 20.36,

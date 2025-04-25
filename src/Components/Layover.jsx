@@ -195,8 +195,9 @@ function Layover({ layover, location_exp }) {
       const db = event.target.result;
       const tx = db.transaction(['expenses'], 'readonly');
       const expensesStore = tx.objectStore('expenses');
-
-      const request = expensesStore.get(50);
+      const airportCodesIndex = expensesStore.index('airport_codes');
+      console.log(station);
+      const request = airportCodesIndex.get(station);
 
       request.onsuccess = () => {
         setExpenses({
@@ -210,6 +211,10 @@ function Layover({ layover, location_exp }) {
 
       request.onerror = (event) => {
         console.log(`!DB Error: ${event.target.error}`);
+      };
+
+      tx.oncomplete = () => {
+        db.close();
       };
     };
   };

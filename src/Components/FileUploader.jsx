@@ -23,6 +23,8 @@ const FileUploader = () => {
       const db = event.target.result;
       const tx = db.transaction(['expenses'], 'readwrite');
       const expensesStore = tx.objectStore('expenses');
+      // const destinationIndex = expensesStore.index('destination');
+      const airportCodesIndex = expensesStore.index('airport_codes');
 
       expensesStore.put(newExpense);
     };
@@ -32,6 +34,10 @@ const FileUploader = () => {
       const expensesStore = db.createObjectStore('expenses', {
         keyPath: 'id',
         autoIncrement: true,
+      });
+      // expensesStore.createIndex('desitnation', 'destination', { unique: true });
+      expensesStore.createIndex('airport_codes', 'airport_codes', {
+        multiEntry: true,
       });
       // expensesStore.put(newExpense);
       // db.close();
