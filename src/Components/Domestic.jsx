@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TimePicker } from '@mui/x-date-pickers';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -11,32 +11,52 @@ dayjs.extend(duration);
 dayjs.extend(customParseFormat);
 const timeFormat = 'HH:mm';
 
-function Domestic({ turn, location_exp }) {
-  const [station, setStation] = useState(turn.turn_stn);
+function Domestic() {
+  const [station, setStation] = useState('YVR');
   const [duty, setDuty] = useState({
-    start: dayjs(`${turn.turn_start}`, timeFormat).subtract(1, 'hour'),
-    end: dayjs(`${turn.turn_end}`, timeFormat).add(15, 'minutes'),
+    // start: dayjs('05:15', timeFormat).subtract(1, 'hour'),
+    // end: dayjs('17:41', timeFormat).add(15, 'minutes'),
+    start: dayjs('05:15', timeFormat),
+    end: dayjs('18:31', timeFormat),
   });
   const [turnTimes, setTurnTimes] = useState({
-    start: dayjs(`${turn.turn_start}`, timeFormat),
-    end: dayjs(`${turn.turn_end}`, timeFormat),
+    start: dayjs('06:30', timeFormat),
+    end: dayjs('18:31', timeFormat),
   });
 
   // Amount of expenses earned for each type of meal
-  const [expenses, setExpenses] = useState({
-    breakfast: location_exp.breakfast,
-    lunch: location_exp.lunch,
-    dinner: location_exp.dinner,
-    snack: location_exp.snack,
+  const [expenses_ca, setExpensesCa] = useState({
+    breakfast: 17.95,
+    lunch: 20.33,
+    dinner: 40.27,
+    snack: 10.52,
   });
 
+  // const [expenses_us, setExpensesUs] = useState({
+  //   breakfast: 24.56,
+  //   lunch: 27.81,
+  //   dinner: 55.09,
+  //   snack: 14.29,
+  // });
+
   // Number of each type of meal
-  const [meals, setMeals] = useState({
-    breakfast: (turn.turn_expenses.match(/B/g) || []).length,
-    lunch: (turn.turn_expenses.match(/L/g) || []).length,
-    dinner: (turn.turn_expenses.match(/D/g) || []).length,
-    snack: (turn.turn_expenses.match(/S/g) || []).length,
+  const [meals_ca, setMealsCa] = useState({
+    breakfast: 0,
+    lunch: 0,
+    dinner: 0,
+    snack: 0,
   });
+
+  useEffect(() => {
+    calculateExpenses();
+  }, []);
+
+  // const [meals_us, setMealsUs] = useState({
+  //   breakfast: 0,
+  //   lunch: 0,
+  //   dinner: 0,
+  //   snack: 0,
+  // });
 
   // const [turnLength, setTurnLength] = useState(
   //   dayjs
@@ -63,13 +83,25 @@ function Domestic({ turn, location_exp }) {
     // handle changes to expenses amount ($)
     const { name, value } = e.target;
 
-    setExpenses((prev) => {
+    setExpensesCa((prev) => {
       return {
         ...prev,
         [name]: value,
       };
     });
   };
+
+  // const handleUsExpensesChange = (e) => {
+  //   // handle changes to expenses amount ($)
+  //   const { name, value } = e.target;
+
+  //   setExpensesUs((prev) => {
+  //     return {
+  //       ...prev,
+  //       [name]: value,
+  //     };
+  //   });
+  // };
 
   const handleTurnTimeChange = ({ target }) => {
     // handle changes to turn times
@@ -92,10 +124,16 @@ function Domestic({ turn, location_exp }) {
   };
 
   const calculateExpenses = () => {
-    let new_expenses = calculateFirstExpenseOfDay();
-    new_expenses += calculateLastExpenseOfDay();
+    const first = calculateFirstExpenseOfDay();
+    const last = calculateLastExpenseOfDay();
+    const string = 'BLDS';
+    const new_expenses = string.substring(
+      string.indexOf(first),
+      string.indexOf(last) + 1
+    );
+    // console.log(`!Expenses: ${new_expenses}`);
 
-    setMeals({
+    setMealsCa({
       breakfast: (new_expenses.match(/B/g) || []).length,
       lunch: (new_expenses.match(/L/g) || []).length,
       dinner: (new_expenses.match(/D/g) || []).length,
@@ -103,32 +141,32 @@ function Domestic({ turn, location_exp }) {
     });
   };
 
-  const canadaOrUsa = (meal, departureTime) => {
-    if (meal === 'L') {
-      if (dayjs(departureTime).isBefore(dayjs('12:00', timeFormat), 'minute')) {
-        return 'destination';
-      } else {
-        return 'departure';
-      }
-    } else if (meal === 'D') {
-      if (dayjs(departureTime).isBefore(dayjs('17:30', timeFormat), 'minute')) {
-        return 'destination';
-      } else {
-        return 'departure';
-      }
-    } else if (meal === 'S') {
-      if (dayjs(departureTime).isBefore(dayjs('22:30', timeFormat), 'minute')) {
-        return 'destination';
-      } else if (
-        dayjs(departureTime).isAfter(dayjs('22:30', timeFormat), 'minute') &&
-        dayjs(departureTime).isBefore(dayjs('00:59', timeFormat), 'minute')
-      ) {
-        return 'departure';
-      }
-    } else {
-      console.log('! Error at canadaOrUsa. else condition.');
-    }
-  };
+  // const canadaOrUsa = (meal, departureTime) => {
+  //   if (meal === 'L') {
+  //     if (dayjs(departureTime).isBefore(dayjs('12:00', timeFormat), 'minute')) {
+  //       return 'destination';
+  //     } else {
+  //       return 'departure';
+  //     }
+  //   } else if (meal === 'D') {
+  //     if (dayjs(departureTime).isBefore(dayjs('17:30', timeFormat), 'minute')) {
+  //       return 'destination';
+  //     } else {
+  //       return 'departure';
+  //     }
+  //   } else if (meal === 'S') {
+  //     if (dayjs(departureTime).isBefore(dayjs('22:30', timeFormat), 'minute')) {
+  //       return 'destination';
+  //     } else if (
+  //       dayjs(departureTime).isAfter(dayjs('22:30', timeFormat), 'minute') &&
+  //       dayjs(departureTime).isBefore(dayjs('00:59', timeFormat), 'minute')
+  //     ) {
+  //       return 'departure';
+  //     }
+  //   } else {
+  //     console.log('! Error at canadaOrUsa. else condition.');
+  //   }
+  // };
 
   const calculateFirstExpenseOfDay = () => {
     const time = turnTimes.start;
@@ -199,40 +237,59 @@ function Domestic({ turn, location_exp }) {
     }
   };
 
-  const calculateDisplayBreakfastTotal = () => {
-    return meals.breakfast * expenses.breakfast;
+  const calcCaBreakfastTotal = () => {
+    return meals_ca.breakfast * expenses_ca.breakfast;
   };
 
-  const calculateDisplayLunchTotal = () => {
-    return meals.lunch * expenses.lunch;
+  const calcCaLunchTotal = () => {
+    return meals_ca.lunch * expenses_ca.lunch;
   };
 
-  const calculateDisplayDinnerTotal = () => {
-    return meals.dinner * expenses.dinner;
+  const calcCaDinnerTotal = () => {
+    return meals_ca.dinner * expenses_ca.dinner;
   };
 
-  const calculateDisplaySnackTotal = () => {
-    return meals.snack * expenses.snack;
+  const calcCaSnackTotal = () => {
+    return meals_ca.snack * expenses_ca.snack;
   };
+
+  // const calcUsBreakfastTotal = () => {
+  //   return meals_ca.breakfast * expenses_ca.breakfast;
+  // };
+
+  // const calcUsLunchTotal = () => {
+  //   return meals_ca.lunch * expenses_ca.lunch;
+  // };
+
+  // const calcUsDinnerTotal = () => {
+  //   return meals_ca.dinner * expenses_ca.dinner;
+  // };
+
+  // const calcUsSnackTotal = () => {
+  //   return meals_ca.snack * expenses_ca.snack;
+  // };
 
   const calculateDisplayTotal = () => {
     return (
       (
-        calculateDisplayBreakfastTotal() +
-        calculateDisplayLunchTotal() +
-        calculateDisplayDinnerTotal() +
-        calculateDisplaySnackTotal()
+        calcCaBreakfastTotal() +
+        calcCaLunchTotal() +
+        calcCaDinnerTotal() +
+        calcCaSnackTotal()
       )
+        // calcUsBreakfastTotal() +
+        // calcUsLunchTotal() +
+        // calcUsDinnerTotal() +
+        // calcUsSnackTotal()
         // + cico * 5.05
         .toFixed(2)
     );
   };
 
-  console.log(meals);
   return (
     <>
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
-        <p>North America/Sun Turn</p>
+        <p>For calculating domestic and sun turns only.</p>
         <form>
           <div className="mb-3">
             <div className="input-group mb-3" id="flight_info">
@@ -372,11 +429,11 @@ function Domestic({ turn, location_exp }) {
               {/* <th>CI/CO</th> */}
             </tr>
             <tr>
-              <td></td>
-              <td>{meals.breakfast}</td>
-              <td>{meals.lunch}</td>
-              <td>{meals.dinner}</td>
-              <td>{meals.snack}</td>
+              <td>🇨🇦</td>
+              <td>{meals_ca.breakfast}</td>
+              <td>{meals_ca.lunch}</td>
+              <td>{meals_ca.dinner}</td>
+              <td>{meals_ca.snack}</td>
               {/* <td>{cico}</td> */}
             </tr>
             <tr>
@@ -386,7 +443,7 @@ function Domestic({ turn, location_exp }) {
                   type="text"
                   className="form-control text-center"
                   id="inputExpenseB"
-                  value={expenses.breakfast}
+                  value={expenses_ca.breakfast}
                   name="breakfast"
                   onChange={handleExpensesChange}
                 />
@@ -396,7 +453,7 @@ function Domestic({ turn, location_exp }) {
                   type="text"
                   className="form-control text-center"
                   id="inputExpenseB"
-                  value={expenses.lunch}
+                  value={expenses_ca.lunch}
                   name="lunch"
                   onChange={handleExpensesChange}
                 />
@@ -406,7 +463,7 @@ function Domestic({ turn, location_exp }) {
                   type="text"
                   className="form-control text-center"
                   id="inputExpenseB"
-                  value={expenses.dinner}
+                  value={expenses_ca.dinner}
                   name="dinner"
                   onChange={handleExpensesChange}
                 />
@@ -416,7 +473,7 @@ function Domestic({ turn, location_exp }) {
                   type="text"
                   className="form-control text-center"
                   id="inputExpenseB"
-                  value={expenses.snack}
+                  value={expenses_ca.snack}
                   name="snack"
                   onChange={handleExpensesChange}
                 />
@@ -425,12 +482,70 @@ function Domestic({ turn, location_exp }) {
             </tr>
             <tr>
               <td>=</td>
-              <td>${calculateDisplayBreakfastTotal().toFixed(2)}</td>
-              <td>${calculateDisplayLunchTotal().toFixed(2)}</td>
-              <td>${calculateDisplayDinnerTotal().toFixed(2)}</td>
-              <td>${calculateDisplaySnackTotal().toFixed(2)}</td>
+              <td>${calcCaBreakfastTotal().toFixed(2)}</td>
+              <td>${calcCaLunchTotal().toFixed(2)}</td>
+              <td>${calcCaDinnerTotal().toFixed(2)}</td>
+              <td>${calcCaSnackTotal().toFixed(2)}</td>
               {/* <td>${(turn.turn_cico * 5.05).toFixed(2)}</td> */}
             </tr>
+            {/* <tr>
+              <td>🇺🇸</td>
+              <td>{meals_us.breakfast}</td>
+              <td>{meals_us.lunch}</td>
+              <td>{meals_us.dinner}</td>
+              <td>{meals_us.snack}</td>
+              
+            </tr>
+            <tr>
+              <td>x</td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.breakfast}
+                  name="breakfast"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.lunch}
+                  name="lunch"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.dinner}
+                  name="dinner"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.snack}
+                  name="snack"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>=</td>
+              <td>${calcUsBreakfastTotal().toFixed(2)}</td>
+              <td>${calcUsLunchTotal().toFixed(2)}</td>
+              <td>${calcUsDinnerTotal().toFixed(2)}</td>
+              <td>${calcUsSnackTotal().toFixed(2)}</td>
+            </tr> */}
             <tr className="table-success">
               <td>Total:</td>
               <td colSpan={4}>${calculateDisplayTotal()}</td>

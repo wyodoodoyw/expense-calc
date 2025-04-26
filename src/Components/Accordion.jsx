@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Domestic from './Domestic';
 import Layover from './Layover';
 import FileUploader from './FileUploader';
 
@@ -26,10 +27,17 @@ function Accordian() {
         </h2>
         <div
           id="collapseOne"
-          className="accordion-collapse collapse show"
+          className={'accordion-collapse ' + (uploaded ? 'collapse' : 'show')}
           data-bs-parent="#accordian"
         >
           <div className="accordion-body">
+            <p className="text-start">
+              Example: For May 2025, go to the following:
+            </p>
+            <p className="text-start">
+              ACAeronet → Crew Scheduling & Planning → Block Bid Packages →
+              2025-05 May → ALL → 202505-MealAllowances
+            </p>
             <FileUploader setUploaded={setUploaded} />
           </div>
         </div>
@@ -52,7 +60,7 @@ function Accordian() {
         </h2>
         <div
           id="collapseTwo"
-          className="accordion-collapse collapse"
+          className={'accordion-collapse ' + (uploaded ? 'show' : 'collapse')}
           data-bs-parent="#accordian"
         >
           <div className="accordion-body text-start">
@@ -63,12 +71,11 @@ function Accordian() {
                   type="radio"
                   name="flexRadioDefault"
                   id="radio1"
-                  value="value1"
+                  value="naSun"
                   onChange={(e) => setSelectedValue(e.target.value)}
-                  disabled
                 />
                 <label className="form-check-label" htmlFor="radio1">
-                  <strong>A North America/Sun flight.</strong>
+                  <strong>A domestic or sun turn.</strong>
                 </label>
               </div>
               <div className="form-check">
@@ -77,9 +84,8 @@ function Accordian() {
                   type="radio"
                   name="flexRadioDefault"
                   id="radio2"
-                  value="value2"
+                  value="intl"
                   onChange={(e) => setSelectedValue(e.target.value)}
-                  checked
                 />
                 <label className="form-check-label" htmlFor="radio2">
                   <strong>A layover at an international destination.</strong>
@@ -103,37 +109,12 @@ function Accordian() {
                   Example: a layover in YUL before going to NRT.
                 </label>
               </div>
-              {selectedValue && <p>{selectedValue}</p>}
             </form>
           </div>
         </div>
       </div>
-
-      {/* Panel #3 */}
-      {uploaded && <Layover />}
-      {/* <div className="accordion-item">
-        <h2 className="accordion-header">
-          <button
-            className="accordion-button collapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#collapseThree"
-            aria-expanded="false"
-            aria-controls="collapseThree"
-          >
-            <strong>
-              Search the destination you&apos;d like to calculate.
-            </strong>
-          </button>
-        </h2>
-        <div
-          id="collapseThree"
-          className="accordion-collapse collapse"
-          data-bs-parent="#accordian"
-        >
-          <Layover />
-        </div>
-      </div> */}
+      {uploaded && selectedValue === 'naSun' && <Domestic />}
+      {uploaded && selectedValue === 'intl' && <Layover />}
     </div>
   );
 }

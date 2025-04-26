@@ -206,8 +206,9 @@ const FileUploader = ({ setUploaded }) => {
         let processedText = [];
 
         // Remove header, empty lines, and unwanted lines
+
         for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes('AIR CANADA PILOT / FLIGHT ATTENDANT')) {
+          if (lines[i].includes('Algiers (ALG)')) {
             preProcessedText.push(splitStringAfter(lines[i], 'Algiers (ALG)'));
           } else if (lines[i].includes('***BRACELET PROVIDED***')) {
             // pass
@@ -291,6 +292,7 @@ const FileUploader = ({ setUploaded }) => {
           } else {
             parseLine(processedText[i]);
           }
+          setUploaded(true);
         }
       } catch (err) {
         console.error(`!Error: ${err}`);
