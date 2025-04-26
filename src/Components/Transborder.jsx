@@ -12,14 +12,21 @@ dayjs.extend(customParseFormat);
 const timeFormat = 'HH:mm';
 
 function Domestic() {
-  const [station, setStation] = useState('YVR');
+  const [station, setStation] = useState('LAX');
   const [duty, setDuty] = useState({
-    start: dayjs('05:15', timeFormat),
-    end: dayjs('18:31', timeFormat),
+    // start: dayjs('05:15', timeFormat).subtract(1, 'hour'),
+    // end: dayjs('17:41', timeFormat).add(15, 'minutes'),
+    start: dayjs('06:45', timeFormat),
+    end: dayjs('19:30', timeFormat),
   });
-  const [turnTimes, setTurnTimes] = useState({
-    start: dayjs('06:30', timeFormat),
-    end: dayjs('18:31', timeFormat),
+  const [outboundTimes, setOutboundTimes] = useState({
+    start: dayjs('08:00', timeFormat),
+    end: dayjs('10:17', timeFormat),
+  });
+
+  const [inboundTimes, setInboundTimes] = useState({
+    start: dayjs('11:45', timeFormat),
+    end: dayjs('19:30', timeFormat),
   });
 
   // Amount of expenses earned for each type of meal
@@ -28,6 +35,13 @@ function Domestic() {
     lunch: 20.33,
     dinner: 40.27,
     snack: 10.52,
+  });
+
+  const [expenses_us, setExpensesUs] = useState({
+    breakfast: 24.56,
+    lunch: 27.81,
+    dinner: 55.09,
+    snack: 14.29,
   });
 
   // Number of each type of meal
@@ -42,12 +56,32 @@ function Domestic() {
     calculateExpenses();
   }, []);
 
+  const [meals_us, setMealsUs] = useState({
+    breakfast: 0,
+    lunch: 0,
+    dinner: 0,
+    snack: 0,
+  });
+
+  // const [turnLength, setTurnLength] = useState(
+  //   dayjs
+  //     .duration(dayjs('18:46', 'HH:mm').diff(dayjs('05:30', 'HH:mm')))
+  //     .format('HH:mm')
+  // );
+  // console.log(
+  //   `!Turn Length: ${JSON.stringify(
+  //     dayjs
+  //       .duration(dayjs('18:46', 'HH:mm').diff(dayjs('05:30', 'HH:mm')))
+  //       .format('HH:mm')
+  //   )}`
+  // );
+
   const handleStationChange = (e) => {
     const new_station = e.target.value;
     setStation(new_station);
   };
 
-  const handleExpensesChange = (e) => {
+  const handleCaExpensesChange = (e) => {
     // handle changes to expenses amount ($)
     const { name, value } = e.target;
 
@@ -59,10 +93,32 @@ function Domestic() {
     });
   };
 
-  const handleTurnTimeChange = ({ target }) => {
+  const handleUsExpensesChange = (e) => {
+    // handle changes to expenses amount ($)
+    const { name, value } = e.target;
+
+    setExpensesUs((prev) => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  };
+
+  const handleOutboundTimeChange = ({ target }) => {
     // handle changes to turn times
     const { name, value } = target;
-    setTurnTimes((prev) => ({
+    setOutboundTimes((prev) => ({
+      ...prev,
+      [name]: dayjs(value, timeFormat),
+    }));
+    calculateExpenses();
+  };
+
+  const handleInboundTimeChange = ({ target }) => {
+    // handle changes to turn times
+    const { name, value } = target;
+    setInboundTimes((prev) => ({
       ...prev,
       [name]: dayjs(value, timeFormat),
     }));
@@ -97,9 +153,37 @@ function Domestic() {
     });
   };
 
+  const canadaOrUsa = (meal, departureTime) => {
+    if (meal === 'L') {
+      if (dayjs(departureTime).isBefore(dayjs('12:00', timeFormat), 'minute')) {
+        return 'destination';
+      } else {
+        return 'departure';
+      }
+    } else if (meal === 'D') {
+      if (dayjs(departureTime).isBefore(dayjs('17:30', timeFormat), 'minute')) {
+        return 'destination';
+      } else {
+        return 'departure';
+      }
+    } else if (meal === 'S') {
+      if (dayjs(departureTime).isBefore(dayjs('22:30', timeFormat), 'minute')) {
+        return 'destination';
+      } else if (
+        dayjs(departureTime).isAfter(dayjs('22:30', timeFormat), 'minute') &&
+        dayjs(departureTime).isBefore(dayjs('00:59', timeFormat), 'minute')
+      ) {
+        return 'departure';
+      }
+    } else {
+      console.log('! Error at canadaOrUsa. else condition.');
+    }
+  };
+
   const calculateFirstExpenseOfDay = () => {
-    const time = turnTimes.start;
-    // console.log(`!start time: ${time}`);
+    const time = outboundTimes.start;
+    console.log(`!start time: ${time}`);
+    console.log(dayjs(time).isBefore(dayjs('08:00', timeFormat), 'minute'));
     if (
       dayjs(time).isBefore(dayjs('08:00', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
@@ -132,7 +216,7 @@ function Domestic() {
   };
 
   const calculateLastExpenseOfDay = () => {
-    const time = turnTimes.end;
+    const time = inboundTimes.end;
     if (
       dayjs(time).isAfter(
         (dayjs('01:00', timeFormat).add(1, 'day'), 'minute')
@@ -182,19 +266,39 @@ function Domestic() {
     return meals_ca.snack * expenses_ca.snack;
   };
 
+  const calcUsBreakfastTotal = () => {
+    return meals_us.breakfast * expenses_us.breakfast;
+  };
+
+  const calcUsLunchTotal = () => {
+    return meals_us.lunch * expenses_us.lunch;
+  };
+
+  const calcUsDinnerTotal = () => {
+    return meals_us.dinner * expenses_us.dinner;
+  };
+
+  const calcUsSnackTotal = () => {
+    return meals_us.snack * expenses_us.snack;
+  };
+
   const calculateDisplayTotal = () => {
     return (
       calcCaBreakfastTotal() +
       calcCaLunchTotal() +
       calcCaDinnerTotal() +
-      calcCaSnackTotal()
+      calcCaSnackTotal() +
+      calcUsBreakfastTotal() +
+      calcUsLunchTotal() +
+      calcUsDinnerTotal() +
+      calcUsSnackTotal()
     ).toFixed(2);
   };
 
   return (
     <>
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
-        <p>For calculating domestic and sun turns only.</p>
+        <p>For calculating transborder turns only.</p>
         <form>
           <div className="mb-3">
             <div className="input-group mb-3" id="flight_info">
@@ -242,17 +346,17 @@ function Domestic() {
               </tr>
               <tr>
                 <td className="align-middle">
-                  <h5>Turn/Flights</h5>
+                  <h5>Outbound</h5>
                 </td>
                 <td>
                   <TimePicker
-                    key="turn_start"
+                    key="outbound_start"
                     ampm={false}
                     format="HH:mm"
                     timeSteps={{ hours: 1, minutes: 1 }}
-                    value={turnTimes.start}
+                    value={outboundTimes.start}
                     onAccept={(val) =>
-                      handleTurnTimeChange({
+                      handleOutboundTimeChange({
                         target: { name: 'start', value: val },
                       })
                     }
@@ -260,13 +364,46 @@ function Domestic() {
                 </td>
                 <td>
                   <TimePicker
-                    id="turn_end"
+                    id="outbound_end"
                     ampm={false}
                     format="HH:mm"
                     timeSteps={{ hours: 1, minutes: 1 }}
-                    value={turnTimes.end}
+                    value={outboundTimes.end}
                     onAccept={(val) =>
-                      handleTurnTimeChange({
+                      handleOutboundTimeChange({
+                        target: { name: 'end', value: val },
+                      })
+                    }
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className="align-middle">
+                  <h5>Inbound</h5>
+                </td>
+                <td>
+                  <TimePicker
+                    key="inbound_start"
+                    ampm={false}
+                    format="HH:mm"
+                    timeSteps={{ hours: 1, minutes: 1 }}
+                    value={inboundTimes.start}
+                    onAccept={(val) =>
+                      handleInboundTimeChange({
+                        target: { name: 'start', value: val },
+                      })
+                    }
+                  />
+                </td>
+                <td>
+                  <TimePicker
+                    id="inbound_end"
+                    ampm={false}
+                    format="HH:mm"
+                    timeSteps={{ hours: 1, minutes: 1 }}
+                    value={inboundTimes.end}
+                    onAccept={(val) =>
+                      handleInboundTimeChange({
                         target: { name: 'end', value: val },
                       })
                     }
@@ -350,7 +487,7 @@ function Domestic() {
                   id="inputExpenseB"
                   value={expenses_ca.breakfast}
                   name="breakfast"
-                  onChange={handleExpensesChange}
+                  onChange={handleCaExpensesChange}
                 />
               </td>
               <td>
@@ -360,7 +497,7 @@ function Domestic() {
                   id="inputExpenseB"
                   value={expenses_ca.lunch}
                   name="lunch"
-                  onChange={handleExpensesChange}
+                  onChange={handleCaExpensesChange}
                 />
               </td>
               <td>
@@ -370,7 +507,7 @@ function Domestic() {
                   id="inputExpenseB"
                   value={expenses_ca.dinner}
                   name="dinner"
-                  onChange={handleExpensesChange}
+                  onChange={handleCaExpensesChange}
                 />
               </td>
               <td>
@@ -380,7 +517,7 @@ function Domestic() {
                   id="inputExpenseB"
                   value={expenses_ca.snack}
                   name="snack"
-                  onChange={handleExpensesChange}
+                  onChange={handleCaExpensesChange}
                 />
               </td>
               {/* <td className="align-middle">$5.05</td> */}
@@ -392,6 +529,64 @@ function Domestic() {
               <td>${calcCaDinnerTotal().toFixed(2)}</td>
               <td>${calcCaSnackTotal().toFixed(2)}</td>
               {/* <td>${(turn.turn_cico * 5.05).toFixed(2)}</td> */}
+            </tr>
+            <tr className="table-dark"></tr>
+            <tr>
+              <td>🇺🇸</td>
+              <td>{meals_us.breakfast}</td>
+              <td>{meals_us.lunch}</td>
+              <td>{meals_us.dinner}</td>
+              <td>{meals_us.snack}</td>
+            </tr>
+            <tr>
+              <td>x</td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.breakfast}
+                  name="breakfast"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.lunch}
+                  name="lunch"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.dinner}
+                  name="dinner"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  id="inputExpenseB"
+                  value={expenses_us.snack}
+                  name="snack"
+                  onChange={handleUsExpensesChange}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>=</td>
+              <td>${calcUsBreakfastTotal().toFixed(2)}</td>
+              <td>${calcUsLunchTotal().toFixed(2)}</td>
+              <td>${calcUsDinnerTotal().toFixed(2)}</td>
+              <td>${calcUsSnackTotal().toFixed(2)}</td>
             </tr>
             <tr className="table-success">
               <td>Total:</td>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Domestic from './Domestic';
 import Layover from './Layover';
+import Transborder from './Transborder';
 import FileUploader from './FileUploader';
 
 function Accordian() {
@@ -76,6 +77,10 @@ function Accordian() {
                 />
                 <label className="form-check-label" htmlFor="radio1">
                   <strong>A domestic or sun turn.</strong>
+                  <p className="mb-0">
+                    Sun Destinations: Cuba, Jamaica, Mexico, BDA, GCM, GGT, LIR,
+                    NAS, SJO
+                  </p>
                 </label>
               </div>
               <div className="form-check">
@@ -84,6 +89,19 @@ function Accordian() {
                   type="radio"
                   name="flexRadioDefault"
                   id="radio2"
+                  value="transborder"
+                  onChange={(e) => setSelectedValue(e.target.value)}
+                />
+                <label className="form-check-label" htmlFor="radio3">
+                  <strong>A transborder turn.</strong>
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="flexRadioDefault"
+                  id="radio3"
                   value="intl"
                   onChange={(e) => setSelectedValue(e.target.value)}
                 />
@@ -96,7 +114,7 @@ function Accordian() {
                   className="form-check-input"
                   type="radio"
                   name="flexRadioDefault"
-                  id="radio3"
+                  id="radio4"
                   value="value3"
                   onChange={(e) => setSelectedValue(e.target.value)}
                   disabled
@@ -115,6 +133,7 @@ function Accordian() {
       </div>
       {uploaded && selectedValue === 'naSun' && <Domestic />}
       {uploaded && selectedValue === 'intl' && <Layover />}
+      {uploaded && selectedValue === 'transborder' && <Transborder />}
     </div>
   );
 }

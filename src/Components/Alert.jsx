@@ -1,10 +1,6 @@
-import { useState } from 'react';
-
-function Alert() {
-  const [checked, setChecked] = useState(false);
-
+function Alert({ setAccepted }) {
   return (
-    <dialog open>
+    <alert>
       <h3>PLEASE READ</h3>
       <p>
         This website/app is a work in progress. I make no claims about its
@@ -16,10 +12,9 @@ function Alert() {
         provided by this website/app.
       </p>
       <form method="dialog">
-        <input type="checkbox" id="accept" onClick={setChecked(!checked)} />
-        {/* {checked && <button>Accept</button>} */}
+        <button onClick={setAccepted(true)}>I Accept</button>
       </form>
-    </dialog>
+    </alert>
   );
 }
 
