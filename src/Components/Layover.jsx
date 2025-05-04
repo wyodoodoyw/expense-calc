@@ -1,6 +1,8 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { TimePicker } from '@mui/x-date-pickers';
+import ExplanationInternationalArrival from './ExplanationInternationalArrival';
+import ExplanationInternationalDept from './ExplanationInternationalDept';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -439,49 +441,8 @@ function Layover() {
         </table>
         <div>
           <h4 className="text-center">Explanation</h4>
-          <strong>
-            Scheduled Arrival at Layover - Meal Allowances on Day of Arrival
-          </strong>
-          <table className="table table-striped table-bordered text-start">
-            <tbody>
-              <tr>
-                <td>Arrival before 12:30</td>
-                <td>BLDS</td>
-              </tr>
-              <tr>
-                <td>Arrival between 12:30 and 13:30</td>
-                <td>LDS</td>
-              </tr>
-              <tr>
-                <td>Arrival after 13:30</td>
-                <td>DS</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <strong>
-            Scheduled Departure at Layover - Meal Allowances on Day of Departure
-          </strong>
-          <table className="table table-striped table-bordered text-start">
-            <tbody>
-              <tr>
-                <td>Departures between 07:00 and 11:29</td>
-                <td>B</td>
-              </tr>
-              <tr>
-                <td>Departures between 11:30 and 16:59</td>
-                <td>BL</td>
-              </tr>
-              <tr>
-                <td>Departures between 17:00 and 21:59</td>
-                <td>BLD</td>
-              </tr>
-              <tr>
-                <td>Departures between 22:00 and 01:00</td>
-                <td>BLDS</td>
-              </tr>
-            </tbody>
-          </table>
+          <ExplanationInternationalArrival />
+          <ExplanationInternationalDept />
           <p>
             <strong>Every full calendar day at layover (00:00-24:00): </strong>
             BLDS

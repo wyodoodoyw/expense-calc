@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Domestic from './Domestic';
 import Layover from './Layover';
 import DomesticToInternational from './DomesticToInternational';
+import InternationalToDomestic from './InternationalToDomestic';
 import FileUploader from './FileUploader';
 
 function Accordian() {
@@ -136,7 +137,6 @@ function Accordian() {
                   id="radio4"
                   value="intlToDom"
                   onChange={(e) => setSelectedValue(e.target.value)}
-                  disabled
                 />
                 <label className="form-check-label" htmlFor="radio3">
                   <strong>
@@ -153,6 +153,7 @@ function Accordian() {
       {uploaded && selectedValue === 'naSun' && <Domestic />}
       {uploaded && selectedValue === 'intl' && <Layover />}
       {uploaded && selectedValue === 'domToIntl' && <DomesticToInternational />}
+      {uploaded && selectedValue === 'intlToDom' && <InternationalToDomestic />}
     </div>
   );
 }

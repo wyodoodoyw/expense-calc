@@ -1,32 +1,30 @@
 /* eslint-disable react/prop-types */
 import { useEffect, useState } from 'react';
 import { TimePicker } from '@mui/x-date-pickers';
-import ExplanationDomesticDept from './ExplanationDomesticDept';
-import ExplanationDomesticArrivals from './ExplanationDomesticArrivals';
-import ExplanationCanadaOrUS from './ExplanationCanadaOrUS';
+import ExplanationInternationalArrival from './ExplanationInternationalArrival';
+import ExplanationDomesticArrival from './ExplanationDomesticArrivals';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import duration from 'dayjs/plugin/duration';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import ExplanationDomesticArrivals from './ExplanationDomesticArrivals';
 
 dayjs.extend(isBetween);
 dayjs.extend(duration);
 dayjs.extend(customParseFormat);
 const timeFormat = 'HH:mm';
 
-function Domestic() {
-  const [station, setStation] = useState('YVR');
-  const [duty, setDuty] = useState({
-    start: dayjs('05:15', timeFormat),
-    end: dayjs('18:31', timeFormat),
-  });
-  const [turnTimes, setTurnTimes] = useState({
-    start: dayjs('06:30', timeFormat),
-    end: dayjs('18:31', timeFormat),
-  });
+function InternationalToDomestic() {
+  const [dutyEnd, setDutyEnd] = useState(dayjs('05:15', timeFormat));
+  const [domesticArrival, setDomesticArrival] = useState(
+    dayjs('08:30', timeFormat)
+  );
+  const [internationalArrival, setInternationalArrival] = useState(
+    dayjs('12:30', timeFormat)
+  );
+
   const [cico, setCico] = useState(0);
   const [fullDays, setFullDays] = useState(0);
-  const [timeAway, setTimeAway] = useState(dayjs('00:00', timeFormat));
 
   // Amount of expenses earned for each type of meal
   const [expenses_ca, setExpensesCa] = useState({
@@ -46,12 +44,7 @@ function Domestic() {
 
   useEffect(() => {
     calculateExpenses();
-  }, []);
-
-  const handleStationChange = (e) => {
-    const new_station = e.target.value;
-    setStation(new_station);
-  };
+  }, [dutyEnd, domesticArrival, internationalArrival]);
 
   const handleExpensesChange = (e) => {
     // handle changes to expenses amount ($)
@@ -74,7 +67,7 @@ function Domestic() {
         dinner: prev.dinner + 1,
         snack: prev.snack + 1,
       }));
-      setCico((prev) => prev + 1);
+      // setCico((prev) => prev + 1);
     } else if (fullDays > 0 && e.target.id === 'minus') {
       setFullDays(fullDays - 1);
       setMealsCa((prev) => ({
@@ -83,49 +76,18 @@ function Domestic() {
         dinner: prev.dinner - 1,
         snack: prev.snack - 1,
       }));
-      setCico((prev) => prev - 1);
+      // setCico((prev) => prev - 1);
     }
   };
 
-  const handleTurnTimeChange = ({ target }) => {
-    // handle changes to turn times
-    const { name, value } = target;
-    setTurnTimes((prev) => ({
-      ...prev,
-      [name]: dayjs(value, timeFormat),
-    }));
-    // setDuty({
-    //   start: (dayjs(turnTimes.start).subtract(1, 'hour'), timeFormat),
-    //   end: (dayjs(turnTimes.end).add(15, 'minutes'), timeFormat),
-    // });
-    calculateExpenses();
-  };
-
-  const handleDutyTimeChange = ({ target }) => {
-    // handle changes to duty times
-    const { name, value } = target;
-    setDuty((prev) => ({
-      ...prev,
-      [name]: dayjs(value, timeFormat),
-    }));
-    calculateExpenses();
-  };
-
-  const calculateFullDays = () => {
-    //TAFB - 24 hours + duty.start - duty.end
-  };
-
   const calculateExpenses = () => {
-    setCico(0);
+    setCico(1);
     setFullDays(0);
-    const first = calculateFirstExpenseOfDay();
+    const first = calculateFirstDayExpenses();
     const last = calculateLastExpenseOfDay();
-    const string = 'BLDS';
-    const new_expenses = string.substring(
-      string.indexOf(first),
-      string.indexOf(last) + 1
-    );
-    // console.log(`!Expenses: ${new_expenses}`);
+    // const string = 'BLDS';
+    const new_expenses = first + last;
+    console.log(`!Expenses: ${new_expenses}`);
 
     setMealsCa({
       breakfast: (new_expenses.match(/B/g) || []).length,
@@ -135,42 +97,32 @@ function Domestic() {
     });
   };
 
-  const calculateFirstExpenseOfDay = () => {
-    const time = turnTimes.start;
-    // console.log(`!start time: ${time}`);
-    if (
-      dayjs(time).isBefore(dayjs('08:00', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!Begin: B`);
-      return 'B';
+  //
+
+  const calculateFirstDayExpenses = () => {
+    const time = internationalArrival;
+    if (dayjs(time).isBefore(dayjs('12:30', timeFormat), 'minute')) {
+      console.log('!Start: BLDS');
+      return 'BLDS';
     } else if (
-      dayjs(time).isBefore(dayjs('12:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
+      time.isBetween(
+        dayjs('12:30', timeFormat),
+        dayjs('13:30', timeFormat),
+        'minute',
+        '[]'
+      )
     ) {
-      // console.log(`!Begin: L`);
-      return 'L';
-    } else if (
-      dayjs(time).isBefore(dayjs('18:00', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('18:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('19:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!Begin: D`);
-      return 'D';
-    } else if (
-      dayjs(time).isBefore(dayjs('23:00', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-      duty.end.isAfter((dayjs('01:00', timeFormat), 'minutes'.add(1, 'day')))
-    ) {
-      // console.log(`!Begin: S`);
-      return 'S';
+      console.log('!Start: LDS');
+      return 'LDS';
+    } else {
+      console.log('!Start: DS');
+      return 'DS';
     }
   };
 
   const calculateLastExpenseOfDay = () => {
-    const time = turnTimes.end;
+    const time = domesticArrival;
+    const duty = { start: dayjs('00:00', timeFormat), end: dutyEnd };
     if (
       dayjs(time).isAfter(
         (dayjs('01:00', timeFormat).add(1, 'day'), 'minute')
@@ -178,28 +130,28 @@ function Domestic() {
       duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
       duty.end.isAfter((dayjs('01:00', timeFormat).add(1, 'day'), 'minutes'))
     ) {
-      // console.log(`!End: S`);
-      return 'S';
+      console.log(`!End: BLDS`);
+      return 'BLDS';
     } else if (
       dayjs(time).isAfter(dayjs('18:30', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
       duty.end.isAfter(dayjs('18:30', timeFormat), 'minutes')
     ) {
-      // console.log(`!End: D`);
-      return 'D';
+      console.log(`!End: BLD`);
+      return 'BLD';
     } else if (
       dayjs(time).isAfter(dayjs('13:30', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
       duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
     ) {
-      // console.log(`!End: L`);
-      return 'L';
+      console.log(`!End: BL`);
+      return 'BL';
     } else if (
       dayjs(time).isAfter(dayjs('09:30', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
       duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
     ) {
-      // console.log(`!End: B`);
+      console.log(`!End: B`);
       return 'B';
     }
   };
@@ -233,30 +185,43 @@ function Domestic() {
   return (
     <>
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
-        {/* <p>For calculating domestic and sun turns only.</p> */}
         <form>
-          <div className="mb-3">
-            <div className="input-group mb-3" id="flight_info">
-              <span className="input-group-text">Turn to: </span>
-              <input
-                id="flight_no"
-                type="text"
-                className="col-11 form-control"
-                placeholder="YUL"
-                value={station}
-                onChange={(val) => handleStationChange(val)}
-              />
-            </div>
-          </div>
           <table className="mx-auto table table-striped table-bordered text-center">
             <tbody>
               <tr>
                 <td></td>
                 <td>
-                  <h5>Start</h5>
+                  <h5>End</h5>
+                </td>
+              </tr>
+              <tr>
+                <td className="align-middle">
+                  <h5>International Flight</h5>
                 </td>
                 <td>
-                  <h5>End</h5>
+                  <TimePicker
+                    id="duty_end"
+                    ampm={false}
+                    format="HH:mm"
+                    timeSteps={{ hours: 1, minutes: 1 }}
+                    value={internationalArrival}
+                    onAccept={(val) => setInternationalArrival(val)}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className="align-middle">
+                  <h5>Domestic Flight</h5>
+                </td>
+                <td>
+                  <TimePicker
+                    key="turn_start"
+                    ampm={false}
+                    format="HH:mm"
+                    timeSteps={{ hours: 1, minutes: 1 }}
+                    value={domesticArrival}
+                    onAccept={(val) => setDomesticArrival(val)}
+                  />
                 </td>
               </tr>
               <tr>
@@ -269,84 +234,11 @@ function Domestic() {
                     ampm={false}
                     format="HH:mm"
                     timeSteps={{ hours: 1, minutes: 1 }}
-                    value={duty.start}
-                    onAccept={(val) =>
-                      handleDutyTimeChange({
-                        target: { name: 'start', value: val },
-                      })
-                    }
-                  />
-                </td>
-                <td></td>
-              </tr>
-              <tr>
-                <td className="align-middle">
-                  <h5>Pairing</h5>
-                </td>
-                <td>
-                  <TimePicker
-                    key="turn_start"
-                    ampm={false}
-                    format="HH:mm"
-                    timeSteps={{ hours: 1, minutes: 1 }}
-                    value={turnTimes.start}
-                    onAccept={(val) =>
-                      handleTurnTimeChange({
-                        target: { name: 'start', value: val },
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <TimePicker
-                    id="turn_end"
-                    ampm={false}
-                    format="HH:mm"
-                    timeSteps={{ hours: 1, minutes: 1 }}
-                    value={turnTimes.end}
-                    onAccept={(val) =>
-                      handleTurnTimeChange({
-                        target: { name: 'end', value: val },
-                      })
-                    }
+                    value={dutyEnd}
+                    onAccept={(val) => setDutyEnd(val)}
                   />
                 </td>
               </tr>
-              <tr>
-                <td className="align-middle">
-                  <h5>Duty</h5>
-                </td>
-                <td></td>
-                <td>
-                  <TimePicker
-                    id="duty_end"
-                    ampm={false}
-                    format="HH:mm"
-                    timeSteps={{ hours: 1, minutes: 1 }}
-                    value={duty.end}
-                    onAccept={(val) =>
-                      handleDutyTimeChange({
-                        target: { name: 'end', value: val },
-                      })
-                    }
-                  />
-                </td>
-              </tr>
-              {/* <tr>
-                <td className="align-middle">
-                  <h5>TAFB</h5>
-                </td>
-                <td colSpan={2}>
-                  <TimeField
-                    id="timeAway"
-                    ampm={false}
-                    format="HH:mm"
-                    timeSteps={{ hours: 1, minutes: 1 }}
-                    value={timeAway}
-                    onAccept={(val) => setTimeAway(val)}
-                  />
-                </td>
-              </tr> */}
             </tbody>
           </table>
           <div
@@ -362,7 +254,7 @@ function Domestic() {
             >
               -
             </button>
-            <span id="days-stepper align-middle">{fullDays}</span>
+            <span id="days-stepper align-middle">{cico}</span>
             <button
               id="plus"
               type="button"
@@ -455,7 +347,7 @@ function Domestic() {
         </table>
         <div>
           <h4 className="text-center">Explanation</h4>
-          <ExplanationDomesticDept />
+          <ExplanationInternationalArrival />
           <ExplanationDomesticArrivals />
           <p>
             <strong>Every full calendar day at layover (00:00-24:00): </strong>
@@ -465,15 +357,10 @@ function Domestic() {
             For more information, consult the Mystery of Meals document on the
             ACComponent website.
           </p>
-          <p>
-            A map showing the different North American and Sun destinations can
-            be found in Appendix I of the contract.
-          </p>
-          <ExplanationCanadaOrUS />
         </div>
       </div>
     </>
   );
 }
 
-export default Domestic;
+export default InternationalToDomestic;
