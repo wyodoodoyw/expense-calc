@@ -11,19 +11,15 @@ dayjs.extend(duration);
 dayjs.extend(customParseFormat);
 const timeFormat = 'HH:mm';
 
-function Domestic() {
-  const [station, setStation] = useState('YVR');
-  const [duty, setDuty] = useState({
-    start: dayjs('05:15', timeFormat),
-    end: dayjs('18:31', timeFormat),
-  });
-  const [turnTimes, setTurnTimes] = useState({
-    start: dayjs('06:30', timeFormat),
-    end: dayjs('18:31', timeFormat),
-  });
-  const [cico, setCico] = useState(0);
+function DomesticToInternational() {
+  const [dutyStart, setDutyStart] = useState(dayjs('05:15', timeFormat));
+  const [domesticDept, setDomesticDept] = useState(dayjs('08:30', timeFormat));
+  const [internationalDept, setInternationalDept] = useState(
+    dayjs('12:30', timeFormat)
+  );
+
+  const [cico, setCico] = useState(1);
   const [fullDays, setFullDays] = useState(0);
-  const [timeAway, setTimeAway] = useState(dayjs('00:00', timeFormat));
 
   // Amount of expenses earned for each type of meal
   const [expenses_ca, setExpensesCa] = useState({
@@ -43,12 +39,7 @@ function Domestic() {
 
   useEffect(() => {
     calculateExpenses();
-  }, []);
-
-  const handleStationChange = (e) => {
-    const new_station = e.target.value;
-    setStation(new_station);
-  };
+  }, [dutyStart, domesticDept, internationalDept]);
 
   const handleExpensesChange = (e) => {
     // handle changes to expenses amount ($)
@@ -84,45 +75,14 @@ function Domestic() {
     }
   };
 
-  const handleTurnTimeChange = ({ target }) => {
-    // handle changes to turn times
-    const { name, value } = target;
-    setTurnTimes((prev) => ({
-      ...prev,
-      [name]: dayjs(value, timeFormat),
-    }));
-    // setDuty({
-    //   start: (dayjs(turnTimes.start).subtract(1, 'hour'), timeFormat),
-    //   end: (dayjs(turnTimes.end).add(15, 'minutes'), timeFormat),
-    // });
-    calculateExpenses();
-  };
-
-  const handleDutyTimeChange = ({ target }) => {
-    // handle changes to duty times
-    const { name, value } = target;
-    setDuty((prev) => ({
-      ...prev,
-      [name]: dayjs(value, timeFormat),
-    }));
-    calculateExpenses();
-  };
-
-  const calculateFullDays = () => {
-    //TAFB - 24 hours + duty.start - duty.end
-  };
-
   const calculateExpenses = () => {
-    setCico(0);
+    setCico(1);
     setFullDays(0);
     const first = calculateFirstExpenseOfDay();
-    const last = calculateLastExpenseOfDay();
-    const string = 'BLDS';
-    const new_expenses = string.substring(
-      string.indexOf(first),
-      string.indexOf(last) + 1
-    );
-    // console.log(`!Expenses: ${new_expenses}`);
+    const last = calculateLastDayExpenses();
+    // const string = 'BLDS';
+    const new_expenses = first + last;
+    console.log(`!Expenses: ${new_expenses}`);
 
     setMealsCa({
       breakfast: (new_expenses.match(/B/g) || []).length,
@@ -133,71 +93,86 @@ function Domestic() {
   };
 
   const calculateFirstExpenseOfDay = () => {
-    const time = turnTimes.start;
+    const time = domesticDept;
+    const duty = { start: dutyStart, end: dayjs('23:59', timeFormat) };
     // console.log(`!start time: ${time}`);
     if (
       dayjs(time).isBefore(dayjs('08:00', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
       duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
     ) {
-      // console.log(`!Begin: B`);
-      return 'B';
+      console.log(`!Begin: B`);
+      return 'BLDS';
     } else if (
       dayjs(time).isBefore(dayjs('12:30', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
       duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
     ) {
-      // console.log(`!Begin: L`);
-      return 'L';
+      console.log(`!Begin: L`);
+      return 'LDS';
     } else if (
       dayjs(time).isBefore(dayjs('18:00', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('18:00', timeFormat), 'minutes') &&
       duty.end.isAfter(dayjs('19:30', timeFormat), 'minutes')
     ) {
-      // console.log(`!Begin: D`);
-      return 'D';
+      console.log(`!Begin: D`);
+      return 'DS';
     } else if (
       dayjs(time).isBefore(dayjs('23:00', timeFormat), 'minute') &&
       duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
       duty.end.isAfter((dayjs('01:00', timeFormat), 'minutes'.add(1, 'day')))
     ) {
-      // console.log(`!Begin: S`);
+      console.log(`!Begin: S`);
       return 'S';
     }
   };
 
-  const calculateLastExpenseOfDay = () => {
-    const time = turnTimes.end;
+  const calculateLastDayExpenses = () => {
+    const time = internationalDept;
+
     if (
-      dayjs(time).isAfter(
-        (dayjs('01:00', timeFormat).add(1, 'day'), 'minute')
-      ) &&
-      duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-      duty.end.isAfter((dayjs('01:00', timeFormat).add(1, 'day'), 'minutes'))
+      time.isBetween(
+        dayjs('7:00', timeFormat),
+        dayjs('11:29', timeFormat),
+        'minute',
+        '[]'
+      )
     ) {
-      // console.log(`!End: S`);
-      return 'S';
-    } else if (
-      dayjs(time).isAfter(dayjs('18:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('18:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!End: D`);
-      return 'D';
-    } else if (
-      dayjs(time).isAfter(dayjs('13:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!End: L`);
-      return 'L';
-    } else if (
-      dayjs(time).isAfter(dayjs('09:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!End: B`);
+      console.log(`!End: B`);
       return 'B';
+    } else if (
+      time.isBetween(
+        dayjs('11:30', timeFormat),
+        dayjs('16:59', timeFormat),
+        'minute',
+        '[]'
+      )
+    ) {
+      console.log(`!End: BL`);
+      return 'BL';
+    } else if (
+      time.isBetween(
+        dayjs('17:00', timeFormat),
+        dayjs('21:59', timeFormat),
+        'minute',
+        '[]'
+      )
+    ) {
+      console.log(`!End: BLD`);
+      return 'BLD';
+    } else if (
+      time.isBetween(
+        dayjs('22:00', timeFormat),
+        dayjs('01:00', timeFormat).add(1, 'day'),
+        'minute',
+        '[]'
+      )
+    ) {
+      console.log(`!End: BLDS`);
+      return 'BLDS';
+    } else {
+      console.log('!triggered else');
+      return '';
     }
   };
 
@@ -230,30 +205,13 @@ function Domestic() {
   return (
     <>
       <div className="mx-auto col-8 justify-content-center my-5 border border-2 border-dark rounded-3 m-1 p-3">
-        {/* <p>For calculating domestic and sun turns only.</p> */}
         <form>
-          <div className="mb-3">
-            <div className="input-group mb-3" id="flight_info">
-              <span className="input-group-text">Turn to: </span>
-              <input
-                id="flight_no"
-                type="text"
-                className="col-11 form-control"
-                placeholder="YUL"
-                value={station}
-                onChange={(val) => handleStationChange(val)}
-              />
-            </div>
-          </div>
           <table className="mx-auto table table-striped table-bordered text-center">
             <tbody>
               <tr>
                 <td></td>
                 <td>
                   <h5>Start</h5>
-                </td>
-                <td>
-                  <h5>End</h5>
                 </td>
               </tr>
               <tr>
@@ -266,19 +224,14 @@ function Domestic() {
                     ampm={false}
                     format="HH:mm"
                     timeSteps={{ hours: 1, minutes: 1 }}
-                    value={duty.start}
-                    onAccept={(val) =>
-                      handleDutyTimeChange({
-                        target: { name: 'start', value: val },
-                      })
-                    }
+                    value={dutyStart}
+                    onAccept={(val) => setDutyStart(val)}
                   />
                 </td>
-                <td></td>
               </tr>
               <tr>
                 <td className="align-middle">
-                  <h5>Pairing</h5>
+                  <h5>Domestic Flight</h5>
                 </td>
                 <td>
                   <TimePicker
@@ -286,64 +239,26 @@ function Domestic() {
                     ampm={false}
                     format="HH:mm"
                     timeSteps={{ hours: 1, minutes: 1 }}
-                    value={turnTimes.start}
-                    onAccept={(val) =>
-                      handleTurnTimeChange({
-                        target: { name: 'start', value: val },
-                      })
-                    }
-                  />
-                </td>
-                <td>
-                  <TimePicker
-                    id="turn_end"
-                    ampm={false}
-                    format="HH:mm"
-                    timeSteps={{ hours: 1, minutes: 1 }}
-                    value={turnTimes.end}
-                    onAccept={(val) =>
-                      handleTurnTimeChange({
-                        target: { name: 'end', value: val },
-                      })
-                    }
+                    value={domesticDept}
+                    onAccept={(val) => setDomesticDept(val)}
                   />
                 </td>
               </tr>
               <tr>
                 <td className="align-middle">
-                  <h5>Duty</h5>
+                  <h5>International Flight</h5>
                 </td>
-                <td></td>
                 <td>
                   <TimePicker
                     id="duty_end"
                     ampm={false}
                     format="HH:mm"
                     timeSteps={{ hours: 1, minutes: 1 }}
-                    value={duty.end}
-                    onAccept={(val) =>
-                      handleDutyTimeChange({
-                        target: { name: 'end', value: val },
-                      })
-                    }
+                    value={internationalDept}
+                    onAccept={(val) => setInternationalDept(val)}
                   />
                 </td>
               </tr>
-              {/* <tr>
-                <td className="align-middle">
-                  <h5>TAFB</h5>
-                </td>
-                <td colSpan={2}>
-                  <TimeField
-                    id="timeAway"
-                    ampm={false}
-                    format="HH:mm"
-                    timeSteps={{ hours: 1, minutes: 1 }}
-                    value={timeAway}
-                    onAccept={(val) => setTimeAway(val)}
-                  />
-                </td>
-              </tr> */}
             </tbody>
           </table>
           <div
@@ -456,7 +371,7 @@ function Domestic() {
           <table className="table table-striped table-bordered text-start">
             <tbody>
               <tr>
-                <td>
+                <td colSpan={2}>
                   Use the table below to determine the first meal to which you
                   are entitled.
                 </td>
@@ -479,31 +394,26 @@ function Domestic() {
               </tr>
             </tbody>
           </table>
-          <strong>Arrivals </strong>i.e. ending a duty period, not including 15
-          minutes deplaning
+          <strong>
+            Scheduled Departure at Layover - Meal Allowances on Day of Departure
+          </strong>
           <table className="table table-striped table-bordered text-start">
             <tbody>
               <tr>
-                <td>
-                  Use the table below to determine the last meal to which you
-                  are entitled. You are entitled to all meals in between.
-                </td>
-              </tr>
-              <tr>
-                <td>Arrive after 09:30 and on duty from 08:00 to 09:30</td>
+                <td>Departures between 07:00 and 11:29</td>
                 <td>B</td>
               </tr>
               <tr>
-                <td>Arrive after 13:30 and on duty from 12:30 to 13:30</td>
-                <td>L</td>
+                <td>Departures between 11:30 and 16:59</td>
+                <td>BL</td>
               </tr>
               <tr>
-                <td>Arrive after 18:30 and on duty from 17:00 to 18:30</td>
-                <td>D</td>
+                <td>Departures between 17:00 and 21:59</td>
+                <td>BLD</td>
               </tr>
               <tr>
-                <td>Arrive after 01:00 and on duty from 23:00 to 01:00</td>
-                <td>S</td>
+                <td>Departures between 22:00 and 01:00</td>
+                <td>BLDS</td>
               </tr>
             </tbody>
           </table>
@@ -515,67 +425,10 @@ function Domestic() {
             For more information, consult the Mystery of Meals document on the
             ACComponent website.
           </p>
-          <p>
-            A map showing the different North American and Sun destinations can
-            be found in Appendix I of the contract.
-          </p>
-          <p>
-            <strong>
-              * This tool is not yet set up to calculate layover expenses when
-              there is a mix of Canadian and US rates.
-            </strong>
-            The meal entitlements should be accurate, but you will need to
-            double check the dollar amounts using the table below.
-          </p>
-          <table className="table table-striped table-bordered text-start">
-            <tbody>
-              <tr>
-                <td colSpan={2}>
-                  Layovers are always paid at the layover rate
-                </td>
-              </tr>
-              <tr>
-                <td colSpan={2}>
-                  Breakfast is always paid at the rate of the country of
-                  departure
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  Flight departs prior to 12:00 <br></br>Flight departs at 12:00
-                  or later
-                </td>
-                <td>
-                  L paid at rate of country of destination <br></br>L paid at
-                  rate of country of departure
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  Flight departs prior to 17:30 <br></br>Flight departs at 17:30
-                  or later
-                </td>
-                <td>
-                  D paid at rate of country of destination <br></br>D paid at
-                  rate of country of departure
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  Flight departs prior to 22:30 <br></br>Flight departs after
-                  22:30 but prior to 00:59
-                </td>
-                <td>
-                  S paid at rate of country of destination <br></br>S paid at
-                  rate of country of departure
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </>
   );
 }
 
-export default Domestic;
+export default DomesticToInternational;

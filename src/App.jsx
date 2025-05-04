@@ -1,14 +1,16 @@
 import './App.css';
+import Disclaimer from './Components/Disclaimer';
 // import Alert from './Components/Alert';
 import Accordion from './Components/Accordion';
 // import Layover from './Components/Layover';
 // import Domestic from './Components/Domestic';
-// import { useState } from 'react';
+import { useState } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
-  // const [accepted, setAccepted] = useState(false);
+  const [clicked, setClicked] = useState(false);
+
   return (
     <>
       <div className="container mb-0">
@@ -16,7 +18,10 @@ function App() {
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Accordion />
+            {!clicked && (
+              <Disclaimer clicked={clicked} setClicked={setClicked} />
+            )}
+            {clicked && <Accordion />}
           </LocalizationProvider>
         </div>
       </div>

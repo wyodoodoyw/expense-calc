@@ -16,7 +16,7 @@ function Layover() {
     layover_end: dayjs('17:40', timeFormat),
   });
   const [fullDays, setFullDays] = useState(0);
-  const [filtered, setFiltered] = useState([]);
+  // const [filtered, setFiltered] = useState([]);
 
   // Amount of expenses earned for each type of meal
   const [expenses, setExpenses] = useState({
@@ -61,7 +61,7 @@ function Layover() {
           }
         });
         console.log(filtered);
-        setFiltered(filtered);
+        // setFiltered(filtered);
         if (filtered.length === 1) {
           setExpenses({
             breakfast: filtered[0].expenses.breakfast,
@@ -437,6 +437,60 @@ function Layover() {
             </tr>
           </tbody>
         </table>
+        <div>
+          <h4 className="text-center">Explanation</h4>
+          <strong>
+            Scheduled Arrival at Layover - Meal Allowances on Day of Arrival
+          </strong>
+          <table className="table table-striped table-bordered text-start">
+            <tbody>
+              <tr>
+                <td>Arrival before 12:30</td>
+                <td>BLDS</td>
+              </tr>
+              <tr>
+                <td>Arrival between 12:30 and 13:30</td>
+                <td>LDS</td>
+              </tr>
+              <tr>
+                <td>Arrival after 13:30</td>
+                <td>DS</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <strong>
+            Scheduled Departure at Layover - Meal Allowances on Day of Departure
+          </strong>
+          <table className="table table-striped table-bordered text-start">
+            <tbody>
+              <tr>
+                <td>Departures between 07:00 and 11:29</td>
+                <td>B</td>
+              </tr>
+              <tr>
+                <td>Departures between 11:30 and 16:59</td>
+                <td>BL</td>
+              </tr>
+              <tr>
+                <td>Departures between 17:00 and 21:59</td>
+                <td>BLD</td>
+              </tr>
+              <tr>
+                <td>Departures between 22:00 and 01:00</td>
+                <td>BLDS</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>
+            <strong>Every full calendar day at layover (00:00-24:00): </strong>
+            BLDS
+          </p>
+          <p>
+            For more information, consult the Mystery of Meals document on the
+            ACComponent website.
+          </p>
+        </div>
       </div>
     </>
   );

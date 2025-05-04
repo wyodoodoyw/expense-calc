@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Domestic from './Domestic';
 import Layover from './Layover';
-import Transborder from './Transborder';
+import DomesticToInternational from './DomesticToInternational';
 import FileUploader from './FileUploader';
 
 function Accordian() {
@@ -76,14 +76,16 @@ function Accordian() {
                   onChange={(e) => setSelectedValue(e.target.value)}
                 />
                 <label className="form-check-label" htmlFor="radio1">
-                  <strong>A domestic or sun turn.</strong>
+                  <strong>
+                    A domestic, transborder, or sun pairing. Please see * below.
+                  </strong>
                   <p className="mb-0">
                     Sun Destinations: Cuba, Jamaica, Mexico, BDA, GCM, GGT, LIR,
                     NAS, SJO
                   </p>
                 </label>
               </div>
-              <div className="form-check">
+              {/* <div className="form-check">
                 <input
                   className="form-check-input"
                   type="radio"
@@ -95,7 +97,7 @@ function Accordian() {
                 <label className="form-check-label" htmlFor="radio3">
                   <strong>A transborder turn.</strong>
                 </label>
-              </div>
+              </div> */}
               <div className="form-check">
                 <input
                   className="form-check-input"
@@ -114,17 +116,34 @@ function Accordian() {
                   className="form-check-input"
                   type="radio"
                   name="flexRadioDefault"
+                  id="radio3"
+                  value="domToIntl"
+                  onChange={(e) => setSelectedValue(e.target.value)}
+                />
+                <label className="form-check-label" htmlFor="radio3">
+                  <strong>
+                    A domestic flight and layover <strong>before</strong> an
+                    international flight.
+                  </strong>
+                  Example: a layover in YUL before going to NRT.
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="flexRadioDefault"
                   id="radio4"
-                  value="value3"
+                  value="intlToDom"
                   onChange={(e) => setSelectedValue(e.target.value)}
                   disabled
                 />
                 <label className="form-check-label" htmlFor="radio3">
                   <strong>
-                    A domestic flight and layover before or after an
+                    A domestic flight and layover <strong>after</strong> an
                     international flight.
                   </strong>
-                  Example: a layover in YUL before going to NRT.
+                  Example: a layover in YUL after going to NRT.
                 </label>
               </div>
             </form>
@@ -133,7 +152,7 @@ function Accordian() {
       </div>
       {uploaded && selectedValue === 'naSun' && <Domestic />}
       {uploaded && selectedValue === 'intl' && <Layover />}
-      {uploaded && selectedValue === 'transborder' && <Transborder />}
+      {uploaded && selectedValue === 'domToIntl' && <DomesticToInternational />}
     </div>
   );
 }

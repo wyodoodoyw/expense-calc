@@ -14,8 +14,6 @@ const timeFormat = 'HH:mm';
 function Domestic() {
   const [station, setStation] = useState('LAX');
   const [duty, setDuty] = useState({
-    // start: dayjs('05:15', timeFormat).subtract(1, 'hour'),
-    // end: dayjs('17:41', timeFormat).add(15, 'minutes'),
     start: dayjs('06:45', timeFormat),
     end: dayjs('19:30', timeFormat),
   });
