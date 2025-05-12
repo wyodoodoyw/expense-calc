@@ -15,6 +15,13 @@ function App() {
     <>
       <div className="container mb-0">
         <div className="text-center pb-4">
+          {/* <img
+            src="src/images/rondollaelle.png"
+            className="img-thumbnail"
+            alt="logo"
+            height={150}
+            width={150}
+          ></img> */}
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
