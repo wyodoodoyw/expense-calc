@@ -3,7 +3,8 @@ import Domestic from './Domestic';
 import Layover from './Layover';
 import DomesticToInternational from './DomesticToInternational';
 import InternationalToDomestic from './InternationalToDomestic';
-import FileUploader from './FileUploader';
+// import FileUploader from './FileUploader';
+import PairingFileUploader from './PairingFileUploader';
 
 function Accordian() {
   const [selectedValue, setSelectedValue] = useState();
@@ -40,7 +41,8 @@ function Accordian() {
               ACAeronet → Crew Scheduling & Planning → Block Bid Packages →
               2025-05 May → ALL → 202505-MealAllowances
             </p>
-            <FileUploader setUploaded={setUploaded} />
+            {/* <FileUploader setUploaded={setUploaded} /> */}
+            <PairingFileUploader />
           </div>
         </div>
       </div>
@@ -126,7 +128,9 @@ function Accordian() {
                     A domestic flight and layover <strong>before</strong> an
                     international flight.
                   </strong>
-                  Example: a layover in YUL before going to NRT.
+                  <p className="mb-0">
+                    Example: a layover in YUL before going to NRT.
+                  </p>
                 </label>
               </div>
               <div className="form-check">
@@ -143,7 +147,9 @@ function Accordian() {
                     A domestic flight and layover <strong>after</strong> an
                     international flight.
                   </strong>
-                  Example: a layover in YUL after going to NRT.
+                  <p className="mb-0">
+                    Example: a layover in YUL after going to NRT.
+                  </p>
                 </label>
               </div>
             </form>

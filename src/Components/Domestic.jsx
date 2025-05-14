@@ -6,11 +6,11 @@ import ExplanationDomesticArrivals from './ExplanationDomesticArrivals';
 import ExplanationCanadaOrUS from './ExplanationCanadaOrUS';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
-import duration from 'dayjs/plugin/duration';
+// import duration from 'dayjs/plugin/duration';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(isBetween);
-dayjs.extend(duration);
+// dayjs.extend(duration);
 dayjs.extend(customParseFormat);
 const timeFormat = 'HH:mm';
 
@@ -467,7 +467,9 @@ function Domestic() {
           </p>
           <p>
             A map showing the different North American and Sun destinations can
-            be found in Appendix I of the contract.
+            be found in Appendix I of the contract. You can also search for
+            &quotLegal Rest Periods: Southern Destinations and Hawaii&quot on
+            ACAeronet
           </p>
           <ExplanationCanadaOrUS />
         </div>
