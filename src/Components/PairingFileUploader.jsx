@@ -119,7 +119,7 @@ const PairingFileUploader = () => {
       pairing = cutStringBeforeExclusive(pairing, '----------');
 
       pairing.slice(/[A-Z][a-z]{2,9}/g);
-      // console.log(pairing);
+      console.log(pairing);
       // if (pairing.includes('-DPG')) {
       //   const sequence = [];
       //   sequence.push(

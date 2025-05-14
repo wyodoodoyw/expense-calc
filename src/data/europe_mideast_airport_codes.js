@@ -1,0 +1,16 @@
+export default [
+  'ATH',
+  'BCN',
+  'BRU',
+  'CPH',
+  'DUB',
+  'FRA',
+  'GVA',
+  'LHR',
+  'MAD',
+  'MUC',
+  'CDG',
+  'FCO',
+  'TLV',
+  'ZRH',
+];
