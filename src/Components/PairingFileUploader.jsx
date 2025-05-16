@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import extractTextFromPDF from 'pdf-parser-client-side';
+// import extractTextFromPDF from 'pdf-parser-client-side';
+import extractTextFromPDF from '../modules/pdf-parser-client-side';
 import cutStringAfterInclusive from '../cutStringAfterInclusive';
 import cutStringAfterExclusive from '../cutStringAfterExclusive';
 import cutStringBeforeExclusive from '../cutStringBeforeExclusive';
 // import cutStringBeforeExclusive from '../cutStringBeforeExclusive';
 // import american_airport_codes from '../data/american_airport_codes';
 // import canadian_airport_codes from '../data/canadian_airport_codes';
+import all_airports from '../data/all_airports';
 
 const PairingFileUploader = () => {
   const [file, setFile] = useState(null);
@@ -49,6 +51,30 @@ const PairingFileUploader = () => {
   // };
 
   // //----- PARSER -----//
+
+  const dividePairing = (pairing, dpg) => {
+    // capture all thre-letter codes (capitalized)
+    const threeLetterCodes = pairing.match(/[A-Z]{3}/g);
+    const airports = [];
+
+    // check that code exists in list of airport codes
+    // elimintes DPG, BLDS, etc. matches
+    for (const code of threeLetterCodes) {
+      all_airports.includes(code) && airports.push(code);
+    }
+    // console.log(airports);
+
+    // if (pairing.includes('-DPG')) {
+    //   const layoverIndex = pairing.indexOf(`${dpg} -DPG`);
+    //   const flight = pairing.substring(0, layoverIndex);
+    //   console.log(`DPG: ${flight}`);
+    // } else {
+    //   const layover = pairing.match(/[A-Z]{1}[a-z]{2,9}/g);
+    //   const layoverIndex = pairing.indexOf(layover[0]);
+    //   const flight = pairing.substring(0, layoverIndex);
+    //   console.log(`Flight: ${flight}`);
+    // }
+  };
 
   const parse = (pairing) => {
     try {
@@ -118,20 +144,12 @@ const PairingFileUploader = () => {
         penultimateLine.match(/[0-9]{1,3}.[0-9]{2}/g)[0];
       pairing = cutStringBeforeExclusive(pairing, '----------');
 
-      pairing.slice(/[A-Z][a-z]{2,9}/g);
-      console.log(pairing);
-      // if (pairing.includes('-DPG')) {
-      //   const sequence = [];
-      //   sequence.push(
-      //     cutStringBeforeExclusive(pairing, `${newPairing.dpg} -DPG`)
-      //   );
-      //   sequence.push(
-      //     cutStringAfterInclusive(pairing, `${newPairing.dpg} -DPG`)
-      //   );
-      //   // console.log(`${newPairing.dpg} -DPG`);
-      //   // pairing.slice(`${newPairing.dpg} -DPG`);
-      //   // console.log(sequence);
-      // }
+      // pairing.slice(/[A-Z][a-z]{2,9}/g);
+      // console.log(pairing);
+
+      const sequence = dividePairing(pairing, newPairing.dpg);
+      // const sequence = dividePairing();
+      // console.log(sequence);
     } catch (err) {
       // console.log(`!Error in parse: ${err}`);
       return;
