@@ -51,81 +51,94 @@ const PairingFileUploader = () => {
   // };
 
   // //----- PARSER -----//
-
-  const dividePairing = (pairing, dpg) => {
-    // capture all thre-letter codes (capitalized)
-    const threeLetterCodes = pairing.match(/[A-Z]{3}/g);
-    const airports = [];
-
-    // check that code exists in list of airport codes
-    // elimintes DPG, BLDS, etc. matches
-    for (const code of threeLetterCodes) {
-      all_airports.includes(code) && airports.push(code);
-    }
-    // console.log(airports);
-
-    // if (pairing.includes('-DPG')) {
-    //   const layoverIndex = pairing.indexOf(`${dpg} -DPG`);
-    //   const flight = pairing.substring(0, layoverIndex);
-    //   console.log(`DPG: ${flight}`);
-    // } else {
-    //   const layover = pairing.match(/[A-Z]{1}[a-z]{2,9}/g);
-    //   const layoverIndex = pairing.indexOf(layover[0]);
-    //   const flight = pairing.substring(0, layoverIndex);
-    //   console.log(`Flight: ${flight}`);
-    // }
-  };
-
   const parse = (pairing) => {
     try {
-      // New object
-      let newPairing = {
-        pairingNumber: pairing.match(/T[0-9]{4}/)[0],
-        pairingOperates: pairing
-          .match(/[0-9]{2}[A-Z]{3} {1,3}- {1,3}[0-9]{2}[A-Z]{3}/)[0]
-          .replace('   -   ', '-'),
-        // pairingPurser: pairing.match(/P [0-9]{2}/)[0].replace('P ', '') || '0',
-        // pairingFA: pairing.match(/FA[0-9]{2}/)[0].replace('FA', '') || '0',
-        // pairingBL: pairing.match(/BL[0-9]{2}/)[0].replace('BL', '') || '0',
-        // pairingLanguages: pairing.match(/[A-Z]{2}[0-9]{2}/) || [],
-        pairingCrew:
-          pairing.match(
-            /(P [0-9]{2}|FA[0-9]{2}|BL[0-9]{2})|[A-Z]{2}[0-9]{2}/g
-          ) || [],
-      };
-      if (newPairing.pairingCrew) {
-        // Remove substring that has been parsed above
-        pairing = cutStringAfterExclusive(
-          pairing,
-          newPairing.pairingCrew[newPairing.pairingCrew.length - 1]
-        );
+      if (!pairing) {
+        throw new Error('Pairing is empty');
       }
 
-      // ******* FIX THIS ******* //
-      newPairing.daysOperating = pairing
-        .substring(0, 7)
-        .replace(' ', '')
-        .match(/[1-7]/g);
+      // New object
+      let newPairing = {};
 
+      // Pairing Number
+      if (pairing.match(/T[0-9]{4}/)) {
+        newPairing.pairingNumber = pairing.match(/T[0-9]{4}/)[0];
+        console.log(newPairing.pairingNumber);
+      } else {
+        throw new Error('Error parsing pairing number');
+      }
+
+      // Date on which pairing operates
+      if (pairing.match(/[0-9]{2}[A-Z]{3} {1,3}- {1,3}[0-9]{2}[A-Z]{3}/)) {
+        newPairing.pairingOperates = pairing
+          .match(/[0-9]{2}[A-Z]{3} {1,3}- {1,3}[0-9]{2}[A-Z]{3}/)[0]
+          .replace('   -   ', '-');
+      } else {
+        throw new Error('Error parsing date on which pairing operates');
+      }
+      // Remove substring that has been parsed above
+      pairing = cutStringAfterExclusive(pairing, '*!*');
+
+      // Number of Pursers/Flight Attendants/Galley Attendants/Language Positions
+      let crew = cutStringBeforeExclusive(pairing, '*!*');
+      crew = crew.match(/[A-Z]{1,2} ?[0-9]{2}/g);
+
+      if (crew) {
+        newPairing.pairingCrew = crew;
+        const languages = [];
+        for (let i = 0; i < newPairing.pairingCrew.length; i++) {
+          const position = newPairing.pairingCrew[i];
+          if (position.includes('P')) {
+            newPairing.pairingPurser = position.replace('P', '');
+            // console.log(`P: ${newPairing.pairingPurser}`);
+          } else if (position.includes('FA')) {
+            newPairing.pairingFA = position.replace('FA', '');
+            // console.log(`FA: ${newPairing.pairingFA}`);
+          } else if (position.includes('BL')) {
+            newPairing.pairingBL = position.replace('BL', '');
+            // console.log(`BL: ${newPairing.pairingBL}`);
+          } else if (position.includes('GJ')) {
+            newPairing.pairingGP = position.replace('GJ', '');
+            // console.log(`GJ: ${newPairing.pairingGP}`);
+          } else if (position.includes('GY')) {
+            newPairing.pairingGY = position.replace('GY', '');
+            // console.log(`GY: ${newPairing.pairingGY}`);
+          } else {
+            languages.push(position);
+          }
+        }
+        if (languages.length > 0) {
+          newPairing.pairingLanguages = languages;
+        }
+      } else {
+        throw new Error('Error parsing crew');
+      }
+
+      // Remove substring that has been parsed above
+      pairing = cutStringAfterExclusive(pairing, '*!*');
+
+      // Parse calendar and dates the pairing operates on
       newPairing.calendar = cutStringAfterInclusive(pairing, 'Su   Mo');
+      newPairing.pairingDates = newPairing.calendar.match(/[0-9]{1,2}/g);
+
+      // Parse last line of pairing (TAFB etc.)
       let lastLine = cutStringAfterInclusive(pairing, 'TAFB');
-      lastLine = cutStringBeforeExclusive(lastLine, 'Su   Mo');
+      lastLine = cutStringBeforeExclusive(lastLine, 'Su   Mo'); // TAFB/PTEB   4405   TOTAL -   1525 *!*
 
       newPairing.tafb = lastLine.match(/[0-9]{3,5}/g)[0];
       newPairing.totalCredit = lastLine.match(/[0-9]{3,4}/g)[1];
-      // console.log(newPairing);
 
       // Remove substring that has been parsed above
       pairing = cutStringBeforeExclusive(pairing, 'TAFB');
 
-      let penultimateLine = cutStringAfterInclusive(pairing, 'BLOCK');
+      // parse second last line of pairing (Block etc.)
+      let penultimateLine = cutStringAfterInclusive(pairing, 'BLOCK'); // BLOCK/H-VOL   1525   1810   (INC-$5.05   CICO)   TOTAL   ALLOWANCE   -$   305.68 *!*
 
       newPairing.blockCredit = penultimateLine.match(/[0-9]{3,4}/g)[0];
       penultimateLine = cutStringAfterExclusive(
         penultimateLine,
         newPairing.blockCredit
       );
-      // console.log(penultimateLine);
       if (penultimateLine.includes('DPG')) {
         newPairing.dpg = penultimateLine.match(/[0-9]{2,3}/g)[0];
         penultimateLine = cutStringAfterExclusive(
@@ -144,30 +157,26 @@ const PairingFileUploader = () => {
         penultimateLine.match(/[0-9]{1,3}.[0-9]{2}/g)[0];
       pairing = cutStringBeforeExclusive(pairing, '----------');
 
-      // pairing.slice(/[A-Z][a-z]{2,9}/g);
-      // console.log(pairing);
-
-      const sequence = dividePairing(pairing, newPairing.dpg);
-      // const sequence = dividePairing();
-      // console.log(sequence);
+      // Split remainder of pairing into lines, either flight or layover
+      const sequence = pairing.split('*!*');
+      console.log(sequence);
     } catch (err) {
-      // console.log(`!Error in parse: ${err}`);
-      return;
+      console.log(`Error: ${err}`);
     }
   };
 
   const handleUpload = async () => {
     // delete existing DB
-    // const request = window.indexedDB.deleteDatabase('ExpensesDB');
-    // request.onsuccess = () => {
-    //   console.log('Database deleted successfully');
-    // };
-    // request.onerror = () => {
-    //   console.log('Error deleting database');
-    // };
-    // request.onblocked = () => {
-    //   console.log('Database deletion blocked');
-    // };
+    const request = window.indexedDB.deleteDatabase('PairingsDB');
+    request.onsuccess = () => {
+      console.log('Database deleted successfully');
+    };
+    request.onerror = () => {
+      console.log('Error deleting database');
+    };
+    request.onblocked = () => {
+      console.log('Database deletion blocked');
+    };
 
     if (file) {
       try {
@@ -176,10 +185,9 @@ const PairingFileUploader = () => {
         // text && setUploaded(true);
         // Remove header
         text = cutStringAfterInclusive(text, 'T5001');
-
-        const pairings = text.split(/(T[0-9]{4}[a-zA-Z0-9 .,!?/()\-$]*)/g);
+        const pairings = text.split(/(T[0-9]{4}[a-zA-Z0-9 .,!?/()\-$*]*)/g);
         for (const pairing of pairings) {
-          if (!pairing) {
+          if (pairing === '') {
             //pass
           } else if (pairing.includes('==')) {
             //pass
@@ -187,8 +195,6 @@ const PairingFileUploader = () => {
             parse(pairing);
           }
         }
-
-        // console.log(processedPairings);
       } catch (err) {
         console.error(`!Error: ${err}`);
       }
