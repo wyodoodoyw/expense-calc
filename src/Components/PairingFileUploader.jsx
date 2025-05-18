@@ -54,10 +54,51 @@ const PairingFileUploader = () => {
   // //----- PARSER -----//
   const parse = (pairing) => {
     const parseAsFlight = (line, index) => {
-      console.log(line);
       const newFlight = {
         index: index,
       };
+
+      // Find occurance of aircraft designator, parse substring prior to it
+      let threeNumbers = line.match(/[0-9]{3}|(77P)/g);
+      for (let i = 0; i < threeNumbers.length; i++) {
+        if (aircraft.includes(threeNumbers[i])) {
+          newFlight.aircraft = threeNumbers[i];
+        }
+      }
+      let days = cutStringBeforeExclusive(line, newFlight.aircraft);
+      newFlight.daysOfWeek = days.match(/[0-9]/g);
+
+      // Remove substring that has been parsed above
+      line = cutStringAfterExclusive(line, newFlight.aircraft);
+
+      line.includes('DHD')
+        ? (newFlight.isDeadhead = true)
+        : (newFlight.isDeadhead = false);
+
+      console.log(line);
+      line = line.replace('DHD', '');
+
+      const numbers = line.match(/[0-9]{1,4}/g);
+      console.log(numbers);
+      newFlight.flightNumber = numbers[0];
+      newFlight.departureTime = numbers[1];
+      newFlight.arrivalTime = numbers[2];
+      newFlight.flightTime = numbers[3];
+
+      if (numbers[5]) {
+        newFlight.dutyTime = numbers[4];
+        newFlight.layoverTime = numbers[5];
+      }
+
+      const airports = line.match(/[A-Z]{3}/g);
+      newFlight.departureAirport = airports[0];
+      newFlight.arrivalAirport = airports[1];
+
+      // Remove substring that has been parsed above
+      line = cutStringAfterExclusive(line, airports[1]);
+      if (line.match(/[A-Z]{2}/g)) {
+        newFlight.mealsOnboard = line.match(/[A-Z]{2}/g);
+      }
       console.log(newFlight);
       return newFlight;
     };
@@ -90,7 +131,9 @@ const PairingFileUploader = () => {
       // Pairing Number
       if (pairing.match(/T[0-9]{4}/)) {
         newPairing.pairingNumber = pairing.match(/T[0-9]{4}/)[0];
-        console.log(newPairing.pairingNumber);
+        console.log(
+          `${newPairing.pairingNumber} **********************************`
+        );
       } else {
         throw new Error('Error parsing pairing number');
       }
