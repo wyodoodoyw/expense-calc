@@ -8,6 +8,7 @@ import cutStringBeforeExclusive from '../cutStringBeforeExclusive';
 // import american_airport_codes from '../data/american_airport_codes';
 // import canadian_airport_codes from '../data/canadian_airport_codes';
 import all_airports from '../data/all_airports';
+import aircraft from '../data/aircraft';
 
 const PairingFileUploader = () => {
   const [file, setFile] = useState(null);
@@ -52,6 +53,32 @@ const PairingFileUploader = () => {
 
   // //----- PARSER -----//
   const parse = (pairing) => {
+    const parseAsFlight = (line, index) => {
+      console.log(line);
+      const newFlight = {
+        index: index,
+      };
+      console.log(newFlight);
+      return newFlight;
+    };
+
+    const parseAsLayover = (line, layoverLength, index) => {
+      const newLayover = {
+        index: index,
+        layoverLength: layoverLength,
+      };
+      const hotelInfo = line.match(/[A-Z][a-z]{2,9}/g);
+      newLayover.hotelInfo = hotelInfo.join(' ');
+      let mealsInfo = cutStringAfterExclusive(
+        line,
+        hotelInfo[hotelInfo.length - 1]
+      );
+      mealsInfo = cutStringAfterExclusive(mealsInfo, 'DT');
+      mealsInfo = mealsInfo.trim();
+      newLayover.meals = mealsInfo;
+      return newLayover;
+    };
+
     try {
       if (!pairing) {
         throw new Error('Pairing is empty');
@@ -159,7 +186,38 @@ const PairingFileUploader = () => {
 
       // Split remainder of pairing into lines, either flight or layover
       const sequence = pairing.split('*!*');
-      console.log(sequence);
+      let layoverLength = '0';
+
+      for (let i = 0; i < sequence.length; i++) {
+        const threeLetters = sequence[i].match(/[A-Z]{3}/g);
+
+        if (!threeLetters) {
+          // pass
+        } else if (
+          threeLetters[0] === 'DHD' &&
+          all_airports.includes(threeLetters[1]) &&
+          all_airports.includes(threeLetters[2])
+        ) {
+          // Flight
+          parseAsFlight(sequence[i], i);
+        } else if (
+          all_airports.includes(threeLetters[0]) &&
+          all_airports.includes(threeLetters[1])
+        ) {
+          // Flight
+          parseAsFlight(sequence[i], i);
+        } else if (threeLetters.length > 1 && threeLetters[0] === 'DPG') {
+          // Layover
+          parseAsLayover(sequence[i], layoverLength, i);
+          layoverLength = null;
+        } else if (threeLetters.length === 1 && threeLetters[0] === 'DPG') {
+          newPairing.pairingDPG = sequence[i].match(/[0-9]{2,3}/g)[0];
+        } else {
+          // Layover
+          parseAsLayover(sequence[i], layoverLength, i);
+          layoverLength = null;
+        }
+      }
     } catch (err) {
       console.log(`Error: ${err}`);
     }

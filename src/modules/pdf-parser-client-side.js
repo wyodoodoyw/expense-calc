@@ -7,7 +7,7 @@ import { pdfjs } from 'react-pdf';
 // ).toString();
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-async function extractTextFromPDF(file, variant) {
+async function extractTextFromPDF(file) {
   try {
     // Create a blob URL for the PDF file
     const blobUrl = URL.createObjectURL(file);
@@ -18,12 +18,14 @@ async function extractTextFromPDF(file, variant) {
     let extractedText = '';
     // Iterate through each page and extract text
     for (let pageNumber = 1; pageNumber <= numPages; pageNumber++) {
+      // console.log(`Page: ${pageNumber}`);
       const page = await pdf.getPage(pageNumber);
       const textContent = await page.getTextContent();
+      // console.log(textContent);
       let transform = textContent.items[0].transform[5];
       let pageText = [];
 
-      // insert '*!*' each time transform changes to separate lines
+      // insert '*!*' each time transform changes to separate line
       for (let i = 0; i < textContent.items.length; i++) {
         const item = textContent.items[i];
         if (item.transform[5] !== transform) {
@@ -35,9 +37,14 @@ async function extractTextFromPDF(file, variant) {
         }
       }
       // join strings together
-      pageText = pageText.join(' ');
-      return pageText;
+      const pageTextString = pageText.join(' ');
+      extractedText += pageTextString;
     }
+
+    if (extractedText) {
+      return extractedText;
+    }
+
     console.error('Error extracting text from PDF');
     // Clean up the blob URL
     URL.revokeObjectURL(blobUrl);
