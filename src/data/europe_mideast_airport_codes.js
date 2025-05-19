@@ -1,4 +1,5 @@
 export default [
+  'AMS',
   'ATH',
   'BCN',
   'BRU',
@@ -7,10 +8,12 @@ export default [
   'FRA',
   'GVA',
   'LHR',
+  'LIS',
   'MAD',
   'MUC',
   'CDG',
   'FCO',
   'TLV',
+  'VIE',
   'ZRH',
 ];
