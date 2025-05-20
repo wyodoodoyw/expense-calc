@@ -1,6 +1,5 @@
 import './App.css';
 import Disclaimer from './Components/Disclaimer';
-// import Alert from './Components/Alert';
 import Accordion from './Components/Accordion';
 // import Layover from './Components/Layover';
 // import Domestic from './Components/Domestic';

@@ -42,7 +42,7 @@ function Accordian() {
               2025-05 May → ALL → 202505-MealAllowances
             </p>
             {/* <FileUploader setUploaded={setUploaded} /> */}
-            <PairingFileUploader />
+            <PairingFileUploader setUploaded={setUploaded} />
           </div>
         </div>
       </div>

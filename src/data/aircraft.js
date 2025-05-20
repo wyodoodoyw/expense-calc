@@ -1,3 +1,5 @@
+import aircraft from './other_airlines';
+
 export default [
   '223',
   '319',
@@ -11,4 +13,5 @@ export default [
   '772',
   '773',
   '77P',
+  ...aircraft,
 ];
