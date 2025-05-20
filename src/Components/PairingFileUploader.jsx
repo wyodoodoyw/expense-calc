@@ -49,7 +49,7 @@ const PairingFileUploader = ({ setUploaded }) => {
         if (i < pairings.length) {
           const pairing = pairings[i];
           const pairingNo = pairing.match(/T[0-9]{4}/g)[0];
-          console.log(pairingNo);
+          // console.log((pairingNo);
           if (pairing === '' || pairing === ' ' || pairing === null) {
             //pass
           } else if (pairing.includes('==')) {

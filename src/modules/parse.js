@@ -162,9 +162,9 @@ const parse = (pairing) => {
 
       if (sequence) {
         for (let i = 0; i < sequence.length; i++) {
-          console.log(`sequence: ${sequence[i]}`);
+          // console.log(`sequence: ${sequence[i]}`);
           const threeLetters = sequence[i].match(/[A-Z]{3}/g);
-          console.log(`three: ${threeLetters}`);
+          // console.log(`three: ${threeLetters}`);
           // console.log(`sequence.trim: ${sequence[i].trim()}`);
           if (!threeLetters && sequence[i].trim().length >= 9) {
             // Layover
@@ -193,7 +193,7 @@ const parse = (pairing) => {
             if (flight.layoverLength) {
               layoverLength = flight.layoverLength;
             }
-            console.log(flight);
+            // console.log(flight);
             pairingSequence.push(flight);
           } else if (
             all_airports.includes(threeLetters[0]) &&
@@ -205,7 +205,7 @@ const parse = (pairing) => {
             if (flight.layoverLength) {
               layoverLength = flight.layoverLength;
             }
-            console.log(flight);
+            // console.log(flight);
             pairingSequence.push(flight);
           } else if (
             sequence[i].trim().length >= 9 &&
