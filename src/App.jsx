@@ -8,25 +8,18 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
-  const [clicked, setClicked] = useState(false);
+  const [clicked, setClicked] = useState(true);
 
   return (
     <>
       <div className="container mb-0">
         <div className="text-center pb-4">
-          {/* <img
-            src="src/images/rondollaelle.png"
-            className="img-thumbnail"
-            alt="logo"
-            height={150}
-            width={150}
-          ></img> */}
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            {!clicked && (
+            {/* {!clicked && (
               <Disclaimer clicked={clicked} setClicked={setClicked} />
-            )}
+            )} */}
             {clicked && <Accordion />}
           </LocalizationProvider>
         </div>

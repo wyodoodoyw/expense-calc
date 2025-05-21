@@ -1,10 +1,20 @@
 import cutStringAfterExclusive from '../cutStringAfterExclusive';
 
-const parseAsLayover = (line, layoverLength, index) => {
-  // console.log('---LAYOVER---');
+const parseAsLayover = (
+  line,
+  layoverLength,
+  layoverStation,
+  layoverStart,
+  index
+) => {
+  // const layoverMinutes = layoverLength.slice(-2);
+  // const layoverHours = layoverLength.replace(layoverMinutes, '');
+
   const newLayover = {
     index: index,
     layoverLength: layoverLength,
+    layoverStation: layoverStation,
+    layoverStart: layoverStart,
   };
   const hotelInfo = line.match(/[A-Z][a-z]{1,9}.?s?/g);
   // console.log((`hotelInfo: ${hotelInfo}`);
@@ -19,7 +29,7 @@ const parseAsLayover = (line, layoverLength, index) => {
       hotelInfo[hotelInfo.length - 1]
     );
     mealsInfo = mealsInfo.trim();
-    newLayover.meals = mealsInfo;
+    newLayover.layoverMeals = mealsInfo;
     // // console.log((`meals: ${newLayover.meals}`);
   }
   return newLayover;

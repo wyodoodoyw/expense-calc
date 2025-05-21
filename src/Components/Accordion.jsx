@@ -1,10 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PairingFileUploader from './PairingFileUploader';
 import SearchPairings from './SearchPairings';
 
 function Accordian() {
-  const [selectedValue, setSelectedValue] = useState();
+  // const [selectedValue, setSelectedValue] = useState();
   const [uploaded, setUploaded] = useState(false);
+
+  useEffect(() => {
+    checkDBExists;
+  }, []);
+
+  const checkDBExists = () => {
+    // check if PairingsDB exists and skip uploading if so
+    const request = window.indexedDB.open('PairingsDB', 1);
+    request.onsuccess = (e) => {
+      console.log(`version: ${e.target.addEventListener.result.oldversion}`);
+      if (e.target.result.oldversion === 1) {
+        console.log('Exists!');
+        setUploaded(true);
+      }
+    };
+  };
 
   return (
     <div className="accordion" id="accordian">

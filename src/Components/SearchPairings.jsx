@@ -35,7 +35,6 @@ function SearchPairings({ uploaded }) {
 
       request.onsuccess = () => {
         setPairingSearchResult(request.result);
-        console.log(pairingSearchResult);
       };
 
       request.onerror = (event) => {

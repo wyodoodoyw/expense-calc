@@ -1,48 +1,74 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-// import { TimePicker } from '@mui/x-date-pickers';
-// import ExplanationInternationalArrival from './ExplanationInternationalArrival';
-// import ExplanationInternationalDept from './ExplanationInternationalDept';
-// import dayjs from 'dayjs';
-// import isBetween from 'dayjs/plugin/isBetween';
-// import customParseFormat from 'dayjs/plugin/customParseFormat';
+import dayjs from 'dayjs';
+// import duration from 'dayjs/plugin/duration';
+// import toTimeFormat from '../modules/to-time-format';
+import canadian_airport_codes from '../data/canadian_airport_codes';
+import american_airport_codes from '../data/american_airport_codes';
+import international_airport_codes from '../data/international_airport_codes';
+import sun_domestic_aiport_codes from '../data/sun_domestic_airport_codes';
 
-// dayjs.extend(isBetween);
-// dayjs.extend(customParseFormat);
+// dayjs.extend(duration);
 // const timeFormat = 'HH:mm';
 
 function Layover({ layover }) {
-  const { hotelInfo, layoverLength, meals } = layover;
-  // const [station, setStation] = useState('YUL');
-  // const [layoverTimes, setLayoverTimes] = useState({
-  //   layover_start: dayjs('15:55', timeFormat),
-  //   layover_end: dayjs('17:40', timeFormat),
-  // });
-  // const [fullDays, setFullDays] = useState(0);
-  // // const [filtered, setFiltered] = useState([]);
+  const {
+    hotelInfo,
+    layoverLength,
+    layoverStation,
+    layoverStart,
+    layoverMeals,
+  } = layover;
 
-  // // Amount of expenses earned for each type of meal
-  // const [expenses, setExpenses] = useState({
-  //   breakfast: 17.95,
-  //   lunch: 20.33,
-  //   dinner: 40.27,
-  //   snack: 10.52,
-  // });
+  const [layoverTimes, setLayoverTimes] = useState({
+    start: dayjs()
+      .set('hour', layoverStart.slice(0, -2))
+      .set('minute', layoverStart.slice(-2))
+      .add(15, 'minute'),
+    end: dayjs()
+      .set('hour', layoverStart.slice(0, -2))
+      .set('minute', layoverStart.slice(-2))
+      .add(15, 'minute')
+      .add(layoverLength.slice(0, -2), 'hour')
+      .add(layoverLength.slice(-2), 'minute'),
+  });
 
-  // // Number of each type of meal
-  // const [meals, setMeals] = useState({
-  //   breakfast: 1,
-  //   lunch: 1,
-  //   dinner: 2,
-  //   snack: 1,
-  // });
+  const calculateFullDays = () => {
+    let hours =
+      Number(layoverLength.slice(0, -2)) +
+      Number(layoverTimes.start.format('HH')) -
+      Number(layoverTimes.end.format('HH')) -
+      24;
+    let minutes =
+      Number(layoverLength.slice(-2)) +
+      Number(layoverTimes.start.format('mm')) -
+      Number(layoverTimes.end.format('mm'));
+    if (minutes === 60) {
+      hours++;
+    }
+    return hours / 24;
+  };
 
-  // // Number of CICO paid
-  // const [cico, setCico] = useState(1);
+  const [fullDays, setFullDays] = useState(calculateFullDays());
 
-  // const handleStationChange = (e) => {
-  //   const new_station = e.target.value;
-  //   setStation(new_station);
+  // Amount of expenses earned for each type of meal
+  const [expenses, setExpenses] = useState({
+    breakfast: 17.95,
+    lunch: 20.33,
+    dinner: 40.27,
+    snack: 10.52,
+  });
+
+  // Number of each type of meal
+  const [meals, setMeals] = useState({
+    breakfast: (layoverMeals.match(/B/g) || []).length,
+    lunch: (layoverMeals.match(/L/g) || []).length,
+    dinner: (layoverMeals.match(/D/g) || []).length,
+    snack: (layoverMeals.match(/S/g) || []).length,
+  });
+
+  // Number of CICO paid
+  // const [cico, setCico] = useState();
 
   //   const request = window.indexedDB.open('ExpensesDB', 1);
 
@@ -260,9 +286,18 @@ function Layover({ layover }) {
   // };
 
   return (
-    <p className="mt-3">
-      Hotel: {hotelInfo} Layover Length: {layoverLength} Meals: {meals}
-    </p>
+    <div>
+      <div className="row align-middle my-1">
+        <div className="col-2">Layover in: {layoverStation}</div>
+        <div className="col-5">Hotel: {hotelInfo}</div>
+        <div className="col-3">Layover Length: {layoverLength}</div>
+        <div className="col-2">Meals: {layoverMeals}</div>
+      </div>
+      {`layover: ${layoverTimes.start.format(
+        'HH:mm'
+      )} - ${layoverTimes.end.format('HH:mm')}`}
+      <p>{fullDays}</p>
+    </div>
   );
 }
 
