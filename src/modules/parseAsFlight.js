@@ -52,8 +52,10 @@ const parseAsFlight = (line, index) => {
   newFlight.arrivalTime = numbers[2];
   newFlight.flightTime = numbers[3];
 
-  if (numbers[5]) {
+  if (numbers[4]) {
     newFlight.dutyTime = numbers[4];
+  }
+  if (numbers[5]) {
     newFlight.layoverLength = numbers[5];
   }
   // console.log(line);

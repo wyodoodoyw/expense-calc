@@ -1,7 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Flight from './Flight';
 import Layover from './Layover';
+import processPairingForDisplay from '../modules/processPairingForDisplay';
 
 function Pairing(props) {
   const { originalPairing } = props;
@@ -23,9 +24,10 @@ function Pairing(props) {
     totalDuty,
     pairingSequence,
   } = originalPairing;
+  // const sequenceRef = useRef(pairingSequence);
   const sequence = pairingSequence;
 
-  const [pairingState, setPairingState] = useState({});
+  // const [pairingState, setPairingState] = useState({});
 
   const [updatablePairing, setUpdatablePairing] = useState({
     blockCredit,
@@ -45,14 +47,15 @@ function Pairing(props) {
       totalCredit: totalCredit,
       totalDuty: totalDuty,
     });
+    // sequenceRef.current = processPairingForDisplay(pairingSequence);
   }, []);
 
-  const updatePairingState = (item) => {
-    setPairingState((prev) => ({
-      ...prev,
-      [item.index]: item,
-    }));
-  };
+  // const updatePairingState = (item) => {
+  //   setPairingState((prev) => ({
+  //     ...prev,
+  //     [item.index]: item,
+  //   }));
+  // };
 
   return (
     <>
@@ -92,7 +95,7 @@ function Pairing(props) {
                         <Flight
                           key={item.index}
                           flight={item}
-                          pairingState={pairingState}
+                          // pairingState={pairingState}
                         />
                       </td>
                     </tr>
@@ -104,7 +107,7 @@ function Pairing(props) {
                         <Layover
                           key={item.index}
                           layover={item}
-                          pairingState={pairingState}
+                          // pairingState={pairingState}
                         />
                       </td>
                     </tr>

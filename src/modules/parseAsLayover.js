@@ -1,20 +1,21 @@
 import cutStringAfterExclusive from '../cutStringAfterExclusive';
 
 const parseAsLayover = (
-  line,
-  layoverLength,
-  layoverStation,
-  layoverStart,
-  index
+  index,
+  line
+  // layoverStation,
+  // layoverStart,
+  // layoverLength
 ) => {
   // const layoverMinutes = layoverLength.slice(-2);
   // const layoverHours = layoverLength.replace(layoverMinutes, '');
 
   const newLayover = {
     index: index,
-    layoverLength: layoverLength,
-    layoverStation: layoverStation,
-    layoverStart: layoverStart,
+    // layoverLength: '0000',
+    // layoverStation: 'YXY',
+    // layoverStart: '0000',
+    // layoverEnd: '0000',
   };
   const hotelInfo = line.match(/[A-Z][a-z]{1,9}.?s?/g);
   // console.log((`hotelInfo: ${hotelInfo}`);
