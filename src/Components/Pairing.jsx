@@ -1,8 +1,9 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-/* eslint-disable react/prop-types */ import Flight from './Flight';
+import Flight from './Flight';
 import Layover from './Layover';
 
-function SearchPairingResult(props) {
+function Pairing(props) {
   const { originalPairing } = props;
   const {
     pairingNumber,
@@ -24,6 +25,8 @@ function SearchPairingResult(props) {
   } = originalPairing;
   const sequence = pairingSequence;
 
+  const [pairingState, setPairingState] = useState({});
+
   const [updatablePairing, setUpdatablePairing] = useState({
     blockCredit,
     cicoAmount,
@@ -42,7 +45,14 @@ function SearchPairingResult(props) {
       totalCredit: totalCredit,
       totalDuty: totalDuty,
     });
-  }, [originalPairing]);
+  }, []);
+
+  const updatePairingState = (item) => {
+    setPairingState((prev) => ({
+      ...prev,
+      [item.index]: item,
+    }));
+  };
 
   return (
     <>
@@ -79,7 +89,11 @@ function SearchPairingResult(props) {
                   return (
                     <tr key={item.index} className="table-primary">
                       <td>
-                        <Flight key={item.index} flight={item} />
+                        <Flight
+                          key={item.index}
+                          flight={item}
+                          pairingState={pairingState}
+                        />
                       </td>
                     </tr>
                   );
@@ -87,7 +101,11 @@ function SearchPairingResult(props) {
                   return (
                     <tr key={item.index} className="table-success">
                       <td>
-                        <Layover key={item.index} layover={item} />
+                        <Layover
+                          key={item.index}
+                          layover={item}
+                          pairingState={pairingState}
+                        />
                       </td>
                     </tr>
                   );
@@ -119,4 +137,4 @@ function SearchPairingResult(props) {
     </>
   );
 }
-export default SearchPairingResult;
+export default Pairing;

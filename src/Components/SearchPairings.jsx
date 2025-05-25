@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { TimePicker } from '@mui/x-date-pickers';
-import SearchPairingResult from './SearchPairingResult';
+// import { TimePicker } from '@mui/x-date-pickers';
+import Pairing from './Pairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
-const timeFormat = 'HH:mm';
+// const timeFormat = 'HH:mm';
 
 function SearchPairings({ uploaded }) {
   const [pairingNumber, setPairingNumber] = useState('T5001');
@@ -85,9 +85,7 @@ function SearchPairings({ uploaded }) {
           </div>
         </div>
       </form>
-      {pairingSearchResult && (
-        <SearchPairingResult originalPairing={pairingSearchResult} />
-      )}
+      {pairingSearchResult && <Pairing originalPairing={pairingSearchResult} />}
     </div>
   );
 }

@@ -38,11 +38,11 @@ function Flight({ flight }) {
 
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
-    // const { name, value } = target;
-    // setFlightTimes((prev) => ({
-    //   ...prev,
-    //   [name]: dayjs(value, timeFormat),
-    // }));
+    const { name, value } = target;
+    setFlightTimes((prev) => ({
+      ...prev,
+      [name]: dayjs(value, timeFormat),
+    }));
     // calculateExpenses();
   };
 
@@ -93,7 +93,8 @@ function Flight({ flight }) {
         )}
       </div>
       <p>
-        {departureTime}-{arrivalTime}
+        ~ {flightTimes.start.format(timeFormat)}-
+        {flightTimes.end.format(timeFormat)}
       </p>
     </div>
   );

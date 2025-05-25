@@ -3,12 +3,28 @@ import Disclaimer from './Components/Disclaimer';
 import Accordion from './Components/Accordion';
 // import Layover from './Components/Layover';
 // import Domestic from './Components/Domestic';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
   const [clicked, setClicked] = useState(true);
+  const [uploaded, setUploaded] = useState(true);
+
+  useEffect(() => {
+    checkDBExists();
+  }, []);
+
+  const checkDBExists = () => {
+    // check if PairingsDB exists and skip uploading if so
+    const request = window.indexedDB.open('PairingsDB');
+    request.onsuccess = (e) => {
+      if (e.target.result.oldVersion > 0) {
+        console.log('Exists!');
+        setUploaded(true);
+      }
+    };
+  };
 
   return (
     <>
@@ -20,7 +36,9 @@ function App() {
             {/* {!clicked && (
               <Disclaimer clicked={clicked} setClicked={setClicked} />
             )} */}
-            {clicked && <Accordion />}
+            {clicked && (
+              <Accordion uploaded={uploaded} setUploaded={setUploaded} />
+            )}
           </LocalizationProvider>
         </div>
       </div>
