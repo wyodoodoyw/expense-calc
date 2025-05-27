@@ -82,12 +82,7 @@ const parseAsFlight = (line, index) => {
 
   if (line !== ' ') {
     newFlight.mealExpenses = line.trim();
-    // console.log(`mealExpenses: ${newFlight.mealExpenses}`);
-  } else {
-    //pass
   }
-  // console.log(`meals: ${newFlight.mealsOnboard}`);
-  // console.log('---FLIGHT END---');
   return newFlight;
 };
 

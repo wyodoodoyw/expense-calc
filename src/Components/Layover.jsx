@@ -18,8 +18,6 @@ dayjs.extend(timezone);
 const timeFormat = 'HH:mm';
 
 function Layover({ layover }) {
-  console.log(layover);
-
   const {
     hotelInfo,
     layoverStation,
@@ -35,12 +33,6 @@ function Layover({ layover }) {
       .set('hour', layoverStart.slice(0, -2))
       .set('minute', layoverStart.slice(-2)),
     departure: dayjs()
-      // .set('hour', layoverStart.slice(0, -2))
-      // .set('minute', layoverStart.slice(-2))
-      // .add(1, 'hour')
-      // .add(15, 'minute')
-      // .add(layoverLength.slice(0, -2), 'hour')
-      // .add(layoverLength.slice(-2), 'minute'),
       .set('hour', layoverEnd.slice(0, -2))
       .set('minute', layoverEnd.slice(-2)),
   });

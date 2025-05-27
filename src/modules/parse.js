@@ -137,7 +137,6 @@ const parse = (pairing) => {
           const threeLetters = sequence[i].match(/[A-Z]{3}/g);
           if (!threeLetters && sequence[i].trim().length >= 9) {
             // Layover
-            console.log(`sequence[i-1]: ${sequence[i - 1]}`);
             const layover = parseAsLayover(i, sequence[i]);
             pairingSequence.push(layover);
           } else if (
@@ -181,7 +180,20 @@ const parse = (pairing) => {
           }
         }
       }
-      newPairing.pairingSequence = processPairingForDisplay(pairingSequence);
+      // Add info for Layovers based on [i-1] and [i+1]
+      for (let i = 0; i < pairingSequence.length; i++) {
+        if (pairingSequence[i].hotelInfo) {
+          // Layover
+          const layover = pairingSequence[i];
+          layover.layoverStart = pairingSequence[i - 1].arrivalTime;
+          layover.layoverEnd = pairingSequence[i + 1].departureTime;
+          layover.layoverLength = pairingSequence[i - 1].layoverLength;
+          layover.layoverStation = pairingSequence[i - 1].arrivalAirport;
+          pairingSequence[i] = layover;
+        }
+      }
+      // newPairing.pairingSequence = pairingSequence;
+      newPairing.sequence = processPairingForDisplay(pairingSequence);
       addPairingToDB(newPairing);
       return;
     }

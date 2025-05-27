@@ -19,6 +19,8 @@ function Flight({ flight }) {
     // daysOfWeek,
     departureAirport,
     departureTime,
+    dutyEnd,
+    dutyStart,
     dutyTime,
     flightNumber,
     flightTime,
@@ -34,6 +36,11 @@ function Flight({ flight }) {
     end: dayjs()
       .set('hour', arrivalTime.slice(0, -2))
       .set('minute', arrivalTime.slice(-2)),
+  });
+
+  const [dutyTimes, setDutyTimes] = useState({
+    start: dutyStart,
+    end: dutyEnd,
   });
 
   const handleTimeChange = ({ target }) => {
@@ -92,10 +99,10 @@ function Flight({ flight }) {
           <div className="col-1"></div>
         )}
       </div>
-      <p>
-        ~ {flightTimes.start.format(timeFormat)}-
-        {flightTimes.end.format(timeFormat)}
-      </p>
+      <p>~ Duty Start: {dutyTimes.start && dutyTimes.start}</p>
+      <p>~ Dept: {flightTimes.start.format(timeFormat)}</p>
+      <p>~ Arrival: {flightTimes.end.format(timeFormat)}</p>
+      <p>~ Duty End: {dutyTimes.end && dutyTimes.end}</p>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect, useRef } from 'react';
-import Flight from './Flight';
+import { useState, useEffect } from 'react';
 import Layover from './Layover';
-import processPairingForDisplay from '../modules/processPairingForDisplay';
+import Flight from './Flight';
+import DutyDay from './DutyDay';
 
 function Pairing(props) {
   const { originalPairing } = props;
@@ -22,10 +22,10 @@ function Pairing(props) {
     totalAllowance,
     totalCredit,
     totalDuty,
-    pairingSequence,
+    sequence,
   } = originalPairing;
   // const sequenceRef = useRef(pairingSequence);
-  const sequence = pairingSequence;
+  // const sequence = pairingSequence;
 
   // const [pairingState, setPairingState] = useState({});
 
@@ -88,19 +88,22 @@ function Pairing(props) {
           <tbody>
             {sequence &&
               sequence.map((item) => {
-                if (item.aircraft) {
+                if (!item[0].hotelInfo) {
+                  // duty day of flights
+                  <p>{JSON.stringify(item)}</p>;
+                  return <DutyDay key={item.index} flights={item} />;
+                } else if (item[0].hotelInfo) {
+                  // layover
                   return (
                     <tr key={item.index} className="table-primary">
                       <td>
-                        <Flight
-                          key={item.index}
-                          flight={item}
-                          // pairingState={pairingState}
-                        />
+                        <Layover key={item.index} layover={item[0]} />
                       </td>
                     </tr>
                   );
-                } else if (item.hotelInfo) {
+                }
+                {
+                  /* else if (item.hotelInfo) {
                   return (
                     <tr key={item.index} className="table-success">
                       <td>
@@ -112,8 +115,9 @@ function Pairing(props) {
                       </td>
                     </tr>
                   );
-                } else {
-                  <p>Error</p>;
+                }  else { 
+                  return(<p>Error</p>;)
+                } */
                 }
               })}
           </tbody>

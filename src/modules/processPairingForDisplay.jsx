@@ -1,35 +1,45 @@
 const processPairingForDisplay = (pairingSequence) => {
-  const pairingSequenceArray = [];
+  // Break up into duty days and layovers
+  const display = [];
   let dutyDayStartingIndex = 0;
+  let dutyDay = [];
   for (let i = 0; i < pairingSequence.length; i++) {
-    if (i === dutyDayStartingIndex && pairingSequence[i].dutyTime) {
-      // One leg in Duty Day
-      pairingSequenceArray.push(pairingSequence[i]);
-    } else if (i === dutyDayStartingIndex) {
-      // First leg in multileg day
-      pairingSequenceArray.push(pairingSequence[i]);
-    } else if (i !== dutyDayStartingIndex && pairingSequence[i].dutyTime) {
+    if (pairingSequence[i].dutyTime) {
       //End of duty day
-      pairingSequenceArray.push(pairingSequence[i]);
-    } else if (i !== dutyDayStartingIndex && pairingSequence[i].hotelInfo) {
+      for (let j = dutyDayStartingIndex; j <= i; j++) {
+        if (j === dutyDayStartingIndex) {
+          // Add duty start time to first flight of duty day
+          // Does not yet subtract 1 hour, or more
+          const departureTime = pairingSequence[j].departureTime;
+          const hour = Number(departureTime.slice(0, -2));
+          const minute = departureTime.slice(-2);
+          pairingSequence[j].dutyStart = `${hour}` + minute;
+        }
+        if (j === i) {
+          // Add duty end time to last flight of duty day
+          // Does not yet add 15 minutes
+          const arrivalTime = pairingSequence[j].arrivalTime;
+          const hour = Number(arrivalTime.slice(0, -2));
+          const minute = arrivalTime.slice(-2);
+          pairingSequence[j].dutyEnd = `${hour}` + minute;
+        }
+        dutyDay.push(pairingSequence[j]);
+        dutyDay.index = i;
+      }
+      display.push(dutyDay);
+      dutyDay = [];
+    } else if (pairingSequence[i].hotelInfo) {
       // layover
-      const layover = pairingSequence[i];
-      layover.layoverStart = pairingSequence[i - 1].arrivalTime;
-      layover.layoverEnd = pairingSequence[i + 1].departureTime;
-      layover.layoverLength = pairingSequence[i - 1].layoverLength;
-      layover.layoverStation = pairingSequence[i - 1].arrivalAirport;
+      const dutyDay = [];
+      dutyDay.push(pairingSequence[i]);
+      dutyDay.index = i;
+      display.push(dutyDay);
       dutyDayStartingIndex = i + 1;
-      pairingSequenceArray.push(layover);
-      dutyDayStartingIndex = i + 1;
-      // console.log(`Layover: ${JSON.stringify(layover)}`);
-    } else if (i !== dutyDayStartingIndex && !pairingSequence[i].dutyTime) {
-      // flight within duty day
-      pairingSequenceArray.push(pairingSequence[i]);
     } else {
-      console.log(`!else: ${JSON.stringify(pairingSequence[i])}`);
+      // pass
     }
   }
-  return pairingSequenceArray;
+  return display;
 };
 
 export default processPairingForDisplay;
