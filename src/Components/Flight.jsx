@@ -11,7 +11,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 const timeFormat = 'HH:mm';
 
-function Flight({ flight }) {
+function Flight({ flight, dutyTimes, setDutyTimes }) {
   const {
     aircraft,
     arrivalAirport,
@@ -19,8 +19,8 @@ function Flight({ flight }) {
     // daysOfWeek,
     departureAirport,
     departureTime,
-    dutyEnd,
-    dutyStart,
+    // dutyEnd,
+    // dutyStart,
     dutyTime,
     flightNumber,
     flightTime,
@@ -38,11 +38,6 @@ function Flight({ flight }) {
       .set('minute', arrivalTime.slice(-2)),
   });
 
-  const [dutyTimes, setDutyTimes] = useState({
-    start: dutyStart,
-    end: dutyEnd,
-  });
-
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
     const { name, value } = target;
@@ -50,11 +45,14 @@ function Flight({ flight }) {
       ...prev,
       [name]: dayjs(value, timeFormat),
     }));
-    // calculateExpenses();
+    setDutyTimes((prev) => ({
+      ...prev,
+      [name]: dayjs(value, timeFormat),
+    }));
   };
 
   return (
-    <div>
+    <>
       <div className="ms-3 text-center row">
         {isDeadhead && <div className="col-1">DHD</div>}
         <div className="col-1">Flight No: AC{flightNumber}</div>
@@ -87,7 +85,7 @@ function Flight({ flight }) {
                 target: { name: 'end', value: val },
               })
             }
-          />{' '}
+          />
         </div>
         <div className="col-1">Flight Time: {flightTime}</div>
         <div className="col-1">{dutyTime && `Duty Time: ${dutyTime}`}</div>
@@ -99,11 +97,9 @@ function Flight({ flight }) {
           <div className="col-1"></div>
         )}
       </div>
-      <p>~ Duty Start: {dutyTimes.start && dutyTimes.start}</p>
       <p>~ Dept: {flightTimes.start.format(timeFormat)}</p>
       <p>~ Arrival: {flightTimes.end.format(timeFormat)}</p>
-      <p>~ Duty End: {dutyTimes.end && dutyTimes.end}</p>
-    </div>
+    </>
   );
 }
 export default Flight;

@@ -65,7 +65,7 @@ const ExpensesTable = (props) => {
           <td>${(meals.snack * expenses.snack).toFixed(2)}</td>
           {isLayover && <td>${5.05}</td>}
         </tr>
-        <tr className="table-success">
+        <tr className="table-primary">
           <td>Total:</td>
           <td colSpan={5}>${calculateDisplayTotal()}</td>
         </tr>

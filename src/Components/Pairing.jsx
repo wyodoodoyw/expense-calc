@@ -102,23 +102,6 @@ function Pairing(props) {
                     </tr>
                   );
                 }
-                {
-                  /* else if (item.hotelInfo) {
-                  return (
-                    <tr key={item.index} className="table-success">
-                      <td>
-                        <Layover
-                          key={item.index}
-                          layover={item}
-                          // pairingState={pairingState}
-                        />
-                      </td>
-                    </tr>
-                  );
-                }  else { 
-                  return(<p>Error</p>;)
-                } */
-                }
               })}
           </tbody>
         </table>

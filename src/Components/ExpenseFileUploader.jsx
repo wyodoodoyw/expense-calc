@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
 // import splitStringBefore from '../splitStringBefore';
-import splitStringAfter from '../splitStringAfter';
+import cutStringAfterexclusive from '../cutStringAfterExclusive';
 import american_airport_codes from '../data/american_airport_codes';
 import canadian_airport_codes from '../data/canadian_airport_codes';
+import cutStringAfterInclusive from '../cutStringAfterInclusive';
 
-const FileUploader = ({ setUploaded }) => {
+const ExpenseFileUploader = ({ setUploaded }) => {
   const [file, setFile] = useState(null);
   // const [expensesList, setExpensesList] = useState([]);
 
@@ -209,7 +210,9 @@ const FileUploader = ({ setUploaded }) => {
 
         for (let i = 0; i < lines.length; i++) {
           if (lines[i].includes('Algiers (ALG)')) {
-            preProcessedText.push(splitStringAfter(lines[i], 'Algiers (ALG)'));
+            preProcessedText.push(
+              cutStringAfterInclusive(lines[i], 'Algiers (ALG)')
+            );
           } else if (lines[i].includes('***BRACELET PROVIDED***')) {
             // pass
           } else if (lines[i] === ' ') {
@@ -315,4 +318,4 @@ const FileUploader = ({ setUploaded }) => {
   );
 };
 
-export default FileUploader;
+export default ExpenseFileUploader;

@@ -11,7 +11,7 @@ const processPairingForDisplay = (pairingSequence) => {
           // Add duty start time to first flight of duty day
           // Does not yet subtract 1 hour, or more
           const departureTime = pairingSequence[j].departureTime;
-          const hour = Number(departureTime.slice(0, -2));
+          const hour = departureTime.slice(0, -2);
           const minute = departureTime.slice(-2);
           pairingSequence[j].dutyStart = `${hour}` + minute;
         }
@@ -19,7 +19,7 @@ const processPairingForDisplay = (pairingSequence) => {
           // Add duty end time to last flight of duty day
           // Does not yet add 15 minutes
           const arrivalTime = pairingSequence[j].arrivalTime;
-          const hour = Number(arrivalTime.slice(0, -2));
+          const hour = arrivalTime.slice(0, -2);
           const minute = arrivalTime.slice(-2);
           pairingSequence[j].dutyEnd = `${hour}` + minute;
         }

@@ -9,7 +9,7 @@ dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
 // const timeFormat = 'HH:mm';
 
-function SearchPairings({ uploaded }) {
+function SearchPairings({ expensesUploaded, pairingsUploaded }) {
   const [pairingNumber, setPairingNumber] = useState('T5001');
   const [pairingSearchResult, setPairingSearchResult] = useState();
 
@@ -58,13 +58,15 @@ function SearchPairings({ uploaded }) {
           aria-expanded="false"
           aria-controls="collapseTwo"
         >
-          <strong>Search for an existing pairing or create a new one.</strong>
+          <h2 className="">Step 3:</h2>
+          <strong className="ms-3">Search for an existing pairing.</strong>
         </button>
       </h2>
       <form className="mx-3">
         <div
           className={
-            'mb-3 accordion-collapse ' + (uploaded ? 'show' : 'collapse')
+            'mb-3 accordion-collapse ' +
+            (pairingsUploaded && expensesUploaded ? 'show' : 'collapse')
           }
         >
           <div className="input-group mb-3" id="airport_code">

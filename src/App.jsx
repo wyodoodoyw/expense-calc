@@ -9,19 +9,28 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
   const [clicked, setClicked] = useState(true);
-  const [uploaded, setUploaded] = useState(true);
+  const [expensesUploaded, setExpensesUploaded] = useState(true);
+  const [pairingsUploaded, setPairingsUploaded] = useState(true);
 
   useEffect(() => {
     checkDBExists();
   }, []);
 
   const checkDBExists = () => {
-    // check if PairingsDB exists and skip uploading if so
-    const request = window.indexedDB.open('PairingsDB');
-    request.onsuccess = (e) => {
+    // check if ExpensesDB exists and skip uploading if so
+    const exRequest = window.indexedDB.open('ExpensesDB');
+    exRequest.onsuccess = (e) => {
       if (e.target.result.oldVersion > 0) {
         console.log('Exists!');
-        setUploaded(true);
+        setPairingsUploaded(true);
+      }
+    };
+    // check if PairingsDB exists and skip uploading if so
+    const paRequest = window.indexedDB.open('PairingsDB');
+    paRequest.onsuccess = (e) => {
+      if (e.target.result.oldVersion > 0) {
+        console.log('Exists!');
+        setExpensesUploaded(true);
       }
     };
   };
@@ -37,7 +46,12 @@ function App() {
               <Disclaimer clicked={clicked} setClicked={setClicked} />
             )} */}
             {clicked && (
-              <Accordion uploaded={uploaded} setUploaded={setUploaded} />
+              <Accordion
+                expensesUploaded={expensesUploaded}
+                setExpensesUploaded={setExpensesUploaded}
+                pairingsUploaded={pairingsUploaded}
+                setPairingsUploaded={setPairingsUploaded}
+              />
             )}
           </LocalizationProvider>
         </div>
