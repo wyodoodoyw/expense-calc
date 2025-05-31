@@ -1,4 +1,4 @@
-import cutStringAfterExclusive from '../cutStringAfterExclusive';
+import cutStringAfterExclusive from './cutStringAfterExclusive';
 
 const parseAsLayover = (index, line) => {
   const newLayover = {

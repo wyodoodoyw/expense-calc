@@ -1,14 +1,36 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
+// import { PairingContext } from './PairingContext';
 import dayjs from 'dayjs';
 import Flight from './Flight';
 
 const timeFormat = 'HH:mm';
 
 function DutyDay(props) {
-  const { flights } = props;
+  const { index, flights } = props;
 
-  // console.log(flights);
+  // const [state, setState] = useContext(PairingContext);
+
+  // useEffect(
+  //   () =>
+  //     setState((prev) => ({
+  //       ...prev,
+  //       key: index,
+  //       dutyStart: dayjs(
+  //         `${flights[0].dutyStart.slice(0, -2)}:${flights[0].dutyStart.slice(
+  //           -2
+  //         )}`,
+  //         timeFormat
+  //       ),
+  //       dutyEnd: dayjs(
+  //         `${flights[flights.length - 1].dutyEnd.slice(0, -2)}:${flights[
+  //           flights.length - 1
+  //         ].dutyEnd.slice(-2)}`,
+  //         timeFormat
+  //       ),
+  //     })),
+  //   []
+  // );
 
   const [dutyTimes, setDutyTimes] = useState({
     start: dayjs(

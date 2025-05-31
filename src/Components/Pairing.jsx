@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { PairingProvider } from './PairingContext';
 import Layover from './Layover';
 import Flight from './Flight';
 import DutyDay from './DutyDay';
@@ -24,10 +25,6 @@ function Pairing(props) {
     totalDuty,
     sequence,
   } = originalPairing;
-  // const sequenceRef = useRef(pairingSequence);
-  // const sequence = pairingSequence;
-
-  // const [pairingState, setPairingState] = useState({});
 
   const [updatablePairing, setUpdatablePairing] = useState({
     blockCredit,
@@ -50,15 +47,15 @@ function Pairing(props) {
     // sequenceRef.current = processPairingForDisplay(pairingSequence);
   }, []);
 
-  // const updatePairingState = (item) => {
+  // const updatePairingState = (current) => {
   //   setPairingState((prev) => ({
   //     ...prev,
-  //     [item.index]: item,
+  //     [current.index]: current,
   //   }));
   // };
 
   return (
-    <>
+    <PairingProvider>
       <div className="text-start font-monospace">
         <div className="row mt-4">
           <div className="col-6 ps-5">
@@ -78,8 +75,8 @@ function Pairing(props) {
           <div className="col-6 text-end pe-5">
             Languages: {pairingBL && `BL${pairingBL}  `}
             {pairingLanguages &&
-              pairingLanguages.map((item) => {
-                return <p key={item}>{`${item}`}</p>;
+              pairingLanguages.map((current) => {
+                return <p key={current}>{`${current}`}</p>;
               })}
           </div>
         </div>
@@ -87,17 +84,30 @@ function Pairing(props) {
         <table className="table mt-3">
           <tbody>
             {sequence &&
-              sequence.map((item) => {
-                if (!item[0].hotelInfo) {
+              sequence.map((current, index, arr) => {
+                if (!current[0].hotelInfo) {
                   // duty day of flights
-                  <p>{JSON.stringify(item)}</p>;
-                  return <DutyDay key={item.index} flights={item} />;
-                } else if (item[0].hotelInfo) {
+                  <p>{JSON.stringify(current)}</p>;
+                  return (
+                    <DutyDay key={index} index={index} flights={current} />
+                  );
+                } else if (current[0].hotelInfo) {
                   // layover
                   return (
-                    <tr key={item.index} className="table-primary">
+                    <tr key={index} className="table-primary">
                       <td>
-                        <Layover key={item.index} layover={item[0]} />
+                        <p>
+                          {arr[index - 1][arr[index - 1].length - 1].dutyEnd}
+                        </p>
+                        <Layover
+                          key={current.index}
+                          layover={current[0]}
+                          prevDuty={
+                            arr[index - 1][arr[index - 1].length - 1].dutyTimes
+                          }
+                          nextDuty={arr[index + 1][0].dutyStart}
+                        />
+                        <p>{arr[index + 1][0].dutyStart}</p>
                       </td>
                     </tr>
                   );
@@ -124,7 +134,7 @@ function Pairing(props) {
         <p className="mt-3"></p>
         <p></p>
       </div>
-    </>
+    </PairingProvider>
   );
 }
 export default Pairing;

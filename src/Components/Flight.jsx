@@ -29,14 +29,17 @@ function Flight({ flight, dutyTimes, setDutyTimes }) {
     mealAllowance,
   } = flight;
 
-  const [flightTimes, setFlightTimes] = useState({
-    start: dayjs()
-      .set('hour', departureTime.slice(0, -2))
-      .set('minute', departureTime.slice(-2)),
-    end: dayjs()
-      .set('hour', arrivalTime.slice(0, -2))
-      .set('minute', arrivalTime.slice(-2)),
-  });
+  const [flightTimes, setFlightTimes] = useState(
+    {
+      start: dayjs()
+        .set('hour', departureTime.slice(0, -2))
+        .set('minute', departureTime.slice(-2)),
+      end: dayjs()
+        .set('hour', arrivalTime.slice(0, -2))
+        .set('minute', arrivalTime.slice(-2)),
+    },
+    []
+  );
 
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
@@ -97,8 +100,6 @@ function Flight({ flight, dutyTimes, setDutyTimes }) {
           <div className="col-1"></div>
         )}
       </div>
-      <p>~ Dept: {flightTimes.start.format(timeFormat)}</p>
-      <p>~ Arrival: {flightTimes.end.format(timeFormat)}</p>
     </>
   );
 }

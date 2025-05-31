@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import extractTextFromPDF from 'pdf-parser-client-side';
 // import splitStringBefore from '../splitStringBefore';
-import cutStringAfterexclusive from '../cutStringAfterExclusive';
+// import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
 import american_airport_codes from '../data/american_airport_codes';
 import canadian_airport_codes from '../data/canadian_airport_codes';
-import cutStringAfterInclusive from '../cutStringAfterInclusive';
+import cutStringAfterInclusive from '../modules/cutStringAfterInclusive';
 
 const ExpenseFileUploader = ({ setUploaded }) => {
   const [file, setFile] = useState(null);
@@ -268,7 +268,7 @@ const ExpenseFileUploader = ({ setUploaded }) => {
             processedText.push(test7);
             processedText.push(test8);
             processedText.push(
-              splitStringAfter(preProcessedText[i], 'Punta Cana')
+              cutStringAfterInclusive(preProcessedText[i], 'Punta Cana')
             );
           } else if (preProcessedText[i].includes(test9)) {
             // St. Lucia

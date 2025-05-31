@@ -1,5 +1,5 @@
-import cutStringAfterExclusive from '../cutStringAfterExclusive';
-import cutStringBeforeExclusive from '../cutStringBeforeExclusive';
+import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
+import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
 import aircraft from '../data/aircraft';
 
 const parseAsFlight = (line, index) => {

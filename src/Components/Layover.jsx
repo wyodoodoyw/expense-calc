@@ -234,11 +234,6 @@ function Layover({ layover }) {
         <div className="col-3">Layover Length: {layoverLength}</div>
         <div className="col-2">Meals: {layoverMeals}</div>
       </div>
-      <p>~ Arrival: {times.arrival.format(timeFormat)}</p>
-      <p>{`~ Layover: ${layoverTimes.start.format(
-        'HH:mm'
-      )} - ${layoverTimes.end.format('HH:mm')}`}</p>
-      <p>~ Depart: {times.departure.format(timeFormat)}</p>
       <p>~ Full Days: {fullDays}</p>
       <ExpensesTable
         station={layoverStation}

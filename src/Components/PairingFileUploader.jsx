@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import extractTextFromPDF from '../modules/pdf-parser-client-side';
-import cutStringAfterInclusive from '../cutStringAfterInclusive';
+import cutStringAfterInclusive from '../modules/cutStringAfterInclusive';
 import parse from '../modules/parse';
-import { ClipLoader } from 'react-spinners';
+// import { ClipLoader } from 'react-spinners';
 
 // import cutStringAfterExclusive from '../cutStringAfterExclusive';
 // import cutStringBeforeExclusive from '../cutStringBeforeExclusive';
