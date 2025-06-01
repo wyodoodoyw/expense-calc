@@ -1,5 +1,8 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react';
 // import { TimePicker } from '@mui/x-date-pickers';
+import { useDispatch } from 'react-redux';
+import { updatePairing } from '../features/pairing/pairingSlice';
 import Pairing from './Pairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -9,9 +12,13 @@ dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
 // const timeFormat = 'HH:mm';
 
-function SearchPairings({ expensesUploaded, pairingsUploaded }) {
+function SearchPairings(props) {
+  const { expensesUploaded, pairingsUploaded } = props;
+
   const [pairingNumber, setPairingNumber] = useState('T5001');
   const [pairingSearchResult, setPairingSearchResult] = useState();
+
+  const dispatch = useDispatch();
 
   const handlePairingNumberChange = (e) => {
     const value = e.target.value;
@@ -35,6 +42,28 @@ function SearchPairings({ expensesUploaded, pairingsUploaded }) {
 
       request.onsuccess = () => {
         setPairingSearchResult(request.result);
+        if (request.result) {
+          dispatch(
+            updatePairing({
+              id: request.result.id,
+              pairingNumber: request.result.pairingNumber,
+              pairingOperates: request.result.pairingOperates,
+              pairingPurser: request.result.pairingPurser,
+              pairingFA: request.result.pairingFA,
+              pairingBL: request.result.pairingBL,
+              pairingGP: request.result.pairingGP,
+              pairingGY: request.result.pairingGY,
+              pairingDates: request.result.pairingDates,
+              pairingLanguages: request.result.pairingLanguages,
+              blockCredit: request.result.blockCredit,
+              cicoAmount: request.result.cicoAmount,
+              tafb: request.result.tafb,
+              totalAllowance: request.result.totalAllowance,
+              totalCredit: request.result.totalCredit,
+              totalDuty: request.result.totalDuty,
+            })
+          );
+        }
       };
 
       request.onerror = (event) => {
@@ -75,7 +104,6 @@ function SearchPairings({ expensesUploaded, pairingsUploaded }) {
               list="pairings"
               id="pairing"
               name="pairing"
-              // type="text"
               className="col-11 form-control flex"
               placeholder=""
               value={pairingNumber}
@@ -87,7 +115,7 @@ function SearchPairings({ expensesUploaded, pairingsUploaded }) {
           </div>
         </div>
       </form>
-      {pairingSearchResult && <Pairing originalPairing={pairingSearchResult} />}
+      {pairingSearchResult && <Pairing pairing={pairingSearchResult} />}
     </div>
   );
 }

@@ -3,7 +3,6 @@ import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
 import aircraft from '../data/aircraft';
 
 const parseAsFlight = (line, index) => {
-  // console.log('---FLIGHT---');
   const newFlight = {
     index: index,
   };

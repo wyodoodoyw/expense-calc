@@ -47,24 +47,22 @@ function DutyDay(props) {
   });
 
   return (
-    <>
+    <div className="row bg-info">
       <p>Duty State Start: {dutyTimes.start.format(timeFormat)}</p>
       {flights.map((flight) => {
         return (
-          <tr key={flight.index} className="table-success">
-            <td key={flight.index}>
-              <Flight
-                key={flight.index}
-                flight={flight}
-                dutyTimes={dutyTimes}
-                setDutyTimes={setDutyTimes}
-              />
-            </td>
-          </tr>
+          <div className="row" key={flight.index}>
+            <Flight
+              key={flight.index}
+              flight={flight}
+              dutyTimes={dutyTimes}
+              setDutyTimes={setDutyTimes}
+            />
+          </div>
         );
       })}
       <p>Duty State End: {dutyTimes.end.format(timeFormat)}</p>
-    </>
+    </div>
   );
 }
 

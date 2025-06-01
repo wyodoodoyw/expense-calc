@@ -45,10 +45,10 @@ function App() {
             )} */}
             {clicked && (
               <Accordion
-                expensesUploaded={expensesUploaded}
-                setExpensesUploaded={setExpensesUploaded}
                 pairingsUploaded={pairingsUploaded}
                 setPairingsUploaded={setPairingsUploaded}
+                expensesUploaded={expensesUploaded}
+                setExpensesUploaded={setExpensesUploaded}
               />
             )}
           </LocalizationProvider>
