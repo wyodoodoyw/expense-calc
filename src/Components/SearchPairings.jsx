@@ -2,7 +2,10 @@
 import { useState } from 'react';
 // import { TimePicker } from '@mui/x-date-pickers';
 import { useDispatch } from 'react-redux';
-import { updatePairing } from '../features/pairing/pairingSlice';
+import {
+  updatePairing,
+  processSequence,
+} from '../features/pairing/pairingSlice';
 import Pairing from './Pairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -63,6 +66,60 @@ function SearchPairings(props) {
               totalDuty: request.result.totalDuty,
             })
           );
+
+          dispatch(processSequence(request.result.sequence));
+          // for (let i = 0; i < request.result.sequence; i++) {
+          //   console.log(request.result.sequence[i]);
+          //   if (request.result.sequence[i][0].aircraft) {
+          //     dispatch(
+          //       addFlightToPairing({
+          //         index: request.result.sequence[0][0].index,
+          //         aircraft: request.result.sequence[0][0].aircraft,
+          //         arrivalAirport: request.result.sequence[0][0].arrivalAirport,
+          //         arrivalTime: dayjs(
+          //           `${request.result.sequence[0][0].arrivalTime.slice(
+          //             0,
+          //             -2
+          //           )}:${request.result.sequence[0][0].arrivalTime.slice(-2)}`,
+          //           'HH:mm'
+          //         ),
+          //         daysOfWeek: request.result.sequence[0][0].daysOfWeek,
+          //         departureAirport:
+          //           request.result.sequence[0][0].departureAirport,
+          //         departureTime: dayjs(
+          //           `${request.result.sequence[0][0].departureTime.slice(
+          //             0,
+          //             -2
+          //           )}:${request.result.sequence[0][0].departureTime.slice(
+          //             -2
+          //           )}`,
+          //           'HH:mm'
+          //         ),
+          //         dutyEnd: dayjs(
+          //           `${request.result.sequence[0][0].dutyEnd.slice(
+          //             0,
+          //             -2
+          //           )}:${request.result.sequence[0][0].dutyEnd.slice(-2)}`,
+          //           'HH:mm'
+          //         ),
+          //         dutyStart: dayjs(
+          //           `${request.result.sequence[0][0].dutyStart.slice(
+          //             0,
+          //             -2
+          //           )}:${request.result.sequence[0][0].dutyStart.slice(-2)}`,
+          //           'HH:mm'
+          //         ),
+          //         dutyTime: request.result.sequence[0][0].dutyTime,
+          //         flightNumber: request.result.sequence[0][0].flightNumber,
+          //         flightTime: request.result.sequence[0][0].flightTime,
+          //         isDeadhead: request.result.sequence[0][0].isDeadhead || false,
+          //         layoverLength:
+          //           request.result.sequence[0][0].layoverLength || null,
+          //         mealsOnboard:
+          //           request.result.sequence[0][0].mealsOnboard || [],
+          //       })
+          //     );
+          // }
         }
       };
 

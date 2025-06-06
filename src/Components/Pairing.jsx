@@ -1,60 +1,11 @@
 /* eslint-disable react/prop-types */
-// import { useState, useEffect, useContext } from 'react';
-// import { PairingProvider } from './PairingContext';
 import Layover from './Layover';
-import Flight from './Flight';
 import DutyDay from './DutyDay';
 import { useSelector } from 'react-redux';
 
-function Pairing(props) {
-  const { sequence } = props.pairing;
-  // const {
-  //   pairingNumber,
-  //   pairingOperates,
-  //   pairingPurser,
-  //   pairingFA,
-  //   pairingBL,
-  //   pairingGP,
-  //   pairingGY,
-  //   pairingDates,
-  //   pairingLanguages,
-  //   blockCredit,
-  //   cicoAmount,
-  //   tafb,
-  //   totalAllowance,
-  //   totalCredit,
-  //   totalDuty,
-  //   sequence,
-  // } = originalPairing;
-
+function Pairing() {
   const p = useSelector((state) => state.pairing);
-  // console.log(`p: ${JSON.stringify(p)}`);
-  // const [updatablePairing, setUpdatablePairing] = useState({
-  //   blockCredit,
-  //   cicoAmount,
-  //   tafb,
-  //   totalAllowance,
-  //   totalCredit,
-  //   totalDuty,
-  // });
-
-  // useEffect(() => {
-  //   setUpdatablePairing({
-  //     blockCredit: blockCredit,
-  //     cicoAmount: cicoAmount,
-  //     tafb: tafb,
-  //     totalAllowance: totalAllowance,
-  //     totalCredit: totalCredit,
-  //     totalDuty: totalDuty,
-  //   });
-  // }, []);
-
-  // const updatePairingState = (current) => {
-  //   setPairingState((prev) => ({
-  //     ...prev,
-  //     [current.index]: current,
-  //   }));
-  // };
+  const sequence = useSelector((state) => state.pairing.sequence);
 
   return (
     <div className="text-start font-monospace">
@@ -86,18 +37,20 @@ function Pairing(props) {
       <div className="row mt-3 ms-3">
         {sequence &&
           sequence.map((current, index, arr) => {
-            if (!current[0].hotelInfo) {
+            if (!current.hotelInfo) {
               // duty day of flights
-              <p>{JSON.stringify(current)}</p>;
+              <p key={index}>{JSON.stringify(current)}</p>;
               return <DutyDay key={index} index={index} flights={current} />;
-            } else if (current[0].hotelInfo) {
+            } else if (current.hotelInfo) {
               // layover
               return (
                 <div className="row" key={sequence.index}>
-                  <p>{arr[index - 1][arr[index - 1].length - 1].dutyEnd}</p>
+                  <p key={sequence.index}>
+                    {arr[index - 1][arr[index - 1].length - 1].dutyEnd}
+                  </p>
                   <Layover
                     key={current.index}
-                    layover={current[0]}
+                    layover={current}
                     prevDuty={
                       arr[index - 1][arr[index - 1].length - 1].dutyTimes
                     }

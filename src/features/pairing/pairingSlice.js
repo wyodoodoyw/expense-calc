@@ -1,25 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-// Define the initial value for the slice state
-// const initialState = {
-// id: 1,
-// pairingNumber: 'T5001',
-// pairingOperates: '27OCT-31OCT',
-// pairingDates: ['27', '28', '29', '30', '31'],
-// pairingCrew: ['P 01', 'FA05', 'GJ01', 'GY01', 'BL02'],
-// pairingPurser: '01',
-// pairingFA: '05',
-// pairingGP: '01',
-// pairingGY: '01',
-// pairingBL: '02',
-// tafb: '4405',
-// totalCredit: '1525',
-// totalDuty: '1810',
-// blockCredit: '1525',
-// totalAllowance: '305.68',
-// cicoAmount: '5.05',
-// };
-
 export const pairingSlice = createSlice({
   name: 'pairing',
   initialState: {
@@ -30,9 +10,7 @@ export const pairingSlice = createSlice({
   reducers: {
     updatePairing: (state, action) => ({
       // update pairing info with payload
-      // console.log(`payload: ${JSON.stringify(action.payload)}`);
-      ...state,
-      // {
+      // ...state,
       id: action.payload.id,
       pairingNumber: action.payload.pairingNumber,
       pairingOperates: action.payload.pairingOperates,
@@ -49,27 +27,29 @@ export const pairingSlice = createSlice({
       totalAllowance: action.payload.totalAllowance,
       totalCredit: action.payload.totalCredit,
       totalDuty: action.payload.totalDuty,
+      //
+      flights: action.payload.flights || [],
+      sequence: action.payload.sequence || [],
     }),
-    // pairingDates: ['27', '28', '29', '30', '31'],
-    // pairingCrew: ['P 01', 'FA05', 'GJ01', 'GY01', 'BL02'],
-    // pairingPurser: '01',
-    // pairingFA: '05',
-    // pairingGP: '01',
-    // pairingGY: '01',
-    // pairingBL: '02',
-    // tafb: '4405',
-    // totalCredit: '1525',
-    // totalDuty: '1810',
-    // blockCredit: '1525',
-    // totalAllowance: '305.68',
-    // cicoAmount: '5.05',
-    // );
+
+    processSequence: (state, action) => {
+      console.log(`processSequence: ${JSON.stringify(action.payload)}`);
+      for (let i = 0; i < action.payload.length; i++) {
+        state.sequence.push(action.payload[i]);
+        if (action.payload[i][0].hotelInfo) {
+          state.sequence[i] = action.payload[i][0];
+        }
+
+        if (action.payload[i][0].aircraft) {
+          state.sequence[i] = action.payload[i].map((flight) => flight);
+        }
+      }
+    },
   },
-  // },
 });
 
 // Export the generated action creators for use in components
-export const { updatePairing } = pairingSlice.actions;
+export const { updatePairing, processSequence } = pairingSlice.actions;
 
 // Export the slice reducer for use in the store configuration
 export default pairingSlice.reducer;
