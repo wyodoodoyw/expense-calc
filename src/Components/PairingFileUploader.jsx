@@ -10,7 +10,8 @@ import parse from '../modules/parse';
 // import parseAsFlight from '../modules/parseAsFlight';
 // import parseAsLayover from '../modules/parseAsLayover';
 
-const PairingFileUploader = ({ setUploaded }) => {
+const PairingFileUploader = (props) => {
+  const { setUploaded } = props;
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +39,7 @@ const PairingFileUploader = ({ setUploaded }) => {
       // Read pdf file
       let text = await extractTextFromPDF(file);
       text && setUploaded(true);
+
       // Remove header
       const firstPairingNumber = text.match(/(C|M|T|V)[0-9]{4}/)[0];
       text = cutStringAfterInclusive(text, firstPairingNumber);
@@ -48,7 +50,7 @@ const PairingFileUploader = ({ setUploaded }) => {
       for (let i = 0; i <= pairings.length; i++) {
         if (i < pairings.length) {
           const pairing = pairings[i];
-          const pairingNo = pairing.match(/T[0-9]{4}/g)[0];
+          // const pairingNo = pairing.match(/T[0-9]{4}/g)[0];
           // console.log((pairingNo);
           if (pairing === '' || pairing === ' ' || pairing === null) {
             //pass
@@ -59,9 +61,8 @@ const PairingFileUploader = ({ setUploaded }) => {
             // console.log(pairing);
             parse(pairing);
           }
-        } else {
-          setLoading(!loading);
         }
+        setLoading(!loading);
       }
     }
   };

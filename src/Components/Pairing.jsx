@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import Layover from './Layover';
 import DutyDay from './DutyDay';
+import Flight from './Flight';
 import { useSelector } from 'react-redux';
 
 function Pairing() {
@@ -33,36 +34,34 @@ function Pairing() {
         </div>
       </div>
 
-      {/* <table className="table mt-3"> */}
       <div className="row mt-3 ms-3">
         {sequence &&
           sequence.map((current, index, arr) => {
             if (!current.hotelInfo) {
               // duty day of flights
               <p key={index}>{JSON.stringify(current)}</p>;
-              return <DutyDay key={index} index={index} flights={current} />;
+              return <Flight key={index} index={index} />;
             } else if (current.hotelInfo) {
               // layover
               return (
-                <div className="row" key={sequence.index}>
-                  <p key={sequence.index}>
+                <div className="row" key={index}>
+                  {/* <p key={sequence.index}>
                     {arr[index - 1][arr[index - 1].length - 1].dutyEnd}
-                  </p>
+                  </p> */}
                   <Layover
                     key={current.index}
                     layover={current}
-                    prevDuty={
-                      arr[index - 1][arr[index - 1].length - 1].dutyTimes
-                    }
-                    nextDuty={arr[index + 1][0].dutyStart}
+                    // prevDuty={
+                    //   arr[index - 1][arr[index - 1].length - 1].dutyTimes
+                    // }
+                    // nextDuty={arr[index + 1][0].dutyStart}
                   />
-                  <p>{arr[index + 1][0].dutyStart}</p>
+                  {/* <p>{arr[index + 1][0].dutyStart}</p> */}
                 </div>
               );
             }
           })}
       </div>
-      {/* </table> */}
       <div className="row ms-3">
         <div className="col-3">BLOCK/H-VOL {p.blockCredit}</div>
         <div className="col-3">Total Duty {p.totalDuty}</div>

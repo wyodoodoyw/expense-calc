@@ -2,15 +2,9 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const pairingSlice = createSlice({
   name: 'pairing',
-  initialState: {
-    // id: 0,
-    // pairingNumber: 'X5432',
-    // pairingOperates: 'JFM01-AMY31',
-  },
+  initialState: {},
   reducers: {
     updatePairing: (state, action) => ({
-      // update pairing info with payload
-      // ...state,
       id: action.payload.id,
       pairingNumber: action.payload.pairingNumber,
       pairingOperates: action.payload.pairingOperates,
@@ -33,15 +27,15 @@ export const pairingSlice = createSlice({
     }),
 
     processSequence: (state, action) => {
-      console.log(`processSequence: ${JSON.stringify(action.payload)}`);
       for (let i = 0; i < action.payload.length; i++) {
         state.sequence.push(action.payload[i]);
-        if (action.payload[i][0].hotelInfo) {
-          state.sequence[i] = action.payload[i][0];
+        //Layover
+        if (action.payload[i].hotelInfo) {
+          // state.sequence[i] = action.payload[i];
         }
-
-        if (action.payload[i][0].aircraft) {
-          state.sequence[i] = action.payload[i].map((flight) => flight);
+        // Flight
+        if (action.payload[i].aircraft) {
+          // state.sequence[i] = action.payload[i].map((flight) => flight);
         }
       }
     },

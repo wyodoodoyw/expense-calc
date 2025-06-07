@@ -192,8 +192,8 @@ const parse = (pairing) => {
           pairingSequence[i] = layover;
         }
       }
-      // newPairing.pairingSequence = pairingSequence;
-      newPairing.sequence = processPairingForDisplay(pairingSequence);
+      newPairing.sequence = pairingSequence;
+      // newPairing.sequence = processPairingForDisplay(pairingSequence);
       addPairingToDB(newPairing);
       return;
     }
