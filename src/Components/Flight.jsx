@@ -2,6 +2,10 @@
 import { useState } from 'react';
 import { TimePicker } from '@mui/x-date-pickers';
 import { useSelector, useDispatch } from 'react-redux';
+import {
+  updateFlightDeparture,
+  updateFlightArrival,
+} from '../features/pairing/pairingSlice';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -15,27 +19,33 @@ function Flight(props) {
   const { index } = props;
 
   const f = useSelector((state) => state.pairing.sequence[index]);
-  // console.log(`f: ${JSON.stringify(f)}`);
+  const departureTime = dayjs()
+    .set('hour', f.departureTime.slice(0, -2))
+    .set('minute', f.departureTime.slice(-2));
+  const arrivalTime = dayjs()
+    .set('hour', f.arrivalTime.slice(0, -2))
+    .set('minute', f.arrivalTime.slice(-2));
 
-  const [flightTimes, setFlightTimes] = useState(
-    {
-      start: dayjs()
-        .set('hour', f.departureTime.slice(0, -2))
-        .set('minute', f.departureTime.slice(-2)),
-      end: dayjs()
-        .set('hour', f.arrivalTime.slice(0, -2))
-        .set('minute', f.arrivalTime.slice(-2)),
-    },
-    []
-  );
+  const dispatch = useDispatch();
 
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
-    // const { name, value } = target;
-    //   setFlightTimes((prev) => ({
-    //     ...prev,
-    //     [name]: dayjs(value, timeFormat),
-    //   }));
+    const { name, value } = target;
+    // console.log(target);
+    if (name === 'start') {
+      dispatch(
+        updateFlightDeparture({ index: index, value: value.format('HHmm') })
+      );
+    }
+    if (name === 'end') {
+      dispatch(
+        updateFlightArrival({ index: index, value: value.format('HHmm') })
+      );
+    }
+    // setFlightTimes((prev) => ({
+    //   ...prev,
+    //   [name]: dayjs(value.format(timeFormat)),
+    // }));
     // setDutyTimes((prev) => ({
     //   ...prev,
     //   [name]: dayjs(value, timeFormat),
@@ -44,7 +54,7 @@ function Flight(props) {
 
   return (
     <>
-      <div className="ms-3 text-center row bg-info">
+      <div className="ms-3 py-3 text-center row bg-info">
         {f.isDeadhead && <div className="col-1">DHD</div>}
         <div className="col-1">Flight No: AC{f.flightNumber}</div>
         <div className="col-1">Equipment: {f.aircraft}</div>
@@ -55,7 +65,7 @@ function Flight(props) {
             ampm={false}
             format="HH:mm"
             timeSteps={{ hours: 1, minutes: 1 }}
-            value={flightTimes.start}
+            value={departureTime}
             onAccept={(val) =>
               handleTimeChange({
                 target: { name: 'start', value: val },
@@ -70,7 +80,7 @@ function Flight(props) {
             ampm={false}
             format="HH:mm"
             timeSteps={{ hours: 1, minutes: 1 }}
-            value={flightTimes.end}
+            value={arrivalTime}
             onAccept={(val) =>
               handleTimeChange({
                 target: { name: 'end', value: val },

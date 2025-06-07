@@ -3,7 +3,7 @@ import { useState } from 'react';
 // import { TimePicker } from '@mui/x-date-pickers';
 import { useDispatch } from 'react-redux';
 import {
-  updatePairing,
+  initializePairing,
   processSequence,
 } from '../features/pairing/pairingSlice';
 import Pairing from './Pairing';
@@ -19,7 +19,7 @@ function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
   const [pairingNumber, setPairingNumber] = useState('T5001');
-  const [pairingSearchResult, setPairingSearchResult] = useState();
+  const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -44,10 +44,10 @@ function SearchPairings(props) {
       const request = pairingNumberIndex.get(pairingNumber);
 
       request.onsuccess = () => {
-        setPairingSearchResult(request.result);
+        setPairingSearchResult(true);
         if (request.result) {
           dispatch(
-            updatePairing({
+            initializePairing({
               id: request.result.id,
               pairingNumber: request.result.pairingNumber,
               pairingOperates: request.result.pairingOperates,
@@ -172,7 +172,7 @@ function SearchPairings(props) {
           </div>
         </div>
       </form>
-      {pairingSearchResult && <Pairing pairing={pairingSearchResult} />}
+      {pairingSearchResult && <Pairing pairingNumber={pairingNumber} />}
     </div>
   );
 }

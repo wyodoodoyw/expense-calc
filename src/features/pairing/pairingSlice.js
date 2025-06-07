@@ -1,10 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit';
+import dayjs from 'dayjs';
+
+const timeFormat = 'HH:mm';
 
 export const pairingSlice = createSlice({
   name: 'pairing',
   initialState: {},
   reducers: {
-    updatePairing: (state, action) => ({
+    initializePairing: (state, action) => ({
       id: action.payload.id,
       pairingNumber: action.payload.pairingNumber,
       pairingOperates: action.payload.pairingOperates,
@@ -39,11 +42,32 @@ export const pairingSlice = createSlice({
         }
       }
     },
+
+    updateFlightDeparture: (state, action) => {
+      const { index, value } = action.payload;
+      console.log(
+        `state1: ${JSON.stringify(state.sequence[index].departureTime)}`
+      );
+      state.sequence[index].departureTime = value;
+    },
+
+    updateFlightArrival: (state, action) => {
+      const { index, value } = action.payload;
+      console.log(
+        `state2: ${JSON.stringify(state.sequence[index].arrivalTime)}`
+      );
+      state.sequence[index].arrivalTime = value;
+    },
   },
 });
 
 // Export the generated action creators for use in components
-export const { updatePairing, processSequence } = pairingSlice.actions;
+export const {
+  initializePairing,
+  processSequence,
+  updateFlightArrival,
+  updateFlightDeparture,
+} = pairingSlice.actions;
 
 // Export the slice reducer for use in the store configuration
 export default pairingSlice.reducer;

@@ -1,12 +1,12 @@
 /* eslint-disable react/prop-types */
 import Layover from './Layover';
-import DutyDay from './DutyDay';
+// import DutyDay from './DutyDay';
 import Flight from './Flight';
 import { useSelector } from 'react-redux';
 
 function Pairing() {
   const p = useSelector((state) => state.pairing);
-  const sequence = useSelector((state) => state.pairing.sequence);
+  const sequence = p.sequence;
 
   return (
     <div className="text-start font-monospace">
@@ -45,18 +45,7 @@ function Pairing() {
               // layover
               return (
                 <div className="row" key={index}>
-                  {/* <p key={sequence.index}>
-                    {arr[index - 1][arr[index - 1].length - 1].dutyEnd}
-                  </p> */}
-                  <Layover
-                    key={current.index}
-                    layover={current}
-                    // prevDuty={
-                    //   arr[index - 1][arr[index - 1].length - 1].dutyTimes
-                    // }
-                    // nextDuty={arr[index + 1][0].dutyStart}
-                  />
-                  {/* <p>{arr[index + 1][0].dutyStart}</p> */}
+                  <Layover key={index} index={index} />
                 </div>
               );
             }

@@ -4,7 +4,7 @@ export const layoverSlice = createSlice({
   name: 'layover',
   initialState: {},
   reducers: {
-    updateFlight: (state, action) => ({
+    initializeLayover: (state, action) => ({
       // update pairing info with payload
       // console.log(`payload: ${JSON.stringify(action.payload)}`);
       ...state,
@@ -16,7 +16,7 @@ export const layoverSlice = createSlice({
 });
 
 // Export the generated action creators for use in components
-export const { updatePairing } = layoverSlice.actions;
+export const { initializeLayover } = layoverSlice.actions;
 
 // Export the slice reducer for use in the store configuration
 export default layoverSlice.reducer;

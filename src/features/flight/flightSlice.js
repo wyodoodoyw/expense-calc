@@ -2,25 +2,9 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export const flightSlice = createSlice({
   name: 'flight',
-  initialState: {
-    // index: null,
-    // aircraft: null,
-    // arrivalAirport: null,
-    // arrivalTime: null,
-    // daysOfWeek: [],
-    // departureAirport: null,
-    // departureTime: null,
-    // dutyEnd: null,
-    // dutyStart: null,
-    // dutyTime: null,
-    // flightNumber: null,
-    // flightTime: null,
-    // isDeadhead: false,
-    // layoverLength: null,
-    // mealsOnboard: [],
-  },
+  initialState: {},
   reducers: {
-    updateFlight: (state, action) => ({
+    intializeFlight: (state, action) => ({
       index: action.payload.index,
       aircraft: action.payload.aircraft,
       arrivalAirport: action.payload.arrivalAirport,
@@ -37,11 +21,22 @@ export const flightSlice = createSlice({
       layoverLength: action.payload.layoverLength || null,
       mealsOnboard: action.payload.mealsOnboard || [],
     }),
+
+    updateFlightDeparture: (state, action) => {
+      const { index, value } = action.payload;
+      state.sequence[index].departureTime = value;
+    },
+
+    updateFlightArrival: (state, action) => {
+      const { index, value } = action.payload;
+      state.sequence[index].arrivalTime = value;
+    },
   },
 });
 
 // Export the generated action creators for use in components
-export const { updatePairing } = flightSlice.actions;
+export const { initializeFlight, updateFlightDeparture, updateFlightArrival } =
+  flightSlice.actions;
 
 // Export the slice reducer for use in the store configuration
 export default flightSlice.reducer;
