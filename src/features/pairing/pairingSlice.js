@@ -45,17 +45,11 @@ export const pairingSlice = createSlice({
 
     updateFlightDeparture: (state, action) => {
       const { index, value } = action.payload;
-      console.log(
-        `state1: ${JSON.stringify(state.sequence[index].departureTime)}`
-      );
       state.sequence[index].departureTime = value;
     },
 
     updateFlightArrival: (state, action) => {
       const { index, value } = action.payload;
-      console.log(
-        `state2: ${JSON.stringify(state.sequence[index].arrivalTime)}`
-      );
       state.sequence[index].arrivalTime = value;
     },
   },

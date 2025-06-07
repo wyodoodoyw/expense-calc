@@ -15,7 +15,7 @@ function Pairing() {
           {p.pairingNumber} OPERATES/OPER- {p.pairingOperates}
         </div>
         <div className="col-6 text-end pe-5">
-          Dates: {JSON.stringify(p.pairingDates)}
+          {/* Dates: {JSON.stringify(p.pairingDates)} */}
         </div>
       </div>
       <div className="row">
@@ -28,8 +28,8 @@ function Pairing() {
         <div className="col-6 text-end pe-5">
           Languages: {p.pairingBL && `BL${p.pairingBL}  `}
           {p.pairingLanguages &&
-            p.pairingLanguages.map((current) => {
-              return <p key={current}>{`${current}`}</p>;
+            p.pairingLanguages.map((lang) => {
+              return `${lang}`;
             })}
         </div>
       </div>

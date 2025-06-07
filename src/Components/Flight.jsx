@@ -31,7 +31,6 @@ function Flight(props) {
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
     const { name, value } = target;
-    // console.log(target);
     if (name === 'start') {
       dispatch(
         updateFlightDeparture({ index: index, value: value.format('HHmm') })
@@ -42,21 +41,14 @@ function Flight(props) {
         updateFlightArrival({ index: index, value: value.format('HHmm') })
       );
     }
-    // setFlightTimes((prev) => ({
-    //   ...prev,
-    //   [name]: dayjs(value.format(timeFormat)),
-    // }));
-    // setDutyTimes((prev) => ({
-    //   ...prev,
-    //   [name]: dayjs(value, timeFormat),
-    // }));
   };
 
   return (
     <>
-      <div className="ms-3 py-3 text-center row bg-info">
-        {f.isDeadhead && <div className="col-1">DHD</div>}
-        <div className="col-1">Flight No: AC{f.flightNumber}</div>
+      <div className="mx-3 py-3 text-center row bg-info">
+        <div className="col-1">
+          Flight No: AC{f.flightNumber} {f.isDeadhead && <p>DHD</p>}
+        </div>
         <div className="col-1">Equipment: {f.aircraft}</div>
         <div className="col-3 h-100 align-middle fs-3">
           {`${f.departureAirport} `}
@@ -90,13 +82,13 @@ function Flight(props) {
         </div>
         <div className="col-1">Flight Time: {f.flightTime}</div>
         <div className="col-1">{f.dutyTime && `Duty Time: ${f.dutyTime}`}</div>
-        {f.mealsOnboard ? (
-          <div className="col-1">Meals Oboard: {f.mealsOnboard}</div>
-        ) : f.mealAllowance ? (
-          <div className="col-1">Meals Allowance: {f.mealAllowance}</div>
-        ) : (
-          <div className="col-1"></div>
+        {f.mealsOnboard && (
+          <div className="col-1">Meals Onboard: {f.mealsOnboard}</div>
         )}
+        {f.mealAllowance && (
+          <div className="col-1">Meals Allowance: {f.mealAllowance}</div>
+        )}
+        {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>
     </>
   );

@@ -25,11 +25,10 @@ function SearchPairings(props) {
 
   const handlePairingNumberChange = (e) => {
     const value = e.target.value;
-    console.log(value);
     setPairingNumber(value);
     const valid = value.match(/(C|M|T|V)[0-9]{4}/g);
     if (valid && valid.length === 1) {
-      console.log('Valid, one result');
+      // console.log('Valid, one result');
     }
   };
 
