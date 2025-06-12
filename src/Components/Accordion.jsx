@@ -49,7 +49,7 @@ function Accordian(props) {
               2025-05 May → Base: YYZ → 202505-YYZ-PairingFile
             </p>
             {/* <FileUploader setUploaded={setUploaded} /> */}
-            <PairingFileUploader setUploaded={setPairingsUploaded} />
+            <PairingFileUploader setPairingsUploaded={setPairingsUploaded} />
           </div>
         </div>
       </div>
@@ -86,7 +86,7 @@ function Accordian(props) {
               ACAeronet → Crew Scheduling & Planning → Block Bid Packages →
               2025-05 May → ALL → 202505-MealAllowances
             </p>
-            <ExpenseFileUploader setUploaded={setExpensesUploaded} />
+            <ExpenseFileUploader setExpensesUploaded={setExpensesUploaded} />
           </div>
         </div>
       </div>

@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import extractTextFromPDF from 'pdf-parser-client-side';
+import extractTextFromPDF from '../modules/pdf-parser-client-side';
 // import splitStringBefore from '../splitStringBefore';
 // import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
 import american_airport_codes from '../data/american_airport_codes';
 import canadian_airport_codes from '../data/canadian_airport_codes';
 import cutStringAfterInclusive from '../modules/cutStringAfterInclusive';
 
-const ExpenseFileUploader = ({ setUploaded }) => {
+const ExpenseFileUploader = ({ setExpensesUploaded }) => {
   const [file, setFile] = useState(null);
-  // const [expensesList, setExpensesList] = useState([]);
 
   const handleFileChange = (e) => {
     if (e.target.files) {
@@ -198,105 +197,38 @@ const ExpenseFileUploader = ({ setUploaded }) => {
       try {
         // Read pdf file
         let text = await extractTextFromPDF(file, 'custom');
-        text && setUploaded(true);
+        text && setExpensesUploaded(true);
 
-        // Split text into array of lines
-        let lines = text.split(/\s{1}\$(\s)(?<!(?=\1)..)\1(?!\1)/gm); // .$.., but not .$... as line separator
-        // console.log(lines);
-        let preProcessedText = [];
-        let processedText = [];
+        // Remove header
+        text = cutStringAfterInclusive(text, 'Algiers');
 
-        // Remove header, empty lines, and unwanted lines
+        // Split destinations by *!* delimeter
+        const destinations = text.split(/\*!\*\s{2}/g);
 
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes('Algiers (ALG)')) {
-            preProcessedText.push(
-              cutStringAfterInclusive(lines[i], 'Algiers (ALG)')
-            );
-          } else if (lines[i].includes('***BRACELET PROVIDED***')) {
-            // pass
-          } else if (lines[i] === ' ') {
-            // pass
-          } else {
-            preProcessedText.push(lines[i]);
-          }
-        }
-        // for (const line of preProcessedText) {
-        //   console.log(line);
-        // }
+        // Remove the following lines at end of array
+        for (let i = destinations.length - 1; i > 0; i--) {
+          const destination = destinations[i];
 
-        // Create line breaks for Bracelet destinations
-        for (let i = 0; i < preProcessedText.length; i++) {
-          const test1 = 'Barbados (BGI)   BB   BGI  ';
-          const test2 = 'Cayo Coco (CCC)   CU   CCC  ';
-          const test3 = 'Curaçao (CUR)   CW   CUR  ';
-          const test4 = 'Huatulco (HUX)   MX   HUX  ';
-          const test5 = 'Ixtapa (ZIH)   MX   ZIH  ';
-          const test6 = 'Liberia (LIR)   CR   LIR  ';
-          const test7 = 'Puerto Plata (POP)   DO   POP';
-          const test8 = 'Puerto Vallarta (PVR)   MX  PVR '; // ##
-          const test9 = 'St. Lucia (UVF)   LC   UVF  ';
-          const test10 = 'Santa Clara (SNU)   CU   SNU  ';
-          const test11 = 'Varadero (VRA)   CU   VRA  ';
-
-          if (preProcessedText[i].includes(test1)) {
-            // Barbados
-            processedText.push(test1);
-            processedText.push(preProcessedText[i].replace(test1, ''));
-          } else if (preProcessedText[i].includes(test2)) {
-            // Cayo Coco
-            processedText.push(test2);
-            processedText.push(preProcessedText[i].replace(test2, ''));
-          } else if (preProcessedText[i].includes(test3)) {
-            // Curaçao
-            processedText.push(test3);
-            processedText.push(preProcessedText[i].replace(test3, ''));
-          } else if (preProcessedText[i].includes(test4)) {
-            // Huatulco
-            processedText.push(test4);
-            processedText.push(preProcessedText[i].replace(test4, ''));
-          } else if (preProcessedText[i].includes(test5)) {
-            // Ixtapa
-            processedText.push(test5);
-            processedText.push(preProcessedText[i].replace(test5, ''));
-          } else if (preProcessedText[i].includes(test6)) {
-            //Liberia
-            processedText.push(test6);
-            processedText.push(preProcessedText[i].replace(test6, ''));
-          } else if (preProcessedText[i].includes(test7)) {
-            // Puerto Plata and Puerto Vallarta
-            processedText.push(test7);
-            processedText.push(test8);
-            processedText.push(
-              cutStringAfterInclusive(preProcessedText[i], 'Punta Cana')
-            );
-          } else if (preProcessedText[i].includes(test9)) {
-            // St. Lucia
-            processedText.push(test9);
-            processedText.push(preProcessedText[i].replace(test9, ''));
-          } else if (preProcessedText[i].includes(test10)) {
-            // Santa Clara
-            processedText.push(test10);
-            processedText.push(preProcessedText[i].replace(test10, ''));
-          } else if (preProcessedText[i].includes(test11)) {
-            // Varadero
-            processedText.push(test11);
-            processedText.push(preProcessedText[i].replace(test11, ''));
-          } else {
-            processedText.push(preProcessedText[i]);
+          if (destination.includes('***BRACELET PROVIDED***')) {
+            destinations.pop();
+          } else if (destination.includes('N E W   A L L O W A N C E')) {
+            destinations.pop();
+          } else if (destination.includes('Meal Allowances')) {
+            destinations.pop();
           }
         }
 
-        // Go through each line of processedText and parse according to conditions
-        for (let i = 0; i < processedText.length; i++) {
-          //console.log(processedText[i]);
-          if (!processedText[i].includes('$')) {
-            parseLineAsBracelet(processedText[i]);
+        // Parse each destination depending on expenses or bracelet
+        for (let i = 0; i < destinations.length; i++) {
+          const destination = destinations[i];
+
+          if (!destination.includes('$')) {
+            parseLineAsBracelet(destination);
           } else {
-            parseLine(processedText[i]);
+            parseLine(destination);
           }
-          setUploaded(true);
         }
+        setExpensesUploaded(true);
       } catch (err) {
         console.error(`!Error: ${err}`);
       }

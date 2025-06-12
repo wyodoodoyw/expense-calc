@@ -71,7 +71,8 @@ function Flight(props) {
   return (
     <>
       <div className="text-start ms-3">
-        {f.index === 0 && currentDutyDay.dutyDayStart}
+        {(f.index === 0 || pairing.sequence[f.index - 1] !== undefined) &&
+          currentDutyDay.dutyDayStart}
       </div>
       <div className="mx-3 py-3 text-center row bg-info">
         <div className="col-1">
@@ -119,7 +120,9 @@ function Flight(props) {
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>
       <div className="text-start ms-3">
-        {f.index === pairing.sequence.length - 1 && currentDutyDay.dutyDayEnd}
+        {(f.index === pairing.sequence.length - 1 ||
+          pairing.sequence[f.index + 1].hotelInfo) &&
+          currentDutyDay.dutyDayEnd}
       </div>
     </>
   );

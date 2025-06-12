@@ -11,7 +11,7 @@ import parse from '../modules/parse';
 // import parseAsLayover from '../modules/parseAsLayover';
 
 const PairingFileUploader = (props) => {
-  const { setUploaded } = props;
+  const { setPairingsUploaded } = props;
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +38,7 @@ const PairingFileUploader = (props) => {
     if (file) {
       // Read pdf file
       let text = await extractTextFromPDF(file);
-      text && setUploaded(true);
+      text && setPairingsUploaded(true);
 
       // Remove header
       const firstPairingNumber = text.match(/(C|M|T|V)[0-9]{4}/)[0];
