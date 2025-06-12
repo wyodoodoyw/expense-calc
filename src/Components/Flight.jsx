@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updateFlightDeparture,
   updateFlightArrival,
+  updateDutyDayStart,
+  updateDutyDayEnd,
 } from '../features/pairing/pairingSlice';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -18,13 +20,24 @@ const timeFormat = 'HH:mm';
 function Flight(props) {
   const { index } = props;
 
-  const f = useSelector((state) => state.pairing.sequence[index]);
+  const pairing = useSelector((state) => state.pairing);
+
+  const f = pairing.sequence[index];
   const departureTime = dayjs()
     .set('hour', f.departureTime.slice(0, -2))
     .set('minute', f.departureTime.slice(-2));
   const arrivalTime = dayjs()
     .set('hour', f.arrivalTime.slice(0, -2))
     .set('minute', f.arrivalTime.slice(-2));
+
+  const dutyDays = pairing.dutyDays;
+  let currentDutyDay = null;
+  for (let i = 0; i < dutyDays.length; i++) {
+    if (dutyDays[i].flightIndices.includes(index)) {
+      currentDutyDay = dutyDays[i];
+      break;
+    }
+  }
 
   const dispatch = useDispatch();
 
@@ -35,16 +48,29 @@ function Flight(props) {
       dispatch(
         updateFlightDeparture({ index: index, value: value.format('HHmm') })
       );
+      dispatch(
+        updateDutyDayStart({
+          index: currentDutyDay.index,
+          value: value.format('HHmm'),
+        })
+      );
     }
     if (name === 'end') {
       dispatch(
         updateFlightArrival({ index: index, value: value.format('HHmm') })
+      );
+      dispatch(
+        updateDutyDayEnd({
+          index: currentDutyDay.index,
+          value: value.format('HHmm'),
+        })
       );
     }
   };
 
   return (
     <>
+      <div className="text-start ms-3">{currentDutyDay.dutyDayStart}</div>
       <div className="mx-3 py-3 text-center row bg-info">
         <div className="col-1">
           Flight No: AC{f.flightNumber} {f.isDeadhead && <p>DHD</p>}
@@ -90,6 +116,7 @@ function Flight(props) {
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>
+      <div className="text-start ms-3">{currentDutyDay.dutyDayEnd}</div>
     </>
   );
 }
