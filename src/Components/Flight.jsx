@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updateFlightDeparture,
   updateFlightArrival,
-  updateDutyDayStart,
   updateDutyDayEnd,
 } from '../features/pairing/pairingSlice';
 import dayjs from 'dayjs';
@@ -71,7 +70,9 @@ function Flight(props) {
 
   return (
     <>
-      <div className="text-start ms-3">{currentDutyDay.dutyDayStart}</div>
+      <div className="text-start ms-3">
+        {f.index === 0 && currentDutyDay.dutyDayStart}
+      </div>
       <div className="mx-3 py-3 text-center row bg-info">
         <div className="col-1">
           Flight No: AC{f.flightNumber} {f.isDeadhead && <p>DHD</p>}
@@ -117,7 +118,9 @@ function Flight(props) {
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>
-      <div className="text-start ms-3">{currentDutyDay.dutyDayEnd}</div>
+      <div className="text-start ms-3">
+        {f.index === pairing.sequence.length - 1 && currentDutyDay.dutyDayEnd}
+      </div>
     </>
   );
 }

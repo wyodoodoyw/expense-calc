@@ -3,22 +3,32 @@ import dayjs from 'dayjs';
 
 const timeFormat = 'HH:mm';
 
-const getDutyStart = (sequence, equip) => {
-  const dutyDayStart = dayjs()
+const getDutyStart = (sequence, firstFlight, aircraft) => {
+  let dutyDayStart = dayjs()
     .set('hour', sequence.departureTime.slice(0, -2))
     .set('minute', sequence.departureTime.slice(0 - 2))
     .subtract(1, 'hour');
-
-  if (equip === '767' || equip === '788') {
-    dutyDayStart.add(10, 'minutes');
-  } else if (equip === '330' || equip === '789' || equip === '772') {
-    dutyDayStart.add(15, 'minutes');
-  } else if (equip === '773') {
-    dutyDayStart.add(20, 'minutes');
-  } else if (equip === '77P') {
-    dutyDayStart.add(25, 'minutes');
+  if (firstFlight) {
+    if (aircraft === '767' || aircraft === '788') {
+      dutyDayStart = dutyDayStart.subtract(10, 'minutes');
+    } else if (aircraft === '330' || aircraft === '789' || aircraft === '772') {
+      dutyDayStart = dutyDayStart.subtract(15, 'minutes');
+    } else if (aircraft === '773') {
+      dutyDayStart = dutyDayStart.subtract(20, 'minutes');
+    } else if (aircraft === '77P') {
+      dutyDayStart = dutyDayStart.subtract(25, 'minutes');
+    }
   }
   return dutyDayStart.format('HHmm');
+};
+
+const getDutyDayEnd = (sequence) => {
+  const dutyDayEnd = dayjs()
+    .set('hour', sequence.arrivalTime.slice(0, -2))
+    .set('minute', sequence.arrivalTime.slice(-2))
+    .add(15, 'minutes')
+    .format('HHmm');
+  return dutyDayEnd;
 };
 
 export const pairingSlice = createSlice({
@@ -42,46 +52,49 @@ export const pairingSlice = createSlice({
       totalAllowance: action.payload.totalAllowance,
       totalCredit: action.payload.totalCredit,
       totalDuty: action.payload.totalDuty,
-      //
-      // flights: [],
       sequence: action.payload.sequence || [],
       dutyDays: [],
     }),
 
     processSequence: (state, action) => {
+      // TURN
       const processTurn = (sequence) => {
-        const dutyDayEnd = dayjs()
-          .set('hour', sequence[1].arrivalTime.slice(0, -2))
-          .set('minute', sequence[1].arrivalTime.slice(-2))
-          .add(15, 'minutes')
-          .format('HHmm');
-        const equip = sequence[0].equipment;
+        const aircraft = sequence[0].aircraft;
         const dutyDay = {
           index: 0,
-          dutyDayStart: getDutyStart(sequence[0], equip),
-          dutyDayEnd: dutyDayEnd,
+          dutyDayStart: getDutyStart(sequence[0], true, aircraft),
+          dutyDayEnd: getDutyDayEnd(sequence[1]),
           flightIndices: sequence.map((flight) => flight.index),
         };
         return dutyDay;
       };
 
+      // MULTI-LEG DAY
       const processMultiLegDay = (sequence) => {
+        const aircraft = sequence[0].aircraft;
         const lastIndex = sequence.length - 1;
         const dutyDay = {
           index: 0,
-          dutyDayStart: sequence[0].departureTime,
-          dutyDayEnd: sequence[lastIndex].arrivalTime,
+          dutyDayStart: getDutyStart(sequence[0], aircraft),
+          dutyDayEnd: getDutyDayEnd(sequence[lastIndex]),
           flightIndices: sequence.map((flight) => flight.index),
         };
         return dutyDay;
       };
 
+      // OTHER DUTY DAYS
       const processDutyDay = (sequence) => {
+        const aircraft = sequence[0].aircraft;
         const lastIndex = sequence.length - 1;
         const dutyDay = {
           index: null,
-          dutyDayStart: sequence[0].departureTime,
-          dutyDayEnd: sequence[lastIndex].arrivalTime,
+          dutyDayStart: getDutyStart(
+            sequence[0],
+            // if first flight of pairing, duty day start varies
+            sequence[0].index === 0,
+            aircraft
+          ),
+          dutyDayEnd: getDutyDayEnd(sequence[lastIndex]),
           flightIndices: sequence.map((flight) => flight.index),
         };
         return dutyDay;
@@ -172,7 +185,6 @@ export const {
   processSequence,
   updateFlightArrival,
   updateFlightDeparture,
-  updateDutyDayStart,
   updateDutyDayEnd,
 } = pairingSlice.actions;
 
