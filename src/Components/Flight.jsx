@@ -44,16 +44,17 @@ function Flight(props) {
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
     const { name, value } = target;
+    const dutyEnd = dayjs(value, timeFormat).add(15, 'minutes').format('HHmm');
     if (name === 'start') {
       dispatch(
         updateFlightDeparture({ index: index, value: value.format('HHmm') })
       );
-      dispatch(
-        updateDutyDayStart({
-          index: currentDutyDay.index,
-          value: value.format('HHmm'),
-        })
-      );
+      // dispatch(
+      //   updateDutyDayStart({
+      //     index: currentDutyDay.index,
+      //     value: value.format('HHmm'),
+      //   })
+      // );
     }
     if (name === 'end') {
       dispatch(
@@ -62,7 +63,7 @@ function Flight(props) {
       dispatch(
         updateDutyDayEnd({
           index: currentDutyDay.index,
-          value: value.format('HHmm'),
+          value: dutyEnd,
         })
       );
     }

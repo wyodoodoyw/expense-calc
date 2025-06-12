@@ -3,6 +3,24 @@ import dayjs from 'dayjs';
 
 const timeFormat = 'HH:mm';
 
+const getDutyStart = (sequence, equip) => {
+  const dutyDayStart = dayjs()
+    .set('hour', sequence.departureTime.slice(0, -2))
+    .set('minute', sequence.departureTime.slice(0 - 2))
+    .subtract(1, 'hour');
+
+  if (equip === '767' || equip === '788') {
+    dutyDayStart.add(10, 'minutes');
+  } else if (equip === '330' || equip === '789' || equip === '772') {
+    dutyDayStart.add(15, 'minutes');
+  } else if (equip === '773') {
+    dutyDayStart.add(20, 'minutes');
+  } else if (equip === '77P') {
+    dutyDayStart.add(25, 'minutes');
+  }
+  return dutyDayStart.format('HHmm');
+};
+
 export const pairingSlice = createSlice({
   name: 'pairing',
   initialState: {},
@@ -32,10 +50,16 @@ export const pairingSlice = createSlice({
 
     processSequence: (state, action) => {
       const processTurn = (sequence) => {
+        const dutyDayEnd = dayjs()
+          .set('hour', sequence[1].arrivalTime.slice(0, -2))
+          .set('minute', sequence[1].arrivalTime.slice(-2))
+          .add(15, 'minutes')
+          .format('HHmm');
+        const equip = sequence[0].equipment;
         const dutyDay = {
           index: 0,
-          dutyDayStart: sequence[0].departureTime,
-          dutyDayEnd: sequence[1].arrivalTime,
+          dutyDayStart: getDutyStart(sequence[0], equip),
+          dutyDayEnd: dutyDayEnd,
           flightIndices: sequence.map((flight) => flight.index),
         };
         return dutyDay;
@@ -75,7 +99,7 @@ export const pairingSlice = createSlice({
       if (numberFlights === 2 && numberLayovers === 0) {
         // Turn
         const dutyDay = processTurn(action.payload);
-        console.log(`Turn: ${JSON.stringify(dutyDay)}`);
+        // console.log(`Turn: ${JSON.stringify(dutyDay)}`);
         state.dutyDays.push(dutyDay);
       } else if (numberFlights > 2 && numberLayovers === 0) {
         // Multi-leg Day
@@ -130,10 +154,10 @@ export const pairingSlice = createSlice({
       state.sequence[index].arrivalTime = value;
     },
 
-    updateDutyDayStart: (state, action) => {
-      const { index, value } = action.payload;
-      state.dutyDays[index].dutyDayStart = value;
-    },
+    // updateDutyDayStart: (state, action) => {
+    //   const { index, value } = action.payload;
+    //   state.dutyDays[index].dutyDayStart = value;
+    // },
 
     updateDutyDayEnd: (state, action) => {
       const { index, value } = action.payload;
