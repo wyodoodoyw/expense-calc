@@ -5,25 +5,42 @@ const parseAsLayover = (index, line) => {
     index: index,
   };
 
-  const hotelInfo = line.match(/[A-Z][a-z]{1,9}\s?/g);
+  if (line.match(/[A-Z][a-z]{1,9}\s?/g)) {
+    const hotelInfo = line.match(/[A-Z][a-z]{1,9}\s?/g);
 
-  for (let i = 0; i < hotelInfo.length; i++) {
-    hotelInfo[i] = hotelInfo[i].trim();
+    for (let i = 0; i < hotelInfo.length; i++) {
+      hotelInfo[i] = hotelInfo[i].trim();
+    }
+
+    if (hotelInfo) {
+      newLayover.hotelInfo = hotelInfo.join(' ');
+    }
+
+    if (hotelInfo) {
+      let mealsInfo = cutStringAfterExclusive(
+        line,
+        hotelInfo[hotelInfo.length - 1]
+      );
+      mealsInfo = mealsInfo.replace('HND', '').replace('DT', '');
+      mealsInfo = mealsInfo.trim();
+      newLayover.layoverMeals = mealsInfo;
+    }
   }
 
-  if (hotelInfo) {
-    newLayover.hotelInfo = hotelInfo.join(' ');
+  if (line.match('TBA')) {
+    const hotelInfo = 'TBA';
+    newLayover.hotelInfo = hotelInfo;
+
+    if (hotelInfo) {
+      let mealsInfo = cutStringAfterExclusive(
+        line,
+        // hotelInfo[hotelInfo.length - 1]
+        'TBA'
+      );
+      newLayover.layoverMeals = mealsInfo.trim();
+    }
   }
 
-  if (hotelInfo) {
-    let mealsInfo = cutStringAfterExclusive(
-      line,
-      hotelInfo[hotelInfo.length - 1]
-    );
-    mealsInfo = mealsInfo.replace('HND', '').replace('DT', '');
-    mealsInfo = mealsInfo.trim();
-    newLayover.layoverMeals = mealsInfo;
-  }
   return newLayover;
 };
 

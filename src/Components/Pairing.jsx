@@ -8,62 +8,122 @@ function Pairing() {
   const p = useSelector((state) => state.pairing);
   const sequence = p.sequence;
 
-  return (
-    <div className="text-start font-monospace">
-      <div className="row mt-4">
-        <div className="col-6 ps-5">
-          {p.pairingNumber} OPERATES/OPER- {p.pairingOperates}
+  if (p.pairingNumber.includes('T5')) {
+    return (
+      <div className="text-start font-monospace">
+        <div className="row mt-4">
+          <div className="col-6 ps-5">
+            {p.pairingNumber} OPERATES/OPER- {p.pairingOperates}
+          </div>
+          <div className="col-6 text-end pe-5">
+            {/* Dates: {JSON.stringify(p.pairingDates)} */}
+          </div>
         </div>
-        <div className="col-6 text-end pe-5">
-          {/* Dates: {JSON.stringify(p.pairingDates)} */}
+        <div className="row">
+          <div className="col-6 ps-5">
+            Crew: {p.pairingPurser && `P${p.pairingPurser}  `}
+            {p.pairingFA && `FA${p.pairingFA}  `}
+            {p.pairingGP && `GJ${p.pairingGP}  `}
+            {p.pairingGY && `GY${p.pairingGY}`}
+          </div>
+          <div className="col-6 text-end pe-5">
+            Languages: {p.pairingBL && `BL${p.pairingBL}  `}
+            {p.pairingLanguages &&
+              p.pairingLanguages.map((lang) => {
+                return `${lang}`;
+              })}
+          </div>
         </div>
-      </div>
-      <div className="row">
-        <div className="col-6 ps-5">
-          Crew: {p.pairingPurser && `P${p.pairingPurser}  `}
-          {p.pairingFA && `FA${p.pairingFA}  `}
-          {p.pairingGP && `GJ${p.pairingGP}  `}
-          {p.pairingGY && `GY${p.pairingGY}`}
-        </div>
-        <div className="col-6 text-end pe-5">
-          Languages: {p.pairingBL && `BL${p.pairingBL}  `}
-          {p.pairingLanguages &&
-            p.pairingLanguages.map((lang) => {
-              return `${lang}`;
+
+        <div className="row mt-3 ms-3">
+          {sequence &&
+            sequence.map((current, index) => {
+              if (!current.hotelInfo) {
+                // duty day of flights
+                <p key={index}>{JSON.stringify(current)}</p>;
+                return <Flight key={index} index={index} />;
+              } else if (current.hotelInfo) {
+                // layover
+                return (
+                  <div className="row" key={index}>
+                    <Layover key={index} index={index} />
+                  </div>
+                );
+              }
             })}
         </div>
+        <div className="row ms-3">
+          <div className="col-3">BLOCK/H-VOL {p.blockCredit}</div>
+          <div className="col-3">Total Duty {p.totalDuty}</div>
+          <div className="col-3">(INC - ${p.cicoAmount} CICO)</div>
+          <div className="col-3">TOTAL ALLOWANCE - ${p.totalAllowance}</div>
+        </div>
+        <div className="row ms-3">
+          <div className="col-3">TAFB/PTEB {p.tafb}</div>
+          <div className="col-3">TOTAL - {p.totalCredit}</div>
+        </div>
+        <p className="mt-3"></p>
+        <p></p>
       </div>
-
-      <div className="row mt-3 ms-3">
-        {sequence &&
-          sequence.map((current, index, arr) => {
-            if (!current.hotelInfo) {
-              // duty day of flights
-              <p key={index}>{JSON.stringify(current)}</p>;
-              return <Flight key={index} index={index} />;
-            } else if (current.hotelInfo) {
-              // layover
-              return (
-                <div className="row" key={index}>
-                  <Layover key={index} index={index} />
-                </div>
-              );
-            }
-          })}
+    );
+  } else {
+    return (
+      <div className="text-start font-monospace">
+        <div className="row mt-4">
+          <div className="col-6 ps-5">
+            {p.pairingNumber} OPERATES/OPER- {p.pairingOperates}
+          </div>
+          <div className="col-6 text-end pe-5">
+            {/* Dates: {JSON.stringify(p.pairingDates)} */}
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-6 ps-5">
+            Crew: {p.pairingPurser && `P${p.pairingPurser}  `}
+            {p.pairingFA && `FA${p.pairingFA}  `}
+            {p.pairingGP && `GJ${p.pairingGP}  `}
+            {p.pairingGY && `GY${p.pairingGY}`}
+          </div>
+          <div className="col-6 text-end pe-5">
+            Languages: {p.pairingBL && `BL${p.pairingBL}  `}
+            {p.pairingLanguages &&
+              p.pairingLanguages.map((lang) => {
+                return `${lang}`;
+              })}
+          </div>
+        </div>
+        {/* INSERT DUTY DAY HERE */}
+        <div className="row mt-3 ms-3">
+          {sequence &&
+            sequence.map((current, index) => {
+              if (!current.hotelInfo) {
+                // duty day of flights
+                <p key={index}>{JSON.stringify(current)}</p>;
+                return <Flight key={index} index={index} />;
+              } else if (current.hotelInfo) {
+                // layover
+                return (
+                  <div className="row" key={index}>
+                    <Layover key={index} index={index} />
+                  </div>
+                );
+              }
+            })}
+        </div>
+        <div className="row ms-3">
+          <div className="col-3">BLOCK/H-VOL {p.blockCredit}</div>
+          <div className="col-3">Total Duty {p.totalDuty}</div>
+          <div className="col-3">(INC - ${p.cicoAmount} CICO)</div>
+          <div className="col-3">TOTAL ALLOWANCE - ${p.totalAllowance}</div>
+        </div>
+        <div className="row ms-3">
+          <div className="col-3">TAFB/PTEB {p.tafb}</div>
+          <div className="col-3">TOTAL - {p.totalCredit}</div>
+        </div>
+        <p className="mt-3"></p>
+        <p></p>
       </div>
-      <div className="row ms-3">
-        <div className="col-3">BLOCK/H-VOL {p.blockCredit}</div>
-        <div className="col-3">Total Duty {p.totalDuty}</div>
-        <div className="col-3">(INC - ${p.cicoAmount} CICO)</div>
-        <div className="col-3">TOTAL ALLOWANCE - ${p.totalAllowance}</div>
-      </div>
-      <div className="row ms-3">
-        <div className="col-3">TAFB/PTEB {p.tafb}</div>
-        <div className="col-3">TOTAL - {p.totalCredit}</div>
-      </div>
-      <p className="mt-3"></p>
-      <p></p>
-    </div>
-  );
+    );
+  }
 }
 export default Pairing;

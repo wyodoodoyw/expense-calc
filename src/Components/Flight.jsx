@@ -1,15 +1,16 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react';
-import { TimePicker } from '@mui/x-date-pickers';
+import { TimePicker, TimeField } from '@mui/x-date-pickers';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   updateFlightDeparture,
   updateFlightArrival,
   updateDutyDayEnd,
 } from '../features/pairing/pairingSlice';
+import na_sun_airports from '../data/na_sun_airports';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import { useEffect, useState } from 'react';
 // import isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(utc);
@@ -21,7 +22,7 @@ function Flight(props) {
 
   const pairing = useSelector((state) => state.pairing);
 
-  const f = pairing.sequence[index];
+  const f = pairing.sequence[index]; // flight
   const departureTime = dayjs()
     .set('hour', f.departureTime.slice(0, -2))
     .set('minute', f.departureTime.slice(-2));
@@ -48,12 +49,6 @@ function Flight(props) {
       dispatch(
         updateFlightDeparture({ index: index, value: value.format('HHmm') })
       );
-      // dispatch(
-      //   updateDutyDayStart({
-      //     index: currentDutyDay.index,
-      //     value: value.format('HHmm'),
-      //   })
-      // );
     }
     if (name === 'end') {
       dispatch(
@@ -68,13 +63,46 @@ function Flight(props) {
     }
   };
 
+  // NASun Flights (with per diem)
+
+  // const [isNASun, setIsNASun] = useState(false);
+  // if (
+  //   na_sun_airports.includes(f.departureAirport) &&
+  //   na_sun_airports.includes(f.arrivalAirport)
+  // ) {
+  //   setIsNASun(true);
+  // }
+
+  // useEffect(() => {
+  //   if (isNASun) {
+  //     calculateFlightExpenses();
+  //   }
+  // }, []);
+
+  // const calculateFlightExpenses = () => {};
+
   return (
     <>
-      <div className="text-start ms-3">
-        {(f.index === 0 || pairing.sequence[f.index - 1] !== undefined) &&
-          currentDutyDay.dutyDayStart}
+      <div className="mx-3 py-3 row text-start">
+        {(f.index === 0 ||
+          pairing.sequence[f.index - 1].hotelInfo !== undefined) && (
+          <div className="col-">Duty Day Start:</div>
+        )}
+        <div className="col-">
+          {(f.index === 0 ||
+            pairing.sequence[f.index - 1].hotelInfo !== undefined) && (
+            <input
+              type="time"
+              value={`${currentDutyDay.dutyDayStart.slice(
+                0,
+                -2
+              )}:${currentDutyDay.dutyDayStart.slice(-2)}`}
+              readOnly
+            />
+          )}
+        </div>
       </div>
-      <div className="mx-3 py-3 text-center row bg-info">
+      <div className="mx-3 py-3 text-center row flex-shrink-1 bg-info">
         <div className="col-1">
           Flight No: AC{f.flightNumber} {f.isDeadhead && <p>DHD</p>}
         </div>
@@ -119,10 +147,24 @@ function Flight(props) {
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>
-      <div className="text-start ms-3">
+      <div className="mx-3 py-3 row text-start">
         {(f.index === pairing.sequence.length - 1 ||
-          pairing.sequence[f.index + 1].hotelInfo) &&
-          currentDutyDay.dutyDayEnd}
+          pairing.sequence[f.index + 1].hotelInfo) && (
+          <div className="col-">Duty Day End:</div>
+        )}
+        <div className="col-">
+          {(f.index === pairing.sequence.length - 1 ||
+            pairing.sequence[f.index + 1].hotelInfo) && (
+            <input
+              type="time"
+              value={`${currentDutyDay.dutyDayEnd.slice(
+                0,
+                -2
+              )}:${currentDutyDay.dutyDayEnd.slice(-2)}`}
+              readOnly
+            />
+          )}
+        </div>
       </div>
     </>
   );
