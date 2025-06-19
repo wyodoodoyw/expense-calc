@@ -36,23 +36,6 @@ function Layover(props) {
     .set('hour', nextFlight.departureTime.slice(0, -2))
     .set('minute', nextFlight.departureTime.slice(-2));
 
-  // const dutyDays = pairing.dutyDays;
-  // let prevDutyDay = null;
-  // let nextDutyDay = null;
-  // for (let i = 0; i < dutyDays.length; i++) {
-  //   if (dutyDays[i].flightIndices.includes(prevFlight.index)) {
-  //     prevDutyDay = {
-  //       start: dutyDays[i].dutyDayStart,
-  //       end: dutyDays[i].dutyDayEnd,
-  //     };
-  //   } else if (dutyDays[i].flightIndices.includes(nextFlight.index)) {
-  //     nextDutyDay = {
-  //       start: dutyDays[i].dutyDayStart,
-  //       end: dutyDays[i].dutyDayEnd,
-  //     };
-  //   }
-  // }
-
   const calculateFullDays = () => {
     let hours =
       Number(l.layoverLength.slice(0, -2)) +
@@ -90,11 +73,11 @@ function Layover(props) {
     if (international_airport_codes.includes(l.layoverStation)) {
       new_expenses = calculateFirstDayExpensesIntl();
       new_expenses += calculateLastDayExpensesIntl();
-      console.log(`New: ${new_expenses}`);
+      // console.log(`New: ${new_expenses}`);
     } else if (na_sun_airports.includes(l.layoverStation)) {
-      new_expenses += calculateFirstDayExpensesNASun();
-      new_expenses += calculateLastDayExpensesNASun();
-      console.log(new_expenses);
+      new_expenses = calculateLayoverExpensesNASun();
+      // new_expenses += calculateLastDayExpensesNASun();
+      // console.log(new_expenses);
     }
 
     setMeals({
@@ -106,31 +89,49 @@ function Layover(props) {
   }, [prevFlight.arrivalTime, nextFlight.departureTime]);
 
   // NASun Layover
-  const calculateFirstDayExpensesNASun = () => {
-    const time = dayjs(layoverStart);
-    if (time.isBefore(dayjs('08:00', timeFormat), 'minute')) {
-      return 'BLDS';
-    } else if (time.isBefore(dayjs('12:30', timeFormat), 'minute')) {
-      return 'LDS';
-    } else if (time.isBefore(dayjs('18:00', timeFormat), 'minute')) {
-      return 'DS';
-    } else if (time.isBefore(dayjs('23:00', timeFormat), 'minute')) {
-      return 'S';
+  const calculateLayoverExpensesNASun = () => {
+    const start = dayjs(layoverStart);
+    const end = dayjs(layoverEnd);
+    let meals = '';
+    if (
+      start.isBefore(dayjs('08:00', timeFormat), 'minute') &&
+      end.isAfter(dayjs('09:30', timeFormat), 'minute')
+    ) {
+      meals += 'B';
     }
+    if (
+      start.isBefore(dayjs('12:30', timeFormat), 'minute') &&
+      end.isAfter(dayjs('13:30', timeFormat), 'minute')
+    ) {
+      meals += 'L';
+    }
+    if (
+      start.isBefore(dayjs('17:00', timeFormat), 'minute') &&
+      end.isAfter(dayjs('18:30', timeFormat), 'minute')
+    ) {
+      meals += 'D';
+    }
+    if (
+      start.isBefore(dayjs('23:00', timeFormat), 'minute') &&
+      end.isAfter(dayjs('01:00', timeFormat), 'minute')
+    ) {
+      meals += 'S';
+    }
+    return meals;
   };
 
-  const calculateLastDayExpensesNASun = () => {
-    const time = dayjs(layoverEnd);
-    if (time.isAfter(dayjs('18:30', timeFormat), 'minute')) {
-      return 'BLD';
-    } else if (time.isAfter(dayjs('13:30', timeFormat), 'minute')) {
-      return 'BL';
-    } else if (time.isAfter(dayjs('09:30', timeFormat), 'minute')) {
-      return 'B';
-    } else if (time.isAfter(dayjs('01:00', timeFormat), 'minute')) {
-      return 'BLDS';
-    }
-  };
+  // const calculateLastDayExpensesNASun = () => {
+  //   const time = dayjs(layoverEnd);
+  //   if (time.isAfter(dayjs('18:30', timeFormat), 'minute')) {
+  //     return 'BLD';
+  //   } else if (time.isAfter(dayjs('13:30', timeFormat), 'minute')) {
+  //     return 'BL';
+  //   } else if (time.isAfter(dayjs('09:30', timeFormat), 'minute')) {
+  //     return 'B';
+  //   } else if (time.isAfter(dayjs('01:00', timeFormat), 'minute')) {
+  //     return 'BLDS';
+  //   }
+  // };
 
   // International Layover
   const calculateFirstDayExpensesIntl = () => {
@@ -247,13 +248,15 @@ function Layover(props) {
         <div className="col-3">Layover Length: {l.layoverLength}</div>
         <div className="col-2">Meals: {l.layoverMeals}</div>
       </div>
-      <ExpensesTable
-        station={l.layoverStation}
-        meals={meals}
-        expenses={expenses}
-        isLayover={true}
-        fullDays={calculateFullDays()}
-      />
+      {international_airport_codes.includes(l.layoverStation) && (
+        <ExpensesTable
+          station={l.layoverStation}
+          meals={meals}
+          expenses={expenses}
+          isLayover={true}
+          fullDays={calculateFullDays()}
+        />
+      )}
     </div>
   );
 }

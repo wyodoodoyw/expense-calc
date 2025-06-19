@@ -18,7 +18,7 @@ dayjs.extend(customParseFormat);
 function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
-  const [pairingNumber, setPairingNumber] = useState('T8894');
+  const [pairingNumber, setPairingNumber] = useState('T8879');
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();

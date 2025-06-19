@@ -23,6 +23,7 @@ function Flight(props) {
   const pairing = useSelector((state) => state.pairing);
 
   const f = pairing.sequence[index]; // flight
+  // console.log(f);
   const departureTime = dayjs()
     .set('hour', f.departureTime.slice(0, -2))
     .set('minute', f.departureTime.slice(-2));
@@ -83,7 +84,7 @@ function Flight(props) {
 
   return (
     <>
-      <div className="mx-3 py-3 row text-start">
+      {/* <div className="mx-3 py-3 row text-start">
         {(f.index === 0 ||
           pairing.sequence[f.index - 1].hotelInfo !== undefined) && (
           <div className="col-">Duty Day Start:</div>
@@ -101,7 +102,7 @@ function Flight(props) {
             />
           )}
         </div>
-      </div>
+      </div> */}
       <div className="mx-3 py-3 text-center row flex-shrink-1 bg-info">
         <div className="col-1">
           Flight No: AC{f.flightNumber} {f.isDeadhead && <p>DHD</p>}
@@ -147,7 +148,7 @@ function Flight(props) {
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>
-      <div className="mx-3 py-3 row text-start">
+      {/* <div className="mx-3 py-3 row text-start">
         {(f.index === pairing.sequence.length - 1 ||
           pairing.sequence[f.index + 1].hotelInfo) && (
           <div className="col-">Duty Day End:</div>
@@ -164,8 +165,8 @@ function Flight(props) {
               readOnly
             />
           )}
-        </div>
-      </div>
+        </div> 
+      </div>*/}
     </>
   );
 }

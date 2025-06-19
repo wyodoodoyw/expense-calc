@@ -7,63 +7,41 @@ import Flight from './Flight';
 const timeFormat = 'HH:mm';
 
 function DutyDay(props) {
-  const { dutyIndex } = props;
+  const { index } = props;
 
-  const flights = useSelector((state) => state.pairing.sequence[dutyIndex]);
-  // console.log(flights);
-
-  // const [state, setState] = useContext(PairingContext);
-
-  // useEffect(
-  //   () =>
-  //     setState((prev) => ({
-  //       ...prev,
-  //       key: index,
-  //       dutyStart: dayjs(
-  //         `${flights[0].dutyStart.slice(0, -2)}:${flights[0].dutyStart.slice(
-  //           -2
-  //         )}`,
-  //         timeFormat
-  //       ),
-  //       dutyEnd: dayjs(
-  //         `${flights[flights.length - 1].dutyEnd.slice(0, -2)}:${flights[
-  //           flights.length - 1
-  //         ].dutyEnd.slice(-2)}`,
-  //         timeFormat
-  //       ),
-  //     })),
-  //   []
-  // );
-
-  // const [dutyTimes, setDutyTimes] = useState({
-  //   start: dayjs(
-  //     `${flights[0].dutyStart.slice(0, -2)}:${flights[0].dutyStart.slice(-2)}`,
-  //     timeFormat
-  //   ),
-  //   end: dayjs(
-  //     `${flights[flights.length - 1].dutyEnd.slice(0, -2)}:${flights[
-  //       flights.length - 1
-  //     ].dutyEnd.slice(-2)}`,
-  //     timeFormat
-  //   ),
-  //   length: flights[flights.length - 1].dutyTime,
-  // });
-
+  const pairing = useSelector((state) => state.pairing);
+  const dutyDay = pairing.dutyDays[index];
+  const sequence = pairing.sequence;
+  const flights = dutyDay.flightIndices.map((index) => {
+    return sequence[index];
+  });
+  console.log(flights);
   return (
     <div className="row bg-info">
-      {/* <p>Duty State Start: {dutyTimes.start.format(timeFormat)}</p> */}
+      <div className="col-">Duty Day Start:</div>
+      <input
+        type="time"
+        value={`${dutyDay.dutyDayStart.slice(
+          0,
+          -2
+        )}:${dutyDay.dutyDayStart.slice(-2)}`}
+        readOnly
+      />
       {flights.map((flight) => {
         return (
           <div className="row" key={flight.index}>
-            <Flight
-              key={flight.index}
-              dutyIndex={dutyIndex}
-              flightIndex={flight.index}
-            />
+            <Flight key={flight.index} index={flight.index} />
           </div>
         );
       })}
-      {/* <p>Duty State End: {dutyTimes.end.format(timeFormat)}</p> */}
+      <div className="col-">Duty Day End:</div>
+      <input
+        type="time"
+        value={`${dutyDay.dutyDayEnd.slice(0, -2)}:${dutyDay.dutyDayEnd.slice(
+          -2
+        )}`}
+        readOnly
+      />
     </div>
   );
 }
