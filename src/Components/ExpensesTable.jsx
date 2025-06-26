@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
 const ExpensesTable = (props) => {
-  const { station, meals, expenses, isLayover, fullDays } = props;
-  // const { mB, mL, mD, mS } = meals;
-  // const { eB, eL, eD, eS } = expenses;
+  const { station, meals, expenses, numLayovers } = props;
+  const isLayover = numLayovers > 0;
 
   const calculateDisplayBreakfastTotal = () => {
     return meals.breakfast * expenses.breakfast;
@@ -47,7 +46,7 @@ const ExpensesTable = (props) => {
           <td>{meals.lunch}</td>
           <td>{meals.dinner}</td>
           <td>{meals.snack}</td>
-          {isLayover && <td>1</td>}
+          {isLayover && <td>{numLayovers}</td>}
         </tr>
         <tr>
           <td>x</td>
@@ -63,7 +62,7 @@ const ExpensesTable = (props) => {
           <td>${(meals.lunch * expenses.lunch).toFixed(2)}</td>
           <td>${(meals.dinner * expenses.dinner).toFixed(2)}</td>
           <td>${(meals.snack * expenses.snack).toFixed(2)}</td>
-          {isLayover && <td>${5.05}</td>}
+          {isLayover && <td>${(numLayovers * 5.05).toFixed(2)}</td>}
         </tr>
         <tr className="table-primary">
           <td>Total:</td>
