@@ -54,6 +54,8 @@ export const pairingSlice = createSlice({
       totalDuty: action.payload.totalDuty,
       sequence: action.payload.sequence || [],
       dutyDays: [],
+      // caAllowance: null,
+      // usAllowance: null,
     }),
 
     processSequence: (state, action) => {
@@ -176,6 +178,16 @@ export const pairingSlice = createSlice({
       const { index, value } = action.payload;
       state.dutyDays[index].dutyDayEnd = value;
     },
+
+    updateCAAllowance: (state, action) => {
+      const { index, value } = action.payload;
+      state.caAllowance = value;
+    },
+
+    updateUSAllowance: (state, action) => {
+      const { index, value } = action.payload;
+      state.usAllowance = value;
+    },
   },
 });
 
@@ -186,6 +198,8 @@ export const {
   updateFlightArrival,
   updateFlightDeparture,
   updateDutyDayEnd,
+  updateCAAllowance,
+  updateUSAllowance,
 } = pairingSlice.actions;
 
 // Export the slice reducer for use in the store configuration

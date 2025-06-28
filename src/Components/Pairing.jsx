@@ -1,9 +1,12 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import ExpensesTable from './ExpensesTable';
+import { useSelector } from 'react-redux';
+
 import Flight from './Flight';
 import Layover from './Layover';
-import { useSelector } from 'react-redux';
+import ExpensesTable from './ExpensesTable';
+import TotalTable from './TotalTable';
+
 import dayjs from 'dayjs';
 import canadian_airport_codes from '../data/canadian_airport_codes';
 import american_airport_codes from '../data/american_airport_codes';
@@ -19,12 +22,15 @@ function Pairing() {
   const lastFlight = sequence[sequence.length - 1];
 
   const [allMeals, setAllMeals] = useState({});
-  const [caExpenses, setCaExpenses] = useState({});
-  const [usExpenses, setUSExpenses] = useState({});
+  // const [caExpenses, setCaExpenses] = useState({});
+  // const [usExpenses, setUSExpenses] = useState({});
+
+  // const caDisplayTotal = useSelector((state) => state.expenseTable);
+  // console.log(caDisplayTotal);
 
   useEffect(() => {
-    getExpenseAmounts('YYZ');
-    getExpenseAmounts('MCO');
+    // getExpenseAmounts('YYZ');
+    // getExpenseAmounts('MCO');
     const meals = calculatePairingMeals();
     setAllMeals({
       breakfast: (meals.match(/B/g) || []).length,
@@ -32,6 +38,7 @@ function Pairing() {
       dinner: (meals.match(/D/g) || []).length,
       snack: (meals.match(/S/g) || []).length,
     });
+    adjustForUS();
   }, []);
 
   const isTransborder = () => {
@@ -57,6 +64,7 @@ function Pairing() {
   };
 
   const getExpenseAmounts = (station) => {
+    // logic sent to ExpenseTable
     const request = window.indexedDB.open('ExpensesDB', 1);
     request.onsuccess = (event) => {
       const db = event.target.result;
@@ -65,19 +73,20 @@ function Pairing() {
       const airportCodesIndex = expensesStore.index('airport_codes');
       const request = airportCodesIndex.get(station);
       request.onsuccess = () => {
+        const e = request.result.expenses;
         if (canadian_airport_codes.includes(station)) {
           setCaExpenses({
-            breakfast: request.result.expenses.breakfast,
-            lunch: request.result.expenses.lunch,
-            dinner: request.result.expenses.dinner,
-            snack: request.result.expenses.snack,
+            breakfast: e.breakfast,
+            lunch: e.lunch,
+            dinner: e.dinner,
+            snack: e.snack,
           });
         } else if (american_airport_codes.includes(station)) {
           setUSExpenses({
-            breakfast: request.result.expenses.breakfast,
-            lunch: request.result.expenses.lunch,
-            dinner: request.result.expenses.dinner,
-            snack: request.result.expenses.snack,
+            breakfast: (e.breakfast - caExpenses.breakfast).toFixed(2),
+            lunch: (e.lunch - caExpenses.lunch).toFixed(2),
+            dinner: (e.dinner - caExpenses.dinner).toFixed(2),
+            snack: (e.snack - caExpenses.snack).toFixed(2),
           });
         }
       };
@@ -102,7 +111,7 @@ function Pairing() {
   };
 
   const calculateFirstDayMeals = () => {
-    const time = dayjs(sequence[0].departureTime, timeFormat);
+    const time = dayjs(firstFlight.departureTime, timeFormat);
     const duty = {
       start: dayjs(firstDuty.dutyDayStart),
       end: dayjs('01:01', timeFormat).add(1, 'day'),
@@ -193,6 +202,60 @@ function Pairing() {
     return hours / 24;
   };
 
+  const adjustForUS = () => {
+    let layoverMeals = '';
+    for (let i = 0; i < sequence.length; i++) {
+      const s = sequence[i];
+      if (s.hotelInfo && american_airport_codes.includes(s.layoverStation)) {
+        // console.log(`layover in ${s.layoverStation}`);
+        const layoverStart = dayjs(s.layoverStart, timeFormat);
+        const layoverEnd = dayjs(s.layoverEnd, timeFormat).add(1, 'day');
+        // console.log(`layoverStart: ${layoverStart}`);
+        // console.log(`layoverEnd: ${layoverEnd}`);
+
+        if (
+          layoverStart.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
+          layoverEnd.isAfter(dayjs('09:30', timeFormat), 'minutes')
+        ) {
+          layoverMeals += 'B';
+        }
+        if (
+          layoverStart.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
+          layoverEnd.isAfter(dayjs('13:30', timeFormat), 'minutes')
+        ) {
+          layoverMeals += 'L';
+        }
+        if (
+          layoverStart.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
+          layoverEnd.isAfter(dayjs('19:30', timeFormat), 'minutes')
+        ) {
+          layoverMeals += 'L';
+        }
+        if (
+          layoverStart.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
+          layoverEnd.isAfter(dayjs('01:00', timeFormat), 'minutes')
+        ) {
+          layoverMeals += 'S';
+        }
+      }
+    }
+    // console.log(`layoverMeals: ${layoverMeals}`);
+    return layoverMeals;
+  };
+
+  // const handleTurnTimeChange = ({ target }) => {
+  //     // handle changes to turn times
+  //     const { name, value } = target;
+  //     setTurnTimes((prev) => ({
+  //       ...prev,
+  //       [name]: dayjs(value, timeFormat),
+  //     }));
+  //     // setDuty({
+  //     //   start: (dayjs(turnTimes.start).subtract(1, 'hour'), timeFormat),
+  //     //   end: (dayjs(turnTimes.end).add(15, 'minutes'), timeFormat),
+  //     // });
+  //     calculateExpenses();
+  //   };
   return (
     <div className="text-start font-monospace">
       <div className="row mt-4">
@@ -248,21 +311,22 @@ function Pairing() {
       </div>
       {!p.pairingNumber.includes('T5') && (
         <ExpensesTable
-          station={sequence[0].departureAirport}
+          station={firstFlight.departureAirport}
           meals={allMeals}
-          expenses={caExpenses}
           numLayovers={numLayovers()}
         />
       )}
-      {/* {!p.pairingNumber.includes('T5') && isTransborder() && (
+      {!p.pairingNumber.includes('T5') && (
         <ExpensesTable
-          station={sequence[0].departureAirport}
-          meals={allMeals}
-          expenses={usExpenses}
-          isLayover={true}
-          fullDays={calculateFullDays()}
+          station="SFO"
+          meals={{ breakfast: 1, lunch: 0, dinner: 0, snack: 1 }}
+          numLayovers={0}
         />
-      )} */}
+      )}
+      <p className="me-3 small text-end">
+        * The prices above represent the US amounts minus the Canadian amounts.
+      </p>
+      {/* <TotalTable /> */}
     </div>
   );
 }

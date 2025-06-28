@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { TimePicker, TimeField } from '@mui/x-date-pickers';
+import { TimePicker } from '@mui/x-date-pickers';
 import { useSelector, useDispatch } from 'react-redux';
 import {
   updateFlightDeparture,
@@ -10,7 +10,6 @@ import na_sun_airports from '../data/na_sun_airports';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import { useEffect, useState } from 'react';
 // import isBetween from 'dayjs/plugin/isBetween';
 
 dayjs.extend(utc);
