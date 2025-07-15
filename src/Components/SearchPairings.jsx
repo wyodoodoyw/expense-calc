@@ -65,7 +65,6 @@ function SearchPairings(props) {
               totalDuty: request.result.totalDuty,
             })
           );
-
           dispatch(processSequence(request.result.sequence));
         }
       };

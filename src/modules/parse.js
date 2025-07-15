@@ -5,6 +5,7 @@ import all_airports from '../data/all_airports';
 import parseAsFlight from '../modules/parseAsFlight';
 import parseAsLayover from '../modules/parseAsLayover';
 import addPairingToDB from '../modules/addPairingToDB';
+import test from '../tests';
 
 const parse = (pairing) => {
   let errorPairingNumber = null;

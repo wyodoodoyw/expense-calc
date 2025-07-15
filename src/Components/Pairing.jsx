@@ -1,14 +1,12 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Flight from './Flight';
 import Layover from './Layover';
 import ExpensesTable from './ExpensesTable';
-import TotalTable from './TotalTable';
 
 import dayjs from 'dayjs';
-import canadian_airport_codes from '../data/canadian_airport_codes';
 import american_airport_codes from '../data/american_airport_codes';
 
 const timeFormat = 'HH:mm';
@@ -16,191 +14,191 @@ const timeFormat = 'HH:mm';
 function Pairing() {
   const p = useSelector((state) => state.pairing);
   const sequence = p.sequence;
-  const firstDuty = p.dutyDays[0];
-  const lastDuty = p.dutyDays[p.dutyDays.length - 1];
+  const numLayovers = p.numLayovers;
+  // const firstDuty = p.dutyDays[0];
+  // const lastDuty = p.dutyDays[p.dutyDays.length - 1];
   const firstFlight = sequence[0];
-  const lastFlight = sequence[sequence.length - 1];
+  // const lastFlight = sequence[sequence.length - 1];
+  // const dispatch = useDispatch();
+  // dispatch(calculatePairingMeals());
+
+  // const calculatedMeals = p.calculatedMeals;
+  // console.log(`calculatedMeals: ${JSON.stringify(p.calculatedMeals)}`);
 
   const [allMeals, setAllMeals] = useState({});
-  // const [caExpenses, setCaExpenses] = useState({});
-  // const [usExpenses, setUSExpenses] = useState({});
 
-  // const caDisplayTotal = useSelector((state) => state.expenseTable);
-  // console.log(caDisplayTotal);
+  // useEffect(() => {
+  //   // const meals = calculatePairingMeals();
+  //   const meals = calculatedMeals;
+  //   setAllMeals({
+  //     breakfast: (meals.match(/B/g) || []).length,
+  //     lunch: (meals.match(/L/g) || []).length,
+  //     dinner: (meals.match(/D/g) || []).length,
+  //     snack: (meals.match(/S/g) || []).length,
+  //   });
+  //   adjustForUS();
+  // }, []);
 
-  useEffect(() => {
-    // getExpenseAmounts('YYZ');
-    // getExpenseAmounts('MCO');
-    const meals = calculatePairingMeals();
-    setAllMeals({
-      breakfast: (meals.match(/B/g) || []).length,
-      lunch: (meals.match(/L/g) || []).length,
-      dinner: (meals.match(/D/g) || []).length,
-      snack: (meals.match(/S/g) || []).length,
-    });
-    adjustForUS();
-  }, []);
+  // const isTransborder = () => {
+  //   for (let i = 0; i < sequence.length; i++) {
+  //     if (
+  //       american_airport_codes.includes(sequence[i].arrivalAirport) ||
+  //       american_airport_codes.includes(sequence[i].layoverStation)
+  //     ) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // };
 
-  const isTransborder = () => {
-    for (let i = 0; i < sequence.length; i++) {
-      if (
-        american_airport_codes.includes(sequence[i].arrivalAirport) ||
-        american_airport_codes.includes(sequence[i].layoverStation)
-      ) {
-        return true;
-      }
-    }
-    return false;
-  };
+  // const numLayovers = () => {
+  //   let layoverCount = 0;
+  //   for (let i = 0; i < sequence.length; i++) {
+  //     if (sequence[i].hotelInfo) {
+  //       layoverCount++;
+  //     }
+  //   }
+  //   return layoverCount;
+  // };
 
-  const numLayovers = () => {
-    let layoverCount = 0;
-    for (let i = 0; i < sequence.length; i++) {
-      if (sequence[i].hotelInfo) {
-        layoverCount++;
-      }
-    }
-    return layoverCount;
-  };
+  // const getExpenseAmounts = (station) => {
+  //   // logic sent to ExpenseTable
+  //   const request = window.indexedDB.open('ExpensesDB', 1);
+  //   request.onsuccess = (event) => {
+  //     const db = event.target.result;
+  //     const tx = db.transaction(['expenses'], 'readonly');
+  //     const expensesStore = tx.objectStore('expenses');
+  //     const airportCodesIndex = expensesStore.index('airport_codes');
+  //     const request = airportCodesIndex.get(station);
+  //     request.onsuccess = () => {
+  //       const e = request.result.expenses;
+  //       if (canadian_airport_codes.includes(station)) {
+  //         setCaExpenses({
+  //           breakfast: e.breakfast,
+  //           lunch: e.lunch,
+  //           dinner: e.dinner,
+  //           snack: e.snack,
+  //         });
+  //       } else if (american_airport_codes.includes(station)) {
+  //         setUSExpenses({
+  //           breakfast: (e.breakfast - caExpenses.breakfast).toFixed(2),
+  //           lunch: (e.lunch - caExpenses.lunch).toFixed(2),
+  //           dinner: (e.dinner - caExpenses.dinner).toFixed(2),
+  //           snack: (e.snack - caExpenses.snack).toFixed(2),
+  //         });
+  //       }
+  //     };
+  //     request.onerror = (event) => {
+  //       console.log(`!DB Error: ${event.target.error}`);
+  //     };
+  //     tx.oncomplete = () => {
+  //       db.close();
+  //     };
+  //   };
+  // };
 
-  const getExpenseAmounts = (station) => {
-    // logic sent to ExpenseTable
-    const request = window.indexedDB.open('ExpensesDB', 1);
-    request.onsuccess = (event) => {
-      const db = event.target.result;
-      const tx = db.transaction(['expenses'], 'readonly');
-      const expensesStore = tx.objectStore('expenses');
-      const airportCodesIndex = expensesStore.index('airport_codes');
-      const request = airportCodesIndex.get(station);
-      request.onsuccess = () => {
-        const e = request.result.expenses;
-        if (canadian_airport_codes.includes(station)) {
-          setCaExpenses({
-            breakfast: e.breakfast,
-            lunch: e.lunch,
-            dinner: e.dinner,
-            snack: e.snack,
-          });
-        } else if (american_airport_codes.includes(station)) {
-          setUSExpenses({
-            breakfast: (e.breakfast - caExpenses.breakfast).toFixed(2),
-            lunch: (e.lunch - caExpenses.lunch).toFixed(2),
-            dinner: (e.dinner - caExpenses.dinner).toFixed(2),
-            snack: (e.snack - caExpenses.snack).toFixed(2),
-          });
-        }
-      };
-      request.onerror = (event) => {
-        console.log(`!DB Error: ${event.target.error}`);
-      };
-      tx.oncomplete = () => {
-        db.close();
-      };
-    };
-  };
+  // const calculatePairingMeals = () => {
+  //   let expenses = '';
+  //   expenses += calculateFirstDayMeals();
 
-  const calculatePairingMeals = () => {
-    let expenses = '';
-    expenses += calculateFirstDayMeals();
+  //   for (let i = 0; i < calculateFullDays(); i++) {
+  //     expenses += 'BLDS';
+  //   }
+  //   expenses += calculateLastDayMeals();
+  //   return expenses;
+  // };
 
-    for (let i = 0; i < calculateFullDays(); i++) {
-      expenses += 'BLDS';
-    }
-    expenses += calculateLastDayMeals();
-    return expenses;
-  };
+  // const calculateFirstDayMeals = () => {
+  //   const time = dayjs(firstFlight.departureTime, timeFormat);
+  //   const duty = {
+  //     start: dayjs(firstDuty.dutyDayStart),
+  //     end: dayjs('01:01', timeFormat).add(1, 'day'),
+  //   };
+  //   if (
+  //     time.isBefore(dayjs('08:00', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
+  //     duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
+  //   ) {
+  //     // console.log(`!Begin: B`);
+  //     return 'BLDS';
+  //   } else if (
+  //     time.isBefore(dayjs('12:30', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
+  //     duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
+  //   ) {
+  //     // console.log(`!Begin: L`);
+  //     return 'LDS';
+  //   } else if (
+  //     time.isBefore(dayjs('18:00', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('18:00', timeFormat), 'minutes') &&
+  //     duty.end.isAfter(dayjs('19:30', timeFormat), 'minutes')
+  //   ) {
+  //     // console.log(`!Begin: D`);
+  //     return 'DS';
+  //   } else if (
+  //     time.isBefore(dayjs('23:00', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
+  //     duty.end.isAfter(dayjs('01:00', timeFormat).add(1, 'day'), 'minutes')
+  //   ) {
+  //     // console.log(`!Begin: S`);
+  //     return 'S';
+  //   }
+  // };
 
-  const calculateFirstDayMeals = () => {
-    const time = dayjs(firstFlight.departureTime, timeFormat);
-    const duty = {
-      start: dayjs(firstDuty.dutyDayStart),
-      end: dayjs('01:01', timeFormat).add(1, 'day'),
-    };
-    if (
-      time.isBefore(dayjs('08:00', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!Begin: B`);
-      return 'BLDS';
-    } else if (
-      time.isBefore(dayjs('12:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!Begin: L`);
-      return 'LDS';
-    } else if (
-      time.isBefore(dayjs('18:00', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('18:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('19:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!Begin: D`);
-      return 'DS';
-    } else if (
-      time.isBefore(dayjs('23:00', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('01:00', timeFormat).add(1, 'day'), 'minutes')
-    ) {
-      // console.log(`!Begin: S`);
-      return 'S';
-    }
-  };
+  // const calculateLastDayMeals = () => {
+  //   const time = dayjs(lastFlight.arrivalTime, timeFormat);
+  //   const duty = {
+  //     start: dayjs('00:00', timeFormat),
+  //     end: dayjs(lastDuty.dutyDayEnd, timeFormat),
+  //   };
 
-  const calculateLastDayMeals = () => {
-    const time = dayjs(lastFlight.arrivalTime, timeFormat);
-    const duty = {
-      start: dayjs('00:00', timeFormat),
-      end: dayjs(lastDuty.dutyDayEnd, timeFormat),
-    };
+  //   if (
+  //     time.isAfter(dayjs('18:30', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
+  //     duty.end.isAfter(dayjs('18:30', timeFormat), 'minutes')
+  //   ) {
+  //     // console.log(`!End: D`);
+  //     return 'BLD';
+  //   } else if (
+  //     time.isAfter(dayjs('13:30', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
+  //     duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
+  //   ) {
+  //     // console.log(`!End: L`);
+  //     return 'BL';
+  //   } else if (
+  //     time.isAfter(dayjs('09:30', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
+  //     duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
+  //   ) {
+  //     // console.log(`!End: B`);
+  //     return 'B';
+  //   } else if (
+  //     time.isAfter(dayjs('01:00', timeFormat), 'minute') &&
+  //     duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
+  //     duty.end.isAfter((dayjs('01:00', timeFormat).add(1, 'day'), 'minutes'))
+  //   ) {
+  //     // console.log(`!End: S`);
+  //     return 'BLDS';
+  //   }
+  // };
 
-    if (
-      time.isAfter(dayjs('18:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('18:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!End: D`);
-      return 'BLD';
-    } else if (
-      time.isAfter(dayjs('13:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!End: L`);
-      return 'BL';
-    } else if (
-      time.isAfter(dayjs('09:30', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-      duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-    ) {
-      // console.log(`!End: B`);
-      return 'B';
-    } else if (
-      time.isAfter(dayjs('01:00', timeFormat), 'minute') &&
-      duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-      duty.end.isAfter((dayjs('01:00', timeFormat).add(1, 'day'), 'minutes'))
-    ) {
-      // console.log(`!End: S`);
-      return 'BLDS';
-    }
-  };
-
-  const calculateFullDays = () => {
-    let hours =
-      Number(p.tafb.slice(0, -2)) +
-      Number(sequence[0].departureTime[(0, 2)]) -
-      Number(sequence[sequence.length - 1].arrivalTime[(0, 2)]) -
-      23;
-    let minutes =
-      Number(p.tafb.slice(-2)) +
-      Number(sequence[sequence.length - 1].arrivalTime[-2]) -
-      Number(sequence[0].arrivalTime[-2]) +
-      15;
-    if (minutes >= 60) {
-      hours += Math.floor(minutes / 60);
-    }
-    return hours / 24;
-  };
+  // const calculateFullDays = () => {
+  //   let hours =
+  //     Number(p.tafb.slice(0, -2)) +
+  //     Number(firstFlight.departureTime[(0, 2)]) -
+  //     Number(lastFlight.arrivalTime[(0, 2)]) -
+  //     23;
+  //   let minutes =
+  //     Number(p.tafb.slice(-2)) +
+  //     Number(lastFlight.arrivalTime[-2]) -
+  //     Number(firstFlight.arrivalTime[-2]) +
+  //     15;
+  //   if (minutes >= 60) {
+  //     hours += Math.floor(minutes / 60);
+  //   }
+  //   return hours / 24;
+  // };
 
   const adjustForUS = () => {
     let layoverMeals = '';
@@ -313,14 +311,14 @@ function Pairing() {
         <ExpensesTable
           station={firstFlight.departureAirport}
           meals={allMeals}
-          numLayovers={numLayovers()}
+          numLayovers={numLayovers}
         />
       )}
       {!p.pairingNumber.includes('T5') && (
         <ExpensesTable
           station="SFO"
           meals={{ breakfast: 1, lunch: 0, dinner: 0, snack: 1 }}
-          numLayovers={0}
+          numLayovers={numLayovers}
         />
       )}
       <p className="me-3 small text-end">

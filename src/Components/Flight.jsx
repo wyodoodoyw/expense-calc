@@ -4,9 +4,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import {
   updateFlightDeparture,
   updateFlightArrival,
+} from '../features/flight/flightSlice';
+import {
+  calculatePairingMeals,
   updateDutyDayEnd,
 } from '../features/pairing/pairingSlice';
-import na_sun_airports from '../data/na_sun_airports';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -20,9 +22,10 @@ function Flight(props) {
   const { index } = props;
 
   const pairing = useSelector((state) => state.pairing);
+  const f = pairing.sequence[index];
 
-  const f = pairing.sequence[index]; // flight
-  // console.log(f);
+  const dispatch = useDispatch();
+
   const departureTime = dayjs()
     .set('hour', f.departureTime.slice(0, -2))
     .set('minute', f.departureTime.slice(-2));
@@ -39,8 +42,6 @@ function Flight(props) {
     }
   }
 
-  const dispatch = useDispatch();
-
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
     const { name, value } = target;
@@ -54,32 +55,15 @@ function Flight(props) {
       dispatch(
         updateFlightArrival({ index: index, value: value.format('HHmm') })
       );
-      dispatch(
-        updateDutyDayEnd({
-          index: currentDutyDay.index,
-          value: dutyEnd,
-        })
-      );
+      // dispatch(
+      //   updateDutyDayEnd({
+      //     index: currentDutyDay.index,
+      //     value: dutyEnd,
+      //   })
+      // );
     }
+    dispatch(calculatePairingMeals());
   };
-
-  // NASun Flights (with per diem)
-
-  // const [isNASun, setIsNASun] = useState(false);
-  // if (
-  //   na_sun_airports.includes(f.departureAirport) &&
-  //   na_sun_airports.includes(f.arrivalAirport)
-  // ) {
-  //   setIsNASun(true);
-  // }
-
-  // useEffect(() => {
-  //   if (isNASun) {
-  //     calculateFlightExpenses();
-  //   }
-  // }, []);
-
-  // const calculateFlightExpenses = () => {};
 
   return (
     <>
