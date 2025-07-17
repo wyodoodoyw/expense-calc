@@ -32,6 +32,128 @@ const getDutyDayEnd = (sequence) => {
   return dutyDayEnd;
 };
 
+const calculatePairingMeals = (state) => {
+  let meals = '';
+
+  const firstFlight = state.sequence[0];
+  const firstDuty = state.dutyDays[0];
+  const firstTime = dayjs(firstFlight.departureTime, timeFormat);
+  meals += calculateFirstDayMeals(firstDuty, firstTime);
+
+  const tafb = state.tafb;
+  const lastFlight = state.sequence[state.sequence.length - 1];
+  for (let i = 0; i < calculateFullDays(tafb, firstFlight, lastFlight); i++) {
+    meals += 'BLDS';
+  }
+
+  const lastDuty = state.dutyDays[state.dutyDays.length - 1];
+  const lastTime = dayjs(lastFlight.arrivalTime, timeFormat);
+  meals += calculateLastDayMeals(lastDuty, lastTime);
+  return meals;
+};
+
+const calculateFirstDayMeals = (firstDuty, time) => {
+  const duty = {
+    start: dayjs(firstDuty.dutyDayStart),
+    end: dayjs('01:01', timeFormat).add(1, 'day'),
+  };
+  if (
+    time.isBefore(dayjs('08:00', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
+    duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
+  ) {
+    // console.log(`!Begin: B`);
+    return 'BLDS';
+  } else if (
+    time.isBefore(dayjs('12:30', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
+    duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
+  ) {
+    // console.log(`!Begin: L`);
+    return 'LDS';
+  } else if (
+    time.isBefore(dayjs('18:00', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('18:00', timeFormat), 'minutes') &&
+    duty.end.isAfter(dayjs('19:30', timeFormat), 'minutes')
+  ) {
+    // console.log(`!Begin: D`);
+    return 'DS';
+  } else if (
+    time.isBefore(dayjs('23:00', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
+    duty.end.isAfter(dayjs('01:00', timeFormat).add(1, 'day'), 'minutes')
+  ) {
+    // console.log(`!Begin: S`);
+    return 'S';
+  }
+};
+
+const calculateLastDayMeals = (lastDuty, time) => {
+  const duty = {
+    start: dayjs('00:00', timeFormat),
+    end: dayjs(lastDuty.dutyDayEnd, timeFormat),
+  };
+
+  if (
+    time.isAfter(dayjs('18:30', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
+    duty.end.isAfter(dayjs('18:30', timeFormat), 'minutes')
+  ) {
+    // console.log(`!End: D`);
+    return 'BLD';
+  } else if (
+    time.isAfter(dayjs('13:30', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
+    duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
+  ) {
+    // console.log(`!End: L`);
+    return 'BL';
+  } else if (
+    time.isAfter(dayjs('09:30', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
+    duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
+  ) {
+    // console.log(`!End: B`);
+    return 'B';
+  } else if (
+    time.isAfter(dayjs('01:00', timeFormat), 'minute') &&
+    duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
+    duty.end.isAfter((dayjs('01:00', timeFormat).add(1, 'day'), 'minutes'))
+  ) {
+    // console.log(`!End: S`);
+    return 'BLDS';
+  }
+};
+
+const calculateFullDays = (tafb, firstFlight, lastFlight) => {
+  let hours =
+    Number(tafb.slice(0, -2)) +
+    Number(firstFlight.departureTime[(0, 2)]) -
+    Number(lastFlight.arrivalTime[(0, 2)]) -
+    23;
+  let minutes =
+    Number(tafb.slice(-2)) +
+    Number(lastFlight.arrivalTime[-2]) -
+    Number(firstFlight.arrivalTime[-2]) +
+    15;
+  if (minutes >= 60) {
+    hours += Math.floor(minutes / 60);
+  }
+  return hours / 24;
+};
+
+const numLayovers = (s) => {
+  let layoverCount = 0;
+  for (let i = 0; i < s.length; i++) {
+    if (s[i].hotelInfo) {
+      layoverCount++;
+    }
+  }
+  return layoverCount;
+};
+
+// STATE //
+
 export const pairingSlice = createSlice({
   name: 'pairing',
   initialState: {},
@@ -158,6 +280,8 @@ export const pairingSlice = createSlice({
       for (let i = 0; i < action.payload.length; i++) {
         state.sequence.push(action.payload[i]);
       }
+      state.calculatedMeals = calculatePairingMeals(state);
+      state.layoverCount = numLayovers(state.sequence);
     },
 
     // updateFlightDeparture: (state, action) => {
@@ -174,6 +298,14 @@ export const pairingSlice = createSlice({
     //   const { index, value } = action.payload;
     //   state.dutyDays[index].dutyDayStart = value;
     // },
+
+    updateFlight: (state, action) => {
+      const { index, flight } = action.payload;
+      if (state.sequence[index]) {
+        state.sequence[index] = flight;
+      }
+      state.calculatedMeals = calculatePairingMeals(state);
+    },
 
     updateDutyDayEnd: (state, action) => {
       const { index, value } = action.payload;
@@ -203,127 +335,30 @@ export const pairingSlice = createSlice({
       state.isTransborder = false;
     },
 
-    numLayovers: (state, action) => {
-      const s = state.sequence;
-      let layoverCount = 0;
-      for (let i = 0; i < s.length; i++) {
-        if (s[i].hotelInfo) {
-          layoverCount++;
-        }
-      }
-      state.layoverCount = layoverCount;
-    },
+    //   calculatePairingMeals: (state, action) => {
+    //     let meals = '';
 
-    calculatePairingMeals: () => {
-      let meals = '';
-      meals += calculateFirstDayMeals();
+    //     const firstFlight = state.sequence[0];
+    //     const firstDuty = state.dutyDays[0];
+    //     const firstTime = dayjs(firstFlight.departureTime, timeFormat);
+    //     meals += calculateFirstDayMeals(firstDuty, firstTime);
 
-      for (let i = 0; i < calculateFullDays(); i++) {
-        meals += 'BLDS';
-      }
-      meals += calculateLastDayMeals();
-      // state.calculatedMeals = meals;
-      return meals;
-    },
+    //     const tafb = state.tafb;
+    //     const lastFlight = state.sequence[state.sequence.length - 1];
+    //     for (
+    //       let i = 0;
+    //       i < calculateFullDays(tafb, firstFlight, lastFlight);
+    //       i++
+    //     ) {
+    //       meals += 'BLDS';
+    //     }
 
-    calculateFirstDayMeals: (state, action) => {
-      const firstFlight = state.sequence[0];
-      const firstDuty = state.dutyDays[0];
-      const time = dayjs(firstFlight.departureTime, timeFormat);
-      const duty = {
-        start: dayjs(firstDuty.dutyDayStart),
-        end: dayjs('01:01', timeFormat).add(1, 'day'),
-      };
-      if (
-        time.isBefore(dayjs('08:00', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-        duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-      ) {
-        // console.log(`!Begin: B`);
-        return 'BLDS';
-      } else if (
-        time.isBefore(dayjs('12:30', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-        duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
-      ) {
-        // console.log(`!Begin: L`);
-        return 'LDS';
-      } else if (
-        time.isBefore(dayjs('18:00', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('18:00', timeFormat), 'minutes') &&
-        duty.end.isAfter(dayjs('19:30', timeFormat), 'minutes')
-      ) {
-        // console.log(`!Begin: D`);
-        return 'DS';
-      } else if (
-        time.isBefore(dayjs('23:00', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-        duty.end.isAfter(dayjs('01:00', timeFormat).add(1, 'day'), 'minutes')
-      ) {
-        // console.log(`!Begin: S`);
-        return 'S';
-      }
-    },
-
-    calculateLastDayMeals: (state, action) => {
-      const lastFlight = state.sequence[state.sequence.length - 1];
-      const lastDuty = state.dutyDays[state.dutyDays.length - 1];
-      const time = dayjs(lastFlight.arrivalTime, timeFormat);
-      const duty = {
-        start: dayjs('00:00', timeFormat),
-        end: dayjs(lastDuty.dutyDayEnd, timeFormat),
-      };
-
-      if (
-        time.isAfter(dayjs('18:30', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
-        duty.end.isAfter(dayjs('18:30', timeFormat), 'minutes')
-      ) {
-        // console.log(`!End: D`);
-        return 'BLD';
-      } else if (
-        time.isAfter(dayjs('13:30', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-        duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
-      ) {
-        // console.log(`!End: L`);
-        return 'BL';
-      } else if (
-        time.isAfter(dayjs('09:30', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-        duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-      ) {
-        // console.log(`!End: B`);
-        return 'B';
-      } else if (
-        time.isAfter(dayjs('01:00', timeFormat), 'minute') &&
-        duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-        duty.end.isAfter((dayjs('01:00', timeFormat).add(1, 'day'), 'minutes'))
-      ) {
-        // console.log(`!End: S`);
-        return 'BLDS';
-      }
-    },
-
-    calculateFullDays: (state, action) => {
-      const p = state;
-      const firstFlight = p.sequence[0];
-      const lastFlight = p.sequence[p.sequence.length - 1];
-      let hours =
-        Number(p.tafb.slice(0, -2)) +
-        Number(firstFlight.departureTime[(0, 2)]) -
-        Number(lastFlight.arrivalTime[(0, 2)]) -
-        23;
-      let minutes =
-        Number(p.tafb.slice(-2)) +
-        Number(lastFlight.arrivalTime[-2]) -
-        Number(firstFlight.arrivalTime[-2]) +
-        15;
-      if (minutes >= 60) {
-        hours += Math.floor(minutes / 60);
-      }
-      return hours / 24;
-    },
+    //     const lastDuty = state.dutyDays[state.dutyDays.length - 1];
+    //     const lastTime = dayjs(lastFlight.arrivalTime, timeFormat);
+    //     meals += calculateLastDayMeals(lastDuty, lastTime);
+    //     state.calculatedMeals = meals;
+    //   },
+    // },
   },
 });
 
@@ -334,12 +369,8 @@ export const {
   updateDutyDayEnd,
   updateCAAllowance,
   updateUSAllowance,
+  updateFlight,
   isTransborder,
-  numLayovers,
-  calculatePairingMeals,
-  calculateFirstDayMeals,
-  calculateLastDayMeals,
-  calculateFullDays,
 } = pairingSlice.actions;
 
 // Export the slice reducer for use in the store configuration

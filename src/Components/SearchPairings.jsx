@@ -6,7 +6,7 @@ import {
   initializePairing,
   processSequence,
 } from '../features/pairing/pairingSlice';
-import Pairing from './Pairing';
+import Pairing from '../features/pairing/Pairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';

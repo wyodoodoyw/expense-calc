@@ -193,7 +193,6 @@ const parse = (pairing) => {
         }
       }
       newPairing.sequence = pairingSequence;
-      // newPairing.sequence = processPairingForDisplay(pairingSequence);
       addPairingToDB(newPairing);
       return;
     }

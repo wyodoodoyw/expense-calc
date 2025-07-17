@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import ExpensesTable from './ExpensesTable';
+// import ExpensesTable from '../features/expensesTable/expensesTableSlice';
 import na_sun_airports from '../data/na_sun_airports';
 import international_airport_codes from '../data/international_airport_codes';
 import dayjs from 'dayjs';

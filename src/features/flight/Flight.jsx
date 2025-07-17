@@ -1,28 +1,20 @@
 /* eslint-disable react/prop-types */
 import { TimePicker } from '@mui/x-date-pickers';
-import { useSelector, useDispatch } from 'react-redux';
-import {
-  updateFlightDeparture,
-  updateFlightArrival,
-} from '../features/flight/flightSlice';
-import {
-  calculatePairingMeals,
-  updateDutyDayEnd,
-} from '../features/pairing/pairingSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateFlight } from '../pairing/pairingSlice';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-// import isBetween from 'dayjs/plugin/isBetween';
+import { useState } from 'react';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-const timeFormat = 'HH:mm';
 
 function Flight(props) {
   const { index } = props;
 
   const pairing = useSelector((state) => state.pairing);
-  const f = pairing.sequence[index];
+  const [f, setFlight] = useState(pairing.sequence[index]);
 
   const dispatch = useDispatch();
 
@@ -33,36 +25,23 @@ function Flight(props) {
     .set('hour', f.arrivalTime.slice(0, -2))
     .set('minute', f.arrivalTime.slice(-2));
 
-  const dutyDays = pairing.dutyDays;
-  let currentDutyDay = null;
-  for (let i = 0; i < dutyDays.length; i++) {
-    if (dutyDays[i].flightIndices.includes(index)) {
-      currentDutyDay = dutyDays[i];
-      break;
-    }
-  }
-
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
     const { name, value } = target;
-    const dutyEnd = dayjs(value, timeFormat).add(15, 'minutes').format('HHmm');
+    // const dutyEnd = dayjs(value, timeFormat).add(15, 'minutes').format('HHmm');
     if (name === 'start') {
-      dispatch(
-        updateFlightDeparture({ index: index, value: value.format('HHmm') })
-      );
+      setFlight((prev) => ({
+        ...prev,
+        departureTime: value.format('HHmm'),
+      }));
     }
     if (name === 'end') {
-      dispatch(
-        updateFlightArrival({ index: index, value: value.format('HHmm') })
-      );
-      // dispatch(
-      //   updateDutyDayEnd({
-      //     index: currentDutyDay.index,
-      //     value: dutyEnd,
-      //   })
-      // );
+      setFlight((prev) => ({
+        ...prev,
+        arrivalTime: value.format('HHmm'),
+      }));
     }
-    dispatch(calculatePairingMeals());
+    dispatch(updateFlight({ index: index, flight: f }));
   };
 
   return (
