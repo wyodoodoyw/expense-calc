@@ -18,7 +18,7 @@ dayjs.extend(customParseFormat);
 function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
-  const [pairingNumber, setPairingNumber] = useState('T8879');
+  const [pairingNumber, setPairingNumber] = useState('');
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
@@ -98,7 +98,7 @@ function SearchPairings(props) {
         <div
           className={
             'mb-3 accordion-collapse ' +
-            (pairingsUploaded && expensesUploaded ? 'show' : 'collapse')
+            (pairingsUploaded ? 'show' : 'collapse')
           }
         >
           <div className="input-group mb-3" id="airport_code">

@@ -34,21 +34,29 @@ const getDutyDayEnd = (sequence) => {
 
 const calculatePairingMeals = (state) => {
   let meals = '';
+  console.log(`-----------------`);
 
   const firstFlight = state.sequence[0];
   const firstDuty = state.dutyDays[0];
   const firstTime = dayjs(firstFlight.departureTime, timeFormat);
   meals += calculateFirstDayMeals(firstDuty, firstTime);
+  console.log(`First Day Meals: ${meals}`);
 
   const tafb = state.tafb;
   const lastFlight = state.sequence[state.sequence.length - 1];
-  for (let i = 0; i < calculateFullDays(tafb, firstFlight, lastFlight); i++) {
+  const fullDays = calculateFullDays(tafb, firstFlight, lastFlight);
+  console.log(`Full Days: ${fullDays}`);
+  let fullMeals = '';
+  for (let i = 0; i < fullDays; i++) {
     meals += 'BLDS';
+    fullMeals += 'BLDS';
   }
+  console.log(`Full Days Meals: ${fullMeals}`);
 
   const lastDuty = state.dutyDays[state.dutyDays.length - 1];
   const lastTime = dayjs(lastFlight.arrivalTime, timeFormat);
   meals += calculateLastDayMeals(lastDuty, lastTime);
+  console.log(`Last Day Meals:  ${calculateLastDayMeals(lastDuty, lastTime)}`);
   return meals;
 };
 
@@ -126,7 +134,8 @@ const calculateLastDayMeals = (lastDuty, time) => {
 };
 
 const calculateFullDays = (tafb, firstFlight, lastFlight) => {
-  let hours =
+  let hours = 0;
+  hours =
     Number(tafb.slice(0, -2)) +
     Number(firstFlight.departureTime[(0, 2)]) -
     Number(lastFlight.arrivalTime[(0, 2)]) -
@@ -139,7 +148,7 @@ const calculateFullDays = (tafb, firstFlight, lastFlight) => {
   if (minutes >= 60) {
     hours += Math.floor(minutes / 60);
   }
-  return hours / 24;
+  return Math.round(hours / 24);
 };
 
 const numLayovers = (s) => {
@@ -284,28 +293,33 @@ export const pairingSlice = createSlice({
       state.layoverCount = numLayovers(state.sequence);
     },
 
-    // updateFlightDeparture: (state, action) => {
-    //   const { index, value } = action.payload;
-    //   state.sequence[index].departureTime = value;
-    // },
+    updateFlightDeparture: (state, action) => {
+      const { index, value } = action.payload;
+      state.sequence[index].departureTime = value;
+      state.calculatedMeals = '';
+      state.calculatedMeals = calculatePairingMeals(state);
+    },
 
-    // updateFlightArrival: (state, action) => {
-    //   const { index, value } = action.payload;
-    //   state.sequence[index].arrivalTime = value;
-    // },
+    updateFlightArrival: (state, action) => {
+      const { index, value } = action.payload;
+      state.sequence[index].arrivalTime = value;
+      state.calculatedMeals = '';
+      state.calculatedMeals = calculatePairingMeals(state);
+    },
 
     // updateDutyDayStart: (state, action) => {
     //   const { index, value } = action.payload;
     //   state.dutyDays[index].dutyDayStart = value;
     // },
 
-    updateFlight: (state, action) => {
-      const { index, flight } = action.payload;
-      if (state.sequence[index]) {
-        state.sequence[index] = flight;
-      }
-      state.calculatedMeals = calculatePairingMeals(state);
-    },
+    // updateFlight: (state, action) => {
+    //   const { index, flight } = action.payload;
+    //   if (state.sequence[index]) {
+    //     state.sequence[index] = flight;
+    //   }
+    //   console.log(flight);
+    //   state.calculatedMeals = calculatePairingMeals(state);
+    // },
 
     updateDutyDayEnd: (state, action) => {
       const { index, value } = action.payload;
@@ -369,7 +383,8 @@ export const {
   updateDutyDayEnd,
   updateCAAllowance,
   updateUSAllowance,
-  updateFlight,
+  updateFlightDeparture,
+  updateFlightArrival,
   isTransborder,
 } = pairingSlice.actions;
 

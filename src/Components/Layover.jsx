@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-// import ExpensesTable from '../features/expensesTable/expensesTableSlice';
+// import ExpensesTable from '../features/expensesTable/ExpensesTable';
 import na_sun_airports from '../data/na_sun_airports';
 import international_airport_codes from '../data/international_airport_codes';
 import dayjs from 'dayjs';
@@ -248,7 +248,7 @@ function Layover(props) {
         <div className="col-3">Layover Length: {l.layoverLength}</div>
         <div className="col-2">Meals: {l.layoverMeals}</div>
       </div>
-      {international_airport_codes.includes(l.layoverStation) && (
+      {/* {international_airport_codes.includes(l.layoverStation) && (
         <ExpensesTable
           station={l.layoverStation}
           meals={meals}
@@ -256,7 +256,7 @@ function Layover(props) {
           isLayover={true}
           fullDays={calculateFullDays()}
         />
-      )}
+      )} */}
     </div>
   );
 }

@@ -75,14 +75,11 @@ function Pairing() {
         <div className="col-3">TAFB/PTEB {p.tafb}</div>
         <div className="col-3">TOTAL - {p.totalCredit}</div>
       </div>
-      {!p.pairingNumber.includes('T5') && (
-        <ExpensesTable station={firstFlight.departureAirport} />
-      )}
+      {!p.pairingNumber.includes('T5') && <ExpensesTable />}
 
-      <p className="me-3 small text-end">
+      {/* <p className="me-3 small text-end">
         * The prices above represent the US amounts minus the Canadian amounts.
-      </p>
-      {/* <TotalTable /> */}
+      </p> */}
     </div>
   );
 }

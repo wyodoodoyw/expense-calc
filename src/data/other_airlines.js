@@ -1,1 +1,15 @@
-export default ['AII', 'QKK', 'DH4', 'BAA'];
+export default [
+  'AII',
+  'QKK',
+  'DH4',
+  'BAA',
+  'LHH',
+  'AVV',
+  'OSS',
+  'EII',
+  'AFF',
+  'LAA',
+  'UAA',
+  'FII',
+  'EKK',
+];

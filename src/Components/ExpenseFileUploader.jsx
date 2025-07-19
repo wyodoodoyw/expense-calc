@@ -101,10 +101,10 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
       newExpense.destination = line.substring(0, preDest + 1);
       newExpense.airport_codes = parseAirportCodes(line);
 
-      newExpense.country_code = line.match(/ [A-Z]{2} /g)[0].replace(' ', '');
+      newExpense.country_code = line.match(/ [A-Z]{2} /g)[0].trim();
       addExpensetoDB(newExpense);
     } catch (err) {
-      console.log(`!Error in parseLineAsBracelet: ${err}`);
+      console.log(`!Error in parseLineAsBracelet: ${err} ${line}`);
       return;
     }
   };
@@ -146,7 +146,7 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
       }
 
       newExpense.airport_codes = parseAirportCodes(line);
-      newExpense.country_code = line.match(/ [A-Z]{2} /gm)[0].replace(' ', '');
+      newExpense.country_code = line.match(/[A-Z]{2}/gm)[0].trim();
 
       const amounts = line.match(/-?\d{1,3}.\d{2}[^%]/gm);
       for (let i = 0; i < amounts.length || 0; i++) {
@@ -203,26 +203,26 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
         text = cutStringAfterInclusive(text, 'Algiers');
 
         // Split destinations by *!* delimeter
-        const destinations = text.split(/\*!\*\s{2}/g);
+        let destinations = text.split(/\*!\*\s{2}/g);
 
-        // Remove the following lines at end of array
-        for (let i = destinations.length - 1; i > 0; i--) {
+        // Find first index of ***BRACELET PROVIDED*** and slice following indices out
+        let endIndex;
+        for (let i = 0; i < destinations.length - 1; i++) {
           const destination = destinations[i];
 
           if (destination.includes('***BRACELET PROVIDED***')) {
-            destinations.pop();
-          } else if (destination.includes('N E W   A L L O W A N C E')) {
-            destinations.pop();
-          } else if (destination.includes('Meal Allowances')) {
-            destinations.pop();
+            endIndex = i;
+            break;
           }
         }
+        destinations = destinations.slice(0, endIndex);
 
         // Parse each destination depending on expenses or bracelet
         for (let i = 0; i < destinations.length; i++) {
           const destination = destinations[i];
 
-          if (!destination.includes('$')) {
+          if (!destination.includes('$') && !destination.includes('BRACELET')) {
+            // console.log(destination);
             parseLineAsBracelet(destination);
           } else {
             parseLine(destination);

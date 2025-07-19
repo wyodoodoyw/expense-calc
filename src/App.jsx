@@ -1,14 +1,14 @@
 import './App.css';
-// import Disclaimer from './Components/Disclaimer';
+import Disclaimer from './Components/Disclaimer';
 import Accordion from './Components/Accordion';
 import { useState, useEffect } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
-  const [clicked, setClicked] = useState(true);
-  const [expensesUploaded, setExpensesUploaded] = useState(true);
-  const [pairingsUploaded, setPairingsUploaded] = useState(true);
+  const [clicked, setClicked] = useState(false);
+  const [expensesUploaded, setExpensesUploaded] = useState(false);
+  const [pairingsUploaded, setPairingsUploaded] = useState(false);
 
   useEffect(() => {
     checkDBExists();
@@ -40,9 +40,9 @@ function App() {
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            {/* {!clicked && (
+            {!clicked && (
               <Disclaimer clicked={clicked} setClicked={setClicked} />
-            )} */}
+            )}
             {clicked && (
               <Accordion
                 pairingsUploaded={pairingsUploaded}

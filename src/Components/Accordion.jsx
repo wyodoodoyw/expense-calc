@@ -27,9 +27,13 @@ function Accordian(props) {
             aria-controls="collapseOne"
           >
             <h2>Step 1: </h2>
-            <strong className="ms-3">
-              Upload the <u>pairing</u> file for the block month.
-            </strong>
+            <div className="ms-3">
+              Upload the{' '}
+              <strong>
+                <u>pairing</u>
+              </strong>{' '}
+              file for the block month.
+            </div>
             <span className="ms-2">ex. 202505-YYZ-PairingFile</span>
           </button>
         </h2>
@@ -48,7 +52,6 @@ function Accordian(props) {
               ACAeronet → Crew Scheduling & Planning → Block Bid Packages →
               2025-05 May → Base: YYZ → 202505-YYZ-PairingFile
             </p>
-            {/* <FileUploader setUploaded={setUploaded} /> */}
             <PairingFileUploader setPairingsUploaded={setPairingsUploaded} />
           </div>
         </div>
@@ -65,9 +68,13 @@ function Accordian(props) {
             aria-controls="collapseOne"
           >
             <h2>Step 2: </h2>
-            <strong className="ms-3">
-              Upload the <u>expenses</u> file for the block month.
-            </strong>
+            <div className="ms-3">
+              Upload the{' '}
+              <strong>
+                <u>expenses</u>
+              </strong>{' '}
+              file for the block month.
+            </div>
             <span className="ms-2">ex. 202505-MealAllowances</span>
           </button>
         </h2>

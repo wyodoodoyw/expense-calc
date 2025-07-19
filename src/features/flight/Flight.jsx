@@ -1,7 +1,10 @@
 /* eslint-disable react/prop-types */
 import { TimePicker } from '@mui/x-date-pickers';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateFlight } from '../pairing/pairingSlice';
+import {
+  updateFlightDeparture,
+  updateFlightArrival,
+} from '../pairing/pairingSlice';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -28,20 +31,24 @@ function Flight(props) {
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times
     const { name, value } = target;
-    // const dutyEnd = dayjs(value, timeFormat).add(15, 'minutes').format('HHmm');
     if (name === 'start') {
       setFlight((prev) => ({
         ...prev,
         departureTime: value.format('HHmm'),
       }));
+      dispatch(
+        updateFlightDeparture({ index: index, value: value.format('HHmm') })
+      );
     }
     if (name === 'end') {
       setFlight((prev) => ({
         ...prev,
         arrivalTime: value.format('HHmm'),
       }));
+      dispatch(
+        updateFlightArrival({ index: index, value: value.format('HHmm') })
+      );
     }
-    dispatch(updateFlight({ index: index, flight: f }));
   };
 
   return (
