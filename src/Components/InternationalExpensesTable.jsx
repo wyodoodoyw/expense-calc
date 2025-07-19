@@ -3,6 +3,7 @@ import canadian_airport_codes from '../../data/canadian_airport_codes';
 import american_airport_codes from '../../data/american_airport_codes';
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
+import getExpensesFromDB from '../modules/getExpensesFromDB';
 import dayjs from 'dayjs';
 
 const timeFormat = 'HH:mm';
@@ -69,45 +70,45 @@ const InternationalExpensesTable = () => {
     setUsLayovers(layovers);
   };
 
-  const getExpenseAmounts = (station) => {
-    const request = window.indexedDB.open('ExpensesDB', 1);
-    request.onsuccess = (event) => {
-      const db = event.target.result;
-      const tx = db.transaction(['expenses'], 'readonly');
-      const expensesStore = tx.objectStore('expenses');
-      const airportCodesIndex = expensesStore.index('airport_codes');
-      const request = airportCodesIndex.get('YYZ');
-      request.onsuccess = () => {
-        const ca = request.result.expenses;
-        if (canadian_airport_codes.includes(station)) {
-          setCaExpenses({
-            breakfast: ca.breakfast,
-            lunch: ca.lunch,
-            dinner: ca.dinner,
-            snack: ca.snack,
-          });
-        }
-        if (usLayovers) {
-          const request2 = airportCodesIndex.get(usLayovers[0].layoverStation);
-          request2.onsuccess = () => {
-            const e = request2.result.expenses;
-            setUsExpenses({
-              breakfast: (e.breakfast - ca.breakfast).toFixed(2),
-              lunch: (e.lunch - ca.lunch).toFixed(2),
-              dinner: (e.dinner - ca.dinner).toFixed(2),
-              snack: (e.snack - ca.snack).toFixed(2),
-            });
-          };
-        }
-      };
-      request.onerror = (event) => {
-        console.log(`!DB Error: ${event.target.error}`);
-      };
-      tx.oncomplete = () => {
-        db.close();
-      };
-    };
-  };
+  // const getExpenseAmounts = (station) => {
+  //   const request = window.indexedDB.open('ExpensesDB', 1);
+  //   request.onsuccess = (event) => {
+  //     const db = event.target.result;
+  //     const tx = db.transaction(['expenses'], 'readonly');
+  //     const expensesStore = tx.objectStore('expenses');
+  //     const airportCodesIndex = expensesStore.index('airport_codes');
+  //     const request = airportCodesIndex.get('YYZ');
+  //     request.onsuccess = () => {
+  //       const ca = request.result.expenses;
+  //       if (canadian_airport_codes.includes(station)) {
+  //         setCaExpenses({
+  //           breakfast: ca.breakfast,
+  //           lunch: ca.lunch,
+  //           dinner: ca.dinner,
+  //           snack: ca.snack,
+  //         });
+  //       }
+  //       if (usLayovers) {
+  //         const request2 = airportCodesIndex.get(usLayovers[0].layoverStation);
+  //         request2.onsuccess = () => {
+  //           const e = request2.result.expenses;
+  //           setUsExpenses({
+  //             breakfast: (e.breakfast - ca.breakfast).toFixed(2),
+  //             lunch: (e.lunch - ca.lunch).toFixed(2),
+  //             dinner: (e.dinner - ca.dinner).toFixed(2),
+  //             snack: (e.snack - ca.snack).toFixed(2),
+  //           });
+  //         };
+  //       }
+  //     };
+  //     request.onerror = (event) => {
+  //       console.log(`!DB Error: ${event.target.error}`);
+  //     };
+  //     tx.oncomplete = () => {
+  //       db.close();
+  //     };
+  //   };
+  // };
 
   // const adjustforUS = () => {
   //   const sequence = p.sequence;

@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import dayjs from 'dayjs';
 import american_airport_codes from '../../data/american_airport_codes';
+import getExpensesFromDB from '../../modules/getExpensesFromDB';
 
 const timeFormat = 'HH:mm';
 

@@ -9,7 +9,14 @@ const getExpensesFromDB = (code) => {
     const request = airportCodesIndex.get(code);
 
     request.onsuccess = () => {
-      return request.result;
+      const res = request.result.expenses;
+      console.log(JSON.stringify(res.breakfast));
+      const expenses = res.breakfast;
+      // lunch: res.lunch,
+      // dinner: res.dinner,
+      // snack: res.snack,
+      // };
+      return expenses;
     };
 
     request.onerror = (event) => {

@@ -28,9 +28,7 @@ function Pairing() {
         <div className="col-6 ps-5">
           {p.pairingNumber} OPERATES/OPER- {p.pairingOperates}
         </div>
-        <div className="col-6 text-end pe-5">
-          {/* Dates: {JSON.stringify(p.pairingDates)} */}
-        </div>
+        <div className="col-6 text-end pe-5"></div>
       </div>
       <div className="row">
         <div className="col-6 ps-5">
@@ -52,8 +50,8 @@ function Pairing() {
         {sequence &&
           sequence.map((current, index) => {
             if (!current.hotelInfo) {
-              // duty day of flights
-              <p key={index}>{JSON.stringify(current)}</p>;
+              // flight
+              <p key={index}>xx{JSON.stringify(current)}</p>;
               return <Flight key={index} index={index} />;
             } else if (current.hotelInfo) {
               // layover
