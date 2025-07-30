@@ -11,12 +11,12 @@ const getExpensesFromDB = (code) => {
     request.onsuccess = () => {
       const res = request.result.expenses;
       console.log(JSON.stringify(res.breakfast));
-      const expenses = res.breakfast;
-      // lunch: res.lunch,
-      // dinner: res.dinner,
-      // snack: res.snack,
-      // };
-      return expenses;
+      return {
+        breakfast: res.breakfast,
+        lunch: res.lunch,
+        dinner: res.dinner,
+        snack: res.snack,
+      };
     };
 
     request.onerror = (event) => {

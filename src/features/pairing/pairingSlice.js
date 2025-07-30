@@ -327,15 +327,15 @@ export const pairingSlice = createSlice({
       state.dutyDays[index].dutyDayEnd = value;
     },
 
-    updateCAAllowance: (state, action) => {
-      const { index, value } = action.payload;
-      state.caAllowance = value;
-    },
+    // updateCAAllowance: (state, action) => {
+    //   const { index, value } = action.payload;
+    //   state.caAllowance = value;
+    // },
 
-    updateUSAllowance: (state, action) => {
-      const { index, value } = action.payload;
-      state.usAllowance = value;
-    },
+    // updateUSAllowance: (state, action) => {
+    //   const { index, value } = action.payload;
+    //   state.usAllowance = value;
+    // },
 
     isTransborder: (state, action) => {
       const s = state.sequence;
@@ -382,8 +382,8 @@ export const {
   initializePairing,
   processSequence,
   updateDutyDayEnd,
-  updateCAAllowance,
-  updateUSAllowance,
+  // updateCAAllowance,
+  // updateUSAllowance,
   updateFlightDeparture,
   updateFlightArrival,
   isTransborder,

@@ -7,6 +7,7 @@ import {
   processSequence,
 } from '../features/pairing/pairingSlice';
 import Pairing from '../features/pairing/Pairing';
+import IntPairing from '../features/pairing/IntPairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -118,7 +119,9 @@ function SearchPairings(props) {
           </div>
         </div>
       </form>
-      {pairingSearchResult && <Pairing pairingNumber={pairingNumber} />}
+      {pairingSearchResult && pairingNumber.includes('T5') && <IntPairing />}
+
+      {pairingSearchResult && !pairingNumber.includes('T5') && <Pairing />}
     </div>
   );
 }
