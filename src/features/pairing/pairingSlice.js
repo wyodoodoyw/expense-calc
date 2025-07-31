@@ -35,29 +35,29 @@ const getDutyDayEnd = (sequence) => {
 
 const calculatePairingMeals = (state) => {
   let meals = '';
-  console.log(`-----------------`);
+  // console.log(`-----------------`);
 
   const firstFlight = state.sequence[0];
   const firstDuty = state.dutyDays[0];
   const firstTime = dayjs(firstFlight.departureTime, timeFormat);
   meals += calculateFirstDayMeals(firstDuty, firstTime);
-  console.log(`First Day Meals: ${meals}`);
+  // console.log(`First Day Meals: ${meals}`);
 
   const tafb = state.tafb;
   const lastFlight = state.sequence[state.sequence.length - 1];
   const fullDays = calculateFullDays(tafb, firstFlight, lastFlight);
-  console.log(`Full Days: ${fullDays}`);
+  // console.log(`Full Days: ${fullDays}`);
   let fullMeals = '';
   for (let i = 0; i < fullDays; i++) {
     meals += 'BLDS';
     fullMeals += 'BLDS';
   }
-  console.log(`Full Days Meals: ${fullMeals}`);
+  // console.log(`Full Days Meals: ${fullMeals}`);
 
   const lastDuty = state.dutyDays[state.dutyDays.length - 1];
   const lastTime = dayjs(lastFlight.arrivalTime, timeFormat);
   meals += calculateLastDayMeals(lastDuty, lastTime);
-  console.log(`Last Day Meals:  ${calculateLastDayMeals(lastDuty, lastTime)}`);
+  // console.log(`Last Day Meals:  ${calculateLastDayMeals(lastDuty, lastTime)}`);
   return meals;
 };
 
@@ -382,8 +382,6 @@ export const {
   initializePairing,
   processSequence,
   updateDutyDayEnd,
-  // updateCAAllowance,
-  // updateUSAllowance,
   updateFlightDeparture,
   updateFlightArrival,
   isTransborder,

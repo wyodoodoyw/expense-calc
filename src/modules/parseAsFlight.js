@@ -1,8 +1,11 @@
+import dayjs from 'dayjs';
 import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
 import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
 import aircraft from '../data/aircraft';
 
-const parseAsFlight = (line, index) => {
+const timeFormat = 'HH:mm';
+
+const parseAsFlight = (line, index, isLastFlight) => {
   const newFlight = {
     index: index,
   };
@@ -20,29 +23,23 @@ const parseAsFlight = (line, index) => {
   }
   // const regex = new RegExp(String.raw`[0-9]{3}|(77P${otherAirlines})`, 'g');
   const regex = new RegExp(String.raw`(${regExpression})`, 'g');
-  // console.log(regex);
   let threeDigits = line.match(regex);
-  // console.log(threeDigits);
   if (threeDigits) {
     for (let i = 0; i < threeDigits.length; i++) {
       if (aircraft.includes(threeDigits[i])) {
         newFlight.aircraft = threeDigits[i];
         break;
-        // console.log(`newFlight.aircraft ${newFlight.aircraft}`);
       }
     }
   }
   let days = cutStringBeforeExclusive(line, newFlight.aircraft);
   newFlight.daysOfWeek = days.match(/[0-9]/g);
-  // console.log(`dayfOfWeek: ${newFlight.daysOfWeek}`);
   // Remove substring that has been parsed above
   line = cutStringAfterExclusive(line, newFlight.aircraft);
 
   line.includes('DHD')
     ? (newFlight.isDeadhead = true)
     : (newFlight.isDeadhead = false);
-  // console.log(`isDHD: ${newFlight.isDeadhead}`);
-  // console.log(line);
   line = line.replace('DHD', '');
 
   const numbers = line.match(/[0-9]{1,4}/g);
@@ -51,15 +48,84 @@ const parseAsFlight = (line, index) => {
   newFlight.arrivalTime = numbers[2];
   newFlight.flightTime = numbers[3];
 
+  if (index === 0 && !newFlight.isDeadhead) {
+    const time = dayjs()
+      .set('hour', newFlight.departureTime.slice(0, -2))
+      .set('minute', newFlight.departureTime.slice(-2));
+    switch (newFlight.aircraft) {
+      case '767':
+        newFlight.dutyStart = time
+          .subtract(1, 'hour')
+          .subtract(10, 'minute')
+          .format('HHmm');
+        break;
+      case '788':
+        newFlight.dutyStart = time
+          .subtract(1, 'hour')
+          .subtract(10, 'minute')
+          .format('HHmm');
+        break;
+      case '330':
+        newFlight.dutyStart = time
+          .subtract(1, 'hour')
+          .subtract(15, 'minute')
+          .format('HHmm');
+        break;
+      case '789':
+        newFlight.dutyStart = time
+          .subtract(1, 'hour')
+          .subtract(15, 'minute')
+          .format('HHmm');
+        break;
+      case '772':
+        newFlight.dutyStart = time
+          .subtract(1, 'hour')
+          .subtract(15, 'minute')
+          .format('HHmm');
+        break;
+      case '773':
+        newFlight.dutyStart = time
+          .subtract(1, 'hour')
+          .subtract(20, 'minute')
+          .format('HHmm');
+        break;
+      case '77P':
+        newFlight.dutyStart = time
+          .subtract(1, 'hour')
+          .subtract(25, 'minute')
+          .format('HHmm');
+        break;
+      default:
+        newFlight.dutyStart = time.subtract(1, 'hour').format('HHmm');
+        break;
+    }
+  } else if (index === 0 && newFlight.isDeadhead) {
+    const time = dayjs()
+      .set('hour', newFlight.departureTime.slice(0, -2))
+      .set('minute', newFlight.departureTime.slice(-2));
+    newFlight.dutyStart = time.subtract(30, 'minute').format('HHmm');
+  }
+
+  if (isLastFlight && !newFlight.isDeadhead) {
+    const time = dayjs()
+      .set('hour', newFlight.arrivalTime.slice(0, -2))
+      .set('minute', newFlight.arrivalTime.slice(-2));
+    newFlight.dutyEnd = time.add(15, 'minute').format('HHmm');
+  } else if (isLastFlight && newFlight.isDeadhead) {
+    const time = dayjs()
+      .set('hour', newFlight.arrivalTime.slice(0, -2))
+      .set('minute', newFlight.arrivalTime.slice(-2));
+    newFlight.dutyEnd = time.format('HHmm');
+  }
+
   if (numbers[4]) {
     newFlight.dutyTime = numbers[4];
   }
   if (numbers[5]) {
     newFlight.layoverLength = numbers[5];
   }
-  // console.log(line);
+
   const airports = line.match(/[A-Z]{3}/g);
-  // console.log(`airports: ${airports}`);
   newFlight.departureAirport = airports[0];
   newFlight.arrivalAirport = airports[1];
 

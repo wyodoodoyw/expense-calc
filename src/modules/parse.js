@@ -145,7 +145,11 @@ const parse = (pairing) => {
             all_airports.includes(threeLetters[2])
           ) {
             // Flight
-            const flight = parseAsFlight(sequence[i], i);
+            const flight = parseAsFlight(
+              sequence[i],
+              i,
+              i === sequence.length - 1
+            );
             pairingSequence.push(flight);
           } else if (
             threeLetters[1] === 'DHD' &&
@@ -153,14 +157,22 @@ const parse = (pairing) => {
             all_airports.includes(threeLetters[3])
           ) {
             // Flight
-            const flight = parseAsFlight(sequence[i], i);
+            const flight = parseAsFlight(
+              sequence[i],
+              i,
+              i === sequence.length - 1
+            );
             pairingSequence.push(flight);
           } else if (
             all_airports.includes(threeLetters[0]) &&
             all_airports.includes(threeLetters[1])
           ) {
             // Flight
-            const flight = parseAsFlight(sequence[i], i);
+            const flight = parseAsFlight(
+              sequence[i],
+              i,
+              i === sequence.length - 1
+            );
             pairingSequence.push(flight);
           } else if (
             sequence[i].trim().length >= 9 &&
