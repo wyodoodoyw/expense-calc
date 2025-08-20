@@ -13,6 +13,7 @@ const ExpensesTable = () => {
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
   const meals = p.calculatedMeals;
+
   let mmeals = meals.split('BLDS');
   for (let i = 0; i < mmeals.length; i++) {
     if (mmeals[i] === '') {
@@ -39,6 +40,7 @@ const ExpensesTable = () => {
   const [intlExpenses, setIntlExpenses] = useState({});
 
   useEffect(() => {
+    calcMeals(meals);
     setCaMeals({
       breakfast: (meals.match(/B/g) || []).length,
       lunch: (meals.match(/L/g) || []).length,
@@ -54,6 +56,17 @@ const ExpensesTable = () => {
 
     // calculateDisplayTotal(caMeals, caExpenses);
   }, []);
+
+  const calcMeals = (meals) => {
+    let newMeals = {};
+    let newMeal = {
+      B: 0,
+      L: 0,
+      D: 0,
+      S: 0,
+    };
+    console.log(meals);
+  };
 
   const getExpenseAmounts = (stn) => {
     const request = window.indexedDB.open('ExpensesDB', 1);
@@ -103,44 +116,56 @@ const ExpensesTable = () => {
   };
 
   const processLayovers = () => {
+    if (seq.length === 2) {
+      //no international layover, no expenses
+      return;
+    }
     for (let i = 0; i < seq.length; i++) {
       if (
         seq[i].hotelInfo &&
         international_airport_codes.includes(seq[i].layoverStation)
       ) {
-        console.log(seq[i].layoverStation);
         setStation(seq[i].layoverStation);
         const amount = calculateIntLayover(
           seq[i].layoverStart,
           seq[i].layoverEnd
         );
-        // console.log(`int meals: ${amount}`);
       } else if (
-        i === 0 &&
+        i === 1 &&
         canadian_airport_codes.includes(seq[i].layoverStation)
       ) {
-        const amount2 = calculateDomLayoverPrior();
-        console.log(amount2);
+        const amount2 = calcDomLayoverPrior(
+          seq[0].dutyStart,
+          seq[0].departureTime,
+          seq[2].departureTime
+        );
+        // console.log(amount2);
       } else if (
         i === seq.length - 2 &&
         canadian_airport_codes.includes(seq[i].layoverStation)
       ) {
-        calculateDomLayoverAfter();
+        calcDomLayoverAfter(
+          seq[seq.length - 3].arrivalTime,
+          seq[seq.length - 1].arrivalTime,
+          seq[seq.length - 1].dutyEnd
+        );
       }
     }
   };
 
-  const calculateDomLayoverPrior = (start, end) => {
+  const calcDomLayoverPrior = (dutyStart, domDeptTime, intDeptTime) => {
     let meals = '';
-    meals = calcMealsDomDept(start, 'dutyStart');
-    meals += calcMealsIntDept('deptTime');
+    meals = calcMealsDomDept(dutyStart, domDeptTime);
+    meals += calcMealsIntDept(intDeptTime);
+    console.log(`Meals for layover before int: ${meals}`);
     return meals;
   };
 
-  const calculateDomLayoverAfter = (start, end) => {
+  const calcDomLayoverAfter = (intArrivalTime, domArrivalTime, dutyEnd) => {
     let meals = '';
-    meals = calcMealsIntArrival('arrivalTime');
-    meals += calcMealsDomArrival('arrivalTime', 'dutyEnd');
+    meals = calcMealsIntArrival(intArrivalTime);
+    meals += calcMealsDomArrival(domArrivalTime, dutyEnd);
+    console.log(`Meals for layover after int: ${meals}`);
     return meals;
   };
 
@@ -148,6 +173,7 @@ const ExpensesTable = () => {
     let meals = '';
     meals = calcMealsIntArrival(start);
     meals += calcMealsIntDept(end);
+    console.log(`Meals for layover: ${meals}`);
     return meals;
   };
 
