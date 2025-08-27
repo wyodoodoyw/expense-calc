@@ -48,6 +48,26 @@ function SearchPairings(props) {
         if (request.result) {
           dispatch(
             initializePairing({
+              id: 0,
+              pairingNumber: '',
+              pairingOperates: '',
+              pairingPurser: '',
+              pairingFA: '',
+              pairingBL: '',
+              pairingGP: '',
+              pairingGY: '',
+              pairingDates: '',
+              pairingLanguages: '',
+              blockCredit: '',
+              cicoAmount: '',
+              tafb: '',
+              totalAllowance: '',
+              totalCredit: '',
+              totalDuty: '',
+            })
+          );
+          dispatch(
+            initializePairing({
               id: request.result.id,
               pairingNumber: request.result.pairingNumber,
               pairingOperates: request.result.pairingOperates,

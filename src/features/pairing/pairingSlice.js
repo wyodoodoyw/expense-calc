@@ -1,7 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import dayjs from 'dayjs';
 import american_airport_codes from '../../data/american_airport_codes';
-import getExpensesFromDB from '../../modules/getExpensesFromDB';
 
 const timeFormat = 'HH:mm';
 
@@ -43,15 +42,15 @@ const calculatePairingMeals = (state) => {
   meals += calculateFirstDayMeals(firstDuty, firstTime);
   // console.log(`First Day Meals: ${meals}`);
 
-  const tafb = state.tafb;
+  // const tafb = state.tafb;
   const lastFlight = state.sequence[state.sequence.length - 1];
-  const fullDays = calculateFullDays(tafb, firstFlight, lastFlight);
+  // const fullDays = calculateFullDays(tafb, firstFlight, lastFlight);
   // console.log(`Full Days: ${fullDays}`);
-  let fullMeals = '';
-  for (let i = 0; i < fullDays; i++) {
-    meals += 'BLDS';
-    fullMeals += 'BLDS';
-  }
+  // let fullMeals = '';
+  // for (let i = 0; i < fullDays; i++) {
+  //   meals += 'BLDS';
+  //   fullMeals += 'BLDS';
+  // }
   // console.log(`Full Days Meals: ${fullMeals}`);
 
   const lastDuty = state.dutyDays[state.dutyDays.length - 1];
@@ -134,23 +133,23 @@ const calculateLastDayMeals = (lastDuty, time) => {
   }
 };
 
-const calculateFullDays = (tafb, firstFlight, lastFlight) => {
-  let hours = 0;
-  hours =
-    Number(tafb.slice(0, -2)) +
-    Number(firstFlight.departureTime[(0, 2)]) -
-    Number(lastFlight.arrivalTime[(0, 2)]) -
-    23;
-  let minutes =
-    Number(tafb.slice(-2)) +
-    Number(lastFlight.arrivalTime[-2]) -
-    Number(firstFlight.arrivalTime[-2]) +
-    15;
-  if (minutes >= 60) {
-    hours += Math.floor(minutes / 60);
-  }
-  return Math.round(hours / 24);
-};
+// const calculateFullDays = (tafb, firstFlight, lastFlight) => {
+//   let hours = 0;
+//   hours =
+//     Number(tafb.slice(0, -2)) +
+//     Number(firstFlight.departureTime[(0, 2)]) -
+//     Number(lastFlight.arrivalTime[(0, 2)]) -
+//     23;
+//   let minutes =
+//     Number(tafb.slice(-2)) +
+//     Number(lastFlight.arrivalTime[-2]) -
+//     Number(firstFlight.arrivalTime[-2]) +
+//     15;
+//   if (minutes >= 60) {
+//     hours += Math.floor(minutes / 60);
+//   }
+//   return Math.round(hours / 24);
+// };
 
 const numLayovers = (s) => {
   let layoverCount = 0;
@@ -308,36 +307,12 @@ export const pairingSlice = createSlice({
       state.calculatedMeals = calculatePairingMeals(state);
     },
 
-    // updateDutyDayStart: (state, action) => {
-    //   const { index, value } = action.payload;
-    //   state.dutyDays[index].dutyDayStart = value;
-    // },
-
-    // updateFlight: (state, action) => {
-    //   const { index, flight } = action.payload;
-    //   if (state.sequence[index]) {
-    //     state.sequence[index] = flight;
-    //   }
-    //   console.log(flight);
-    //   state.calculatedMeals = calculatePairingMeals(state);
-    // },
-
     updateDutyDayEnd: (state, action) => {
       const { index, value } = action.payload;
       state.dutyDays[index].dutyDayEnd = value;
     },
 
-    // updateCAAllowance: (state, action) => {
-    //   const { index, value } = action.payload;
-    //   state.caAllowance = value;
-    // },
-
-    // updateUSAllowance: (state, action) => {
-    //   const { index, value } = action.payload;
-    //   state.usAllowance = value;
-    // },
-
-    isTransborder: (state, action) => {
+    isTransborder: (state) => {
       const s = state.sequence;
       for (let i = 0; i < s.length; i++) {
         if (
@@ -349,31 +324,6 @@ export const pairingSlice = createSlice({
       }
       state.isTransborder = false;
     },
-
-    //   calculatePairingMeals: (state, action) => {
-    //     let meals = '';
-
-    //     const firstFlight = state.sequence[0];
-    //     const firstDuty = state.dutyDays[0];
-    //     const firstTime = dayjs(firstFlight.departureTime, timeFormat);
-    //     meals += calculateFirstDayMeals(firstDuty, firstTime);
-
-    //     const tafb = state.tafb;
-    //     const lastFlight = state.sequence[state.sequence.length - 1];
-    //     for (
-    //       let i = 0;
-    //       i < calculateFullDays(tafb, firstFlight, lastFlight);
-    //       i++
-    //     ) {
-    //       meals += 'BLDS';
-    //     }
-
-    //     const lastDuty = state.dutyDays[state.dutyDays.length - 1];
-    //     const lastTime = dayjs(lastFlight.arrivalTime, timeFormat);
-    //     meals += calculateLastDayMeals(lastDuty, lastTime);
-    //     state.calculatedMeals = meals;
-    //   },
-    // },
   },
 });
 

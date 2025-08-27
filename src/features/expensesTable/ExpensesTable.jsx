@@ -2,7 +2,7 @@
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import canadian_airport_codes from '../../data/canadian_airport_codes';
-import american_airport_codes from '../../data/american_airport_codes';
+// import american_airport_codes from '../../data/american_airport_codes';
 import international_airport_codes from '../../data/international_airport_codes';
 import calcMealsDomDept from '../../modules/calcMealsDomDept';
 import calcMealsDomArrival from '../../modules/calcMealsDomArrival';
@@ -17,7 +17,7 @@ const ExpensesTable = () => {
   const [meals, setMeals] = useState([]);
   const [station, setStation] = useState('');
   const [caExpenses, setCaExpenses] = useState({});
-  const [usExpenses, setUsExpenses] = useState({});
+  // const [usExpenses, setUsExpenses] = useState({});
   const [intlExpenses, setIntlExpenses] = useState({});
   const [displayTotal, setDisplayTotal] = useState(0);
 
@@ -26,11 +26,12 @@ const ExpensesTable = () => {
     processLayovers();
 
     getExpenseAmounts('YYZ');
-    getExpenseAmounts('MCO');
     getExpenseAmounts('NRT');
+  }, [p]);
 
+  useEffect(() => {
     calculateDisplayTotal();
-  }, []);
+  }, [meals, caExpenses, intlExpenses, numLayovers]);
 
   const getExpenseAmounts = (stn) => {
     const request = window.indexedDB.open('ExpensesDB', 1);
@@ -52,14 +53,14 @@ const ExpensesTable = () => {
               snack: exp.snack,
             });
             break;
-          case 'MCO':
-            setUsExpenses({
-              breakfast: exp.breakfast,
-              lunch: exp.lunch,
-              dinner: exp.dinner,
-              snack: exp.snack,
-            });
-            break;
+          // case 'MCO':
+          //   setUsExpenses({
+          //     breakfast: exp.breakfast,
+          //     lunch: exp.lunch,
+          //     dinner: exp.dinner,
+          //     snack: exp.snack,
+          //   });
+          //   break;
           default:
             setIntlExpenses({
               breakfast: exp.breakfast,
@@ -167,6 +168,7 @@ const ExpensesTable = () => {
 
   const calculateDisplayTotal = () => {
     let dispTotal = 0;
+
     for (let i = 0; i < meals.length; i++) {
       if (meals[i].station === 'YYZ') {
         dispTotal +=
