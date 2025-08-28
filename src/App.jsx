@@ -6,9 +6,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 function App() {
-  const [clicked, setClicked] = useState(true);
-  const [expensesUploaded, setExpensesUploaded] = useState(true);
-  const [pairingsUploaded, setPairingsUploaded] = useState(true);
+  const [clicked, setClicked] = useState(false);
+  const [expensesUploaded, setExpensesUploaded] = useState(false);
+  const [pairingsUploaded, setPairingsUploaded] = useState(false);
 
   useEffect(() => {
     checkDBExists();
