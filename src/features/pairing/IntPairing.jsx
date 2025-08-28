@@ -8,7 +8,6 @@ import ExpensesTable from '../expensesTable/ExpensesTable';
 
 function IntPairing() {
   const p = useSelector((state) => state.pairing);
-  console.log(p.pairingNumber);
   const sequence = p.sequence;
   // const firstFlight = sequence[0];
   // const [allMeals, setAllMeals] = useState({});

@@ -12,4 +12,9 @@ export default [
   'UAA',
   'FII',
   'EKK',
+  'IBB',
+  'CAA',
+  'GKK',
+  'AEE',
+  'HAA',
 ];
