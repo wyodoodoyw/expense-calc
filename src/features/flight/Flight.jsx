@@ -53,25 +53,6 @@ function Flight(props) {
 
   return (
     <>
-      {/* <div className="mx-3 py-3 row text-start">
-        {(f.index === 0 ||
-          pairing.sequence[f.index - 1].hotelInfo !== undefined) && (
-          <div className="col-">Duty Day Start:</div>
-        )}
-        <div className="col-">
-          {(f.index === 0 ||
-            pairing.sequence[f.index - 1].hotelInfo !== undefined) && (
-            <input
-              type="time"
-              value={`${currentDutyDay.dutyDayStart.slice(
-                0,
-                -2
-              )}:${currentDutyDay.dutyDayStart.slice(-2)}`}
-              readOnly
-            />
-          )}
-        </div>
-      </div> */}
       <div className="mx-3 py-3 text-center row flex-shrink-1 bg-info">
         <div className="col-1">
           Flight No: AC{f.flightNumber} {f.isDeadhead && <p>DHD</p>}
@@ -117,25 +98,6 @@ function Flight(props) {
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>
-      {/* <div className="mx-3 py-3 row text-start">
-        {(f.index === pairing.sequence.length - 1 ||
-          pairing.sequence[f.index + 1].hotelInfo) && (
-          <div className="col-">Duty Day End:</div>
-        )}
-        <div className="col-">
-          {(f.index === pairing.sequence.length - 1 ||
-            pairing.sequence[f.index + 1].hotelInfo) && (
-            <input
-              type="time"
-              value={`${currentDutyDay.dutyDayEnd.slice(
-                0,
-                -2
-              )}:${currentDutyDay.dutyDayEnd.slice(-2)}`}
-              readOnly
-            />
-          )}
-        </div> 
-      </div>*/}
     </>
   );
 }

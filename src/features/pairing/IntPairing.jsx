@@ -1,5 +1,4 @@
 /* eslint-disable react/prop-types */
-import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import Flight from '../flight/Flight';
@@ -9,18 +8,6 @@ import ExpensesTable from '../expensesTable/ExpensesTable';
 function IntPairing() {
   const p = useSelector((state) => state.pairing);
   const sequence = p.sequence;
-  // const firstFlight = sequence[0];
-  // const [allMeals, setAllMeals] = useState({});
-
-  // useEffect(() => {
-  //   const meals = p.calculatedMeals;
-  //   setAllMeals({
-  //     breakfast: (meals.match(/B/g) || []).length,
-  //     lunch: (meals.match(/L/g) || []).length,
-  //     dinner: (meals.match(/D/g) || []).length,
-  //     snack: (meals.match(/S/g) || []).length,
-  //   });
-  // }, []);
 
   return (
     <div className="text-start font-monospace">

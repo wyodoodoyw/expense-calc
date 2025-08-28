@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { store } from '../../app/store';
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import canadian_airport_codes from '../../data/canadian_airport_codes';
@@ -15,6 +16,10 @@ const ExpensesTable = () => {
   const seq = p.sequence;
   const numLayovers = p.layoverCount;
 
+  // const unsubscribe = store.subscribe(() => {
+  //   console.log('State changed', store.getState());
+  // });
+
   const [meals, setMeals] = useState([]);
   const [station, setStation] = useState('');
   const [caExpenses, setCaExpenses] = useState({});
@@ -23,9 +28,13 @@ const ExpensesTable = () => {
   const [displayTotal, setDisplayTotal] = useState(0);
 
   useEffect(() => {
+    getExpenseAmounts('YYZ');
+  }, []);
+
+  useEffect(() => {
     setMeals([]);
     processLayovers();
-    getExpenseAmounts('YYZ');
+    // getExpenseAmounts('YYZ');
     // getExpenseAmounts(station);
   }, [p]);
 

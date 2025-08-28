@@ -4,13 +4,21 @@ import Accordion from './Components/Accordion';
 import { useState, useEffect } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import test from './tests';
 
 function App() {
-  const [clicked, setClicked] = useState(false);
-  const [expensesUploaded, setExpensesUploaded] = useState(false);
-  const [pairingsUploaded, setPairingsUploaded] = useState(false);
+  // Production
+  // const [clicked, setClicked] = useState(false);
+  // const [expensesUploaded, setExpensesUploaded] = useState(false);
+  // const [pairingsUploaded, setPairingsUploaded] = useState(false);
+
+  // Development
+  const [clicked, setClicked] = useState(true);
+  const [expensesUploaded, setExpensesUploaded] = useState(true);
+  const [pairingsUploaded, setPairingsUploaded] = useState(true);
 
   useEffect(() => {
+    // test('T5002');
     checkDBExists();
   }, []);
 
