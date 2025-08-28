@@ -8,6 +8,7 @@ import calcMealsDomDept from '../../modules/calcMealsDomDept';
 import calcMealsDomArrival from '../../modules/calcMealsDomArrival';
 import calcMealsIntDept from '../../modules/calcMealsIntDept';
 import calcMealsIntArrival from '../../modules/calcMealsIntArrival';
+import calcLayoverDays from '../../modules/calcLayoverDays';
 
 const ExpensesTable = () => {
   const p = useSelector((state) => state.pairing);
@@ -92,7 +93,11 @@ const ExpensesTable = () => {
       ) {
         // International Layover
         setStation(seq[i].layoverStation);
-        calculateIntLayover(seq[i].layoverStart, seq[i].layoverEnd);
+        calculateIntLayover(
+          seq[i].layoverStart,
+          seq[i].layoverEnd,
+          seq[i].layoverLength
+        );
       } else if (
         i === 1 &&
         canadian_airport_codes.includes(seq[i].layoverStation)
@@ -101,7 +106,8 @@ const ExpensesTable = () => {
         calcDomLayoverPrior(
           seq[0].dutyStart,
           seq[0].departureTime,
-          seq[2].departureTime
+          seq[2].departureTime,
+          seq[1].layoverLength
         );
       } else if (
         i === seq.length - 2 &&
@@ -111,7 +117,8 @@ const ExpensesTable = () => {
         calcDomLayoverAfter(
           seq[seq.length - 3].arrivalTime,
           seq[seq.length - 1].arrivalTime,
-          seq[seq.length - 1].dutyEnd
+          seq[seq.length - 1].dutyEnd,
+          seq[seq.length - 2].layoverLength
         );
       }
     }
@@ -155,11 +162,18 @@ const ExpensesTable = () => {
     ]);
   };
 
-  const calculateIntLayover = (start, end) => {
+  const calculateIntLayover = (start, end, length) => {
     setMeals((prev) => [
       ...prev,
       { index: prev.length, meals: calcMealsIntArrival(start), station: 'int' },
     ]);
+    // if (length) {
+    //   setMeals((prev) => [
+    //     ...prev,
+    //     { index: prev.length, meals: 'BLDS', station: 'int' },
+    //   ]);
+    // }
+    console.log(`Layover Days: ${calcLayoverDays(start, end, length)}`);
     setMeals((prev) => [
       ...prev,
       { index: prev.length, meals: calcMealsIntDept(end), station: 'int' },

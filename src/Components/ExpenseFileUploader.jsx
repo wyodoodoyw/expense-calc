@@ -197,10 +197,12 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
       try {
         // Read pdf file
         let text = await extractTextFromPDF(file, 'custom');
-        text && setExpensesUploaded(true);
+        // console.log(text);
 
         // Remove header
         text = cutStringAfterInclusive(text, 'Algiers');
+        text && setExpensesUploaded(true);
+        // console.log(text);
 
         // Split destinations by *!* delimeter
         let destinations = text.split(/\*!\*\s{2}/g);
@@ -210,6 +212,10 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
         for (let i = 0; i < destinations.length - 1; i++) {
           const destination = destinations[i];
 
+          if (destination.includes('AIR CANADA FLIGHT ATTENDANT')) {
+            endIndex = i;
+            break;
+          }
           if (destination.includes('***BRACELET PROVIDED***')) {
             endIndex = i;
             break;
