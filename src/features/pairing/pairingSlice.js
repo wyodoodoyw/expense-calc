@@ -2,8 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import dayjs from 'dayjs';
 import american_airport_codes from '../../data/american_airport_codes';
 
-const timeFormat = 'HH:mm';
-
 const getDutyStart = (sequence, firstFlight, aircraft) => {
   let dutyDayStart = dayjs()
     .set('hour', sequence.departureTime.slice(0, -2))
@@ -31,125 +29,6 @@ const getDutyDayEnd = (sequence) => {
     .format('HHmm');
   return dutyDayEnd;
 };
-
-// const calculatePairingMeals = (state) => {
-// let meals = '';
-// console.log(`-----------------`);
-
-// const firstFlight = state.sequence[0];
-// const firstDuty = state.dutyDays[0];
-// const firstTime = dayjs(firstFlight.departureTime, timeFormat);
-// meals += calculateFirstDayMeals(firstDuty, firstTime);
-// console.log(`First Day Meals: ${meals}`);
-
-// const tafb = state.tafb;
-// const lastFlight = state.sequence[state.sequence.length - 1];
-// const fullDays = calculateFullDays(tafb, firstFlight, lastFlight);
-// console.log(`Full Days: ${fullDays}`);
-// let fullMeals = '';
-// for (let i = 0; i < fullDays; i++) {
-//   meals += 'BLDS';
-//   fullMeals += 'BLDS';
-// }
-// console.log(`Full Days Meals: ${fullMeals}`);
-
-// const lastDuty = state.dutyDays[state.dutyDays.length - 1];
-// const lastTime = dayjs(lastFlight.arrivalTime, timeFormat);
-// meals += calculateLastDayMeals(lastDuty, lastTime);
-// console.log(`Last Day Meals:  ${calculateLastDayMeals(lastDuty, lastTime)}`);
-// return meals;
-// };
-
-// const calculateFirstDayMeals = (firstDuty, time) => {
-//   const duty = {
-//     start: dayjs(firstDuty.dutyDayStart),
-//     end: dayjs('01:01', timeFormat).add(1, 'day'),
-//   };
-//   if (
-//     time.isBefore(dayjs('08:00', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-//     duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-//   ) {
-//     // console.log(`!Begin: B`);
-//     return 'BLDS';
-//   } else if (
-//     time.isBefore(dayjs('12:30', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-//     duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
-//   ) {
-//     // console.log(`!Begin: L`);
-//     return 'LDS';
-//   } else if (
-//     time.isBefore(dayjs('18:00', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('18:00', timeFormat), 'minutes') &&
-//     duty.end.isAfter(dayjs('19:30', timeFormat), 'minutes')
-//   ) {
-//     // console.log(`!Begin: D`);
-//     return 'DS';
-//   } else if (
-//     time.isBefore(dayjs('23:00', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-//     duty.end.isAfter(dayjs('01:00', timeFormat).add(1, 'day'), 'minutes')
-//   ) {
-//     // console.log(`!Begin: S`);
-//     return 'S';
-//   }
-// };
-
-// const calculateLastDayMeals = (lastDuty, time) => {
-//   const duty = {
-//     start: dayjs('00:00', timeFormat),
-//     end: dayjs(lastDuty.dutyDayEnd, timeFormat),
-//   };
-
-//   if (
-//     time.isAfter(dayjs('18:30', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('17:00', timeFormat), 'minutes') &&
-//     duty.end.isAfter(dayjs('18:30', timeFormat), 'minutes')
-//   ) {
-//     // console.log(`!End: D`);
-//     return 'BLD';
-//   } else if (
-//     time.isAfter(dayjs('13:30', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('12:30', timeFormat), 'minutes') &&
-//     duty.end.isAfter(dayjs('13:30', timeFormat), 'minutes')
-//   ) {
-//     // console.log(`!End: L`);
-//     return 'BL';
-//   } else if (
-//     time.isAfter(dayjs('09:30', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('08:00', timeFormat), 'minutes') &&
-//     duty.end.isAfter(dayjs('09:30', timeFormat), 'minutes')
-//   ) {
-//     // console.log(`!End: B`);
-//     return 'B';
-//   } else if (
-//     time.isAfter(dayjs('01:00', timeFormat), 'minute') &&
-//     duty.start.isBefore(dayjs('23:00', timeFormat), 'minutes') &&
-//     duty.end.isAfter((dayjs('01:00', timeFormat).add(1, 'day'), 'minutes'))
-//   ) {
-//     // console.log(`!End: S`);
-//     return 'BLDS';
-//   }
-// };
-
-// const calculateFullDays = (tafb, firstFlight, lastFlight) => {
-//   let hours = 0;
-//   hours =
-//     Number(tafb.slice(0, -2)) +
-//     Number(firstFlight.departureTime[(0, 2)]) -
-//     Number(lastFlight.arrivalTime[(0, 2)]) -
-//     23;
-//   let minutes =
-//     Number(tafb.slice(-2)) +
-//     Number(lastFlight.arrivalTime[-2]) -
-//     Number(firstFlight.arrivalTime[-2]) +
-//     15;
-//   if (minutes >= 60) {
-//     hours += Math.floor(minutes / 60);
-//   }
-//   return Math.round(hours / 24);
-// };
 
 const numLayovers = (s) => {
   let layoverCount = 0;
@@ -271,7 +150,6 @@ export const pairingSlice = createSlice({
           if (action.payload[i].hotelInfo) {
             const dutyDay = processDutyDay(action.payload.slice(firstIndex, i));
             dutyDay.index = dutyDayIndex;
-            // console.log(`Multi-Day: ${JSON.stringify(dutyDay)}`);
             state.dutyDays.push(dutyDay);
             firstIndex = i + 1;
             dutyDayIndex++;
@@ -280,7 +158,6 @@ export const pairingSlice = createSlice({
               action.payload.slice(firstIndex, i + 1)
             );
             dutyDay.index = dutyDayIndex;
-            // console.log(`Multi-Day: ${JSON.stringify(dutyDay)}`);
             state.dutyDays.push(dutyDay);
           }
         }
@@ -289,22 +166,17 @@ export const pairingSlice = createSlice({
       for (let i = 0; i < action.payload.length; i++) {
         state.sequence.push(action.payload[i]);
       }
-      // state.calculatedMeals = calculatePairingMeals(state);
       state.layoverCount = numLayovers(state.sequence);
     },
 
     updateFlightDeparture: (state, action) => {
       const { index, value } = action.payload;
       state.sequence[index].departureTime = value;
-      // state.calculatedMeals = '';
-      // state.calculatedMeals = calculatePairingMeals(state);
     },
 
     updateFlightArrival: (state, action) => {
       const { index, value } = action.payload;
       state.sequence[index].arrivalTime = value;
-      // state.calculatedMeals = '';
-      // state.calculatedMeals = calculatePairingMeals(state);
     },
 
     updateDutyDayEnd: (state, action) => {

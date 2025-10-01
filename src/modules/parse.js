@@ -5,7 +5,8 @@ import all_airports from '../data/all_airports';
 import parseAsFlight from '../modules/parseAsFlight';
 import parseAsLayover from '../modules/parseAsLayover';
 import addPairingToDB from '../modules/addPairingToDB';
-import test from '../tests';
+// import getExpenseseFromDB from '../modules/getExpensesFromDB';
+import international_airport_codes from '../data/international_airport_codes';
 
 const parse = (pairing) => {
   let errorPairingNumber = null;
@@ -201,6 +202,12 @@ const parse = (pairing) => {
           layover.layoverEnd = pairingSequence[i + 1].departureTime;
           layover.layoverLength = pairingSequence[i - 1].layoverLength;
           layover.layoverStation = pairingSequence[i - 1].arrivalAirport;
+          layover.isInt = international_airport_codes.includes(
+            pairingSequence[i - 1].arrivalAirport
+          );
+          // if (layover.isInt) {
+          //   layover.expenses = getExpenseseFromDB(layover.layoverStation);
+          // }
           pairingSequence[i] = layover;
         }
       }

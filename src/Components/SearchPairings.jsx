@@ -34,6 +34,27 @@ function SearchPairings(props) {
   };
 
   const handleSearchClick = () => {
+    dispatch(
+      initializePairing({
+        id: 0,
+        pairingNumber: '',
+        pairingOperates: '',
+        pairingPurser: '',
+        pairingFA: '',
+        pairingBL: '',
+        pairingGP: '',
+        pairingGY: '',
+        pairingDates: '',
+        pairingLanguages: '',
+        blockCredit: '',
+        cicoAmount: '',
+        tafb: '',
+        totalAllowance: '',
+        totalCredit: '',
+        totalDuty: '',
+      })
+    );
+
     const request = window.indexedDB.open('PairingsDB', 1);
 
     request.onsuccess = (event) => {
@@ -46,26 +67,26 @@ function SearchPairings(props) {
       request.onsuccess = () => {
         setPairingSearchResult(true);
         if (request.result) {
-          dispatch(
-            initializePairing({
-              id: 0,
-              pairingNumber: '',
-              pairingOperates: '',
-              pairingPurser: '',
-              pairingFA: '',
-              pairingBL: '',
-              pairingGP: '',
-              pairingGY: '',
-              pairingDates: '',
-              pairingLanguages: '',
-              blockCredit: '',
-              cicoAmount: '',
-              tafb: '',
-              totalAllowance: '',
-              totalCredit: '',
-              totalDuty: '',
-            })
-          );
+          // dispatch(
+          //   initializePairing({
+          //     id: 0,
+          //     pairingNumber: '',
+          //     pairingOperates: '',
+          //     pairingPurser: '',
+          //     pairingFA: '',
+          //     pairingBL: '',
+          //     pairingGP: '',
+          //     pairingGY: '',
+          //     pairingDates: '',
+          //     pairingLanguages: '',
+          //     blockCredit: '',
+          //     cicoAmount: '',
+          //     tafb: '',
+          //     totalAllowance: '',
+          //     totalCredit: '',
+          //     totalDuty: '',
+          //   })
+          // );
           dispatch(
             initializePairing({
               id: request.result.id,

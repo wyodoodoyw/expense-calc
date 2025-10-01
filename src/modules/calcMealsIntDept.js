@@ -3,7 +3,10 @@ import dayjs from 'dayjs';
 const timeFormat = 'HHmm';
 
 const calcMealsIntDept = (deptTime) => {
-  const time = dayjs(deptTime, timeFormat);
+  // const time = dayjs(deptTime, timeFormat);
+  const time = dayjs()
+    .set('hour', Number(deptTime.slice(0, 2)))
+    .set('minute', Number(deptTime.slice(-2)));
 
   if (
     time.isAfter(dayjs('07:00', timeFormat), 'minute') &&

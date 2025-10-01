@@ -1,18 +1,12 @@
 /* eslint-disable react/prop-types */
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-// import ExpensesTable from '../features/expensesTable/ExpensesTable';
-import na_sun_airports from '../data/na_sun_airports';
-import international_airport_codes from '../data/international_airport_codes';
+import na_sun_airports from '../../data/na_sun_airports';
+import international_airport_codes from '../../data/international_airport_codes';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-// import toTimeFormat from '../modules/to-time-format';
-// import canadian_airport_codes from '../data/canadian_airport_codes';
-// import american_airport_codes from '../data/american_airport_codes';
-// import international_airport_codes from '../data/international_airport_codes';
-// import sun_domestic_aiport_codes from '../data/sun_domestic_airport_codes';
 
 dayjs.extend(isBetween);
 dayjs.extend(utc);
@@ -201,19 +195,6 @@ function Layover(props) {
       return '';
     }
   };
-
-  // const getCategory = (station) => {
-  //   if (
-  //     canadian_airport_codes.includes(station) ||
-  //     sun_domestic_aiport_codes.includes(station)
-  //   ) {
-  //     return 'Domestic';
-  //   } else if (american_airport_codes.includes(station)) {
-  //     return 'Transborder';
-  //   } else if (international_airport_codes.includes(station)) {
-  //     return 'International';
-  //   }
-  // };
 
   const getExpenseAmounts = (station) => {
     const request = window.indexedDB.open('ExpensesDB', 1);

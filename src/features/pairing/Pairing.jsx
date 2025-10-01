@@ -3,7 +3,7 @@
 import { useSelector } from 'react-redux';
 
 import Flight from '../flight/Flight';
-import Layover from '../../Components/Layover';
+import Layover from '../layover/Layover';
 import ExpensesTable from '../expensesTable/ExpensesTable';
 
 function Pairing() {

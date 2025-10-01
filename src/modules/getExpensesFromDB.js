@@ -1,4 +1,4 @@
-const getExpensesFromDB = (code) => {
+const getExpensesFromDB = (code, setter) => {
   const request = window.indexedDB.open('ExpensesDB', 1);
 
   request.onsuccess = (event) => {
@@ -6,20 +6,14 @@ const getExpensesFromDB = (code) => {
     const tx = db.transaction(['expenses'], 'readonly');
     const expensesStore = tx.objectStore('expenses');
     const airportCodesIndex = expensesStore.index('airport_codes');
-    const request = airportCodesIndex.get(code);
+    const request2 = airportCodesIndex.get(code);
 
-    request.onsuccess = () => {
-      const res = request.result.expenses;
-      console.log(JSON.stringify(res.breakfast));
-      return {
-        breakfast: res.breakfast,
-        lunch: res.lunch,
-        dinner: res.dinner,
-        snack: res.snack,
-      };
+    request2.onsuccess = () => {
+      const res = request2.result.expenses;
+      setter(res);
     };
 
-    request.onerror = (event) => {
+    request2.onerror = (event) => {
       console.log(`!DB Error: ${event.target.error}`);
     };
 
