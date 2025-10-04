@@ -134,6 +134,7 @@ const parse = (pairing) => {
       const pairingSequence = [];
 
       if (sequence) {
+        // console.log(sequence);
         for (let i = 0; i < sequence.length; i++) {
           const threeLetters = sequence[i].match(/[A-Z]{3}/g);
           if (!threeLetters && sequence[i].trim().length >= 9) {

@@ -3,8 +3,6 @@ import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
 import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
 import aircraft from '../data/aircraft';
 
-const timeFormat = 'HH:mm';
-
 const parseAsFlight = (line, index, isLastFlight) => {
   const newFlight = {
     index: index,
@@ -130,6 +128,9 @@ const parseAsFlight = (line, index, isLastFlight) => {
   newFlight.arrivalAirport = airports[1];
 
   // Remove substring that has been parsed above
+  line = cutStringAfterExclusive(line, numbers[0]);
+  line = cutStringAfterExclusive(line, numbers[1]);
+  line = cutStringAfterExclusive(line, numbers[2]);
   if (numbers[5]) {
     line = cutStringAfterExclusive(line, numbers[5]);
   } else if (numbers[4]) {
@@ -140,9 +141,21 @@ const parseAsFlight = (line, index, isLastFlight) => {
 
   // console.log(`line: ${line}`);
   if (line && line.match(/[A-Z]{2}/g)) {
-    const mealsOnboard = line.match(/[A-Z]{2}/g);
-    newFlight.mealsOnboard = mealsOnboard;
-    line = cutStringAfterExclusive(line, mealsOnboard[mealsOnboard.length - 1]);
+    if (line.match(/(HB|CB|HL|HD|FB|SS)/g)) {
+      const mealsOnboard = line.match(/[A-Z]{2}/g);
+      newFlight.mealsOnboard = mealsOnboard;
+      line = cutStringAfterExclusive(
+        line,
+        mealsOnboard[mealsOnboard.length - 1]
+      );
+    } else if (line.match(/B|L|D|S/g)) {
+      const mealExpenses = line.match(/[A-Z]{2}/g);
+      newFlight.mealExpenses = mealExpenses;
+      line = cutStringAfterExclusive(
+        line,
+        mealExpenses[mealExpenses.length - 1]
+      );
+    }
   }
 
   if (line !== ' ') {

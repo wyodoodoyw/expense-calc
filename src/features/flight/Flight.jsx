@@ -93,8 +93,8 @@ function Flight(props) {
         {f.mealsOnboard && (
           <div className="col-1">Meals Onboard: {f.mealsOnboard}</div>
         )}
-        {f.mealAllowance && (
-          <div className="col-1">Meals Allowance: {f.mealAllowance}</div>
+        {f.mealExpenses && (
+          <div className="col-1">Meals Allowance: {f.mealExpenses}</div>
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>

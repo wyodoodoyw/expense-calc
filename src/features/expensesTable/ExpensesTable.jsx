@@ -10,8 +10,9 @@ import calcMealsIntDept from '../../modules/calcMealsIntDept';
 import calcMealsIntArrival from '../../modules/calcMealsIntArrival';
 import calcLayoverDays from '../../modules/calcLayoverDays';
 
+// import useTraceUpdate from '../../hooks/useTraceUpdate';
+
 const ExpensesTable = () => {
-  // const dispatch = useDispatch();
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
   const numLayovers = p.layoverCount;
@@ -25,10 +26,57 @@ const ExpensesTable = () => {
   useEffect(() => {
     processLayovers();
     getExpenseseFromDB('YYZ', setCaExpenses);
-    calculateDisplayTotal();
+    determineIntlStation();
   }, []);
 
-  useEffect(() => {}, [displayTotal]);
+  useEffect(() => {
+    processLayovers();
+    determineIntlStation();
+  }, [p]);
+
+  useEffect(() => {
+    calculateDisplayTotal();
+    // if (
+    //   p.pairingNumber &&
+    //   displayTotal &&
+    //   displayTotal !== '0.00' &&
+    //   displayTotal !== p.totalAllowance
+    // ) {
+    //   console.log(
+    //     `${p.pairingNumber}: Display total ${displayTotal} is different from clculated totalAllowance ${p.totalAllowance}`
+    //   );
+    // }
+  }, [meals, caExpenses, intlExpenses]);
+
+  useEffect(() => {
+    if (
+      p.pairingNumber &&
+      !displayTotal.isNaN &&
+      displayTotal !== '0.00' &&
+      displayTotal !== p.totalAllowance
+    ) {
+      console.log(
+        `${p.pairingNumber}: Display total ${displayTotal} is different from clculated totalAllowance ${p.totalAllowance}`
+      );
+    }
+  }, [displayTotal]);
+
+  const determineIntlStation = () => {
+    for (let i = 0; i < seq.length; i++) {
+      if (seq[i].hotelInfo && seq[i].isInt) {
+        // International Layover
+        setStation(seq[i].layoverStation);
+        getExpenseseFromDB(seq[i].layoverStation, setIntlExpenses);
+      } else if (
+        canadian_airport_codes.includes(seq[i].departureStation) &&
+        canadian_airport_codes.includes(seq[i].arrivalStation)
+      ) {
+        // Pairing includes domestic flight with PD
+        console.log(`Implement domestic PD here.`);
+        console.log('Can check if flight includes mealExpenses.');
+      }
+    }
+  };
 
   const processLayovers = () => {
     setMeals([]);
@@ -39,8 +87,8 @@ const ExpensesTable = () => {
     for (let i = 0; i < seq.length; i++) {
       if (seq[i].hotelInfo && seq[i].isInt) {
         // International Layover
-        setStation(seq[i].layoverStation);
-        getExpenseseFromDB(seq[i].layoverStation, setIntlExpenses);
+        // setStation(seq[i].layoverStation);
+        // getExpenseseFromDB(seq[i].layoverStation, setIntlExpenses);
         calculateIntLayover(
           seq[i].layoverStart,
           seq[i].layoverEnd,
@@ -81,23 +129,30 @@ const ExpensesTable = () => {
     layoverStart,
     layoverLength
   ) => {
-    setMeals((prev) => [
-      ...prev,
-      {
-        index: prev.length,
-        meals: calcMealsDomDept(dutyStart, domDeptTime),
-        station: 'YYZ',
-      },
-    ]);
-    if (layoverLength.slice(0, 2) - 24 + layoverStart.slice(0, 2) >= 1) {
+    const deptMeals = calcMealsDomDept(dutyStart, domDeptTime);
+    if (deptMeals) {
       setMeals((prev) => [
         ...prev,
         {
           index: prev.length,
-          meals: calcMealsIntDept(intDeptTime),
+          meals: deptMeals,
           station: 'YYZ',
         },
       ]);
+    }
+
+    if (layoverLength.slice(0, 2) - 24 + layoverStart.slice(0, 2) >= 1) {
+      const deptMeals2 = calcMealsIntDept(intDeptTime);
+      if (deptMeals2) {
+        setMeals((prev) => [
+          ...prev,
+          {
+            index: prev.length,
+            meals: deptMeals2,
+            station: 'YYZ',
+          },
+        ]);
+      }
     }
   };
 
@@ -108,42 +163,60 @@ const ExpensesTable = () => {
     layoverEnd,
     layoverLength
   ) => {
-    setMeals((prev) => [
-      ...prev,
-      {
-        index: prev.length,
-        meals: calcMealsIntArrival(intArrivalTime),
-        station: 'YYZ',
-      },
-    ]);
-    if (
-      Number(layoverLength.slice(0, 2)) - 24 + Number(layoverEnd.slice(0, 2)) >=
-      24
-    ) {
+    const arrivalMeals = calcMealsIntArrival(intArrivalTime);
+    if (arrivalMeals) {
       setMeals((prev) => [
         ...prev,
         {
           index: prev.length,
-          meals: calcMealsDomArrival(domArrivalTime, dutyEnd),
+          meals: arrivalMeals,
           station: 'YYZ',
         },
       ]);
     }
-    setMeals((prev) => [
-      ...prev,
-      {
-        index: prev.length,
-        meals: calcMealsDomArrival(domArrivalTime, dutyEnd),
-        station: 'YYZ',
-      },
-    ]);
+
+    if (
+      Number(layoverLength.slice(0, 2)) - 24 + Number(layoverEnd.slice(0, 2)) >=
+      24
+    ) {
+      const arrivalMeals = calcMealsDomArrival(domArrivalTime, dutyEnd);
+      if (arrivalMeals) {
+        setMeals((prev) => [
+          ...prev,
+          {
+            index: prev.length,
+            meals: arrivalMeals,
+            station: 'YYZ',
+          },
+        ]);
+      }
+    }
+    const arrivalMeals2 = calcMealsDomArrival(domArrivalTime, dutyEnd);
+    if (arrivalMeals2) {
+      setMeals((prev) => [
+        ...prev,
+        {
+          index: prev.length,
+          meals: arrivalMeals2,
+          station: 'YYZ',
+        },
+      ]);
+    }
   };
 
   const calculateIntLayover = (start, end, length) => {
-    setMeals((prev) => [
-      ...prev,
-      { index: prev.length, meals: calcMealsIntArrival(start), station: 'int' },
-    ]);
+    const startMeals = calcMealsIntArrival(start);
+    if (startMeals) {
+      setMeals((prev) => [
+        ...prev,
+        {
+          index: prev.length,
+          meals: calcMealsIntArrival(start),
+          station: 'int',
+        },
+      ]);
+    }
+
     // Adjust for full days on layover
     for (let i = 1; i <= calcLayoverDays(start, end, length); i++) {
       setMeals((prev) => [
@@ -151,14 +224,18 @@ const ExpensesTable = () => {
         { index: prev.length, meals: 'BLDS', station: 'int' },
       ]);
     }
-    setMeals((prev) => [
-      ...prev,
-      { index: prev.length, meals: calcMealsIntDept(end), station: 'int' },
-    ]);
+    const endMeals = calcMealsIntDept(end);
+    if (endMeals) {
+      setMeals((prev) => [
+        ...prev,
+        { index: prev.length, meals: endMeals, station: 'int' },
+      ]);
+    }
   };
 
   const calculateDisplayTotal = () => {
     let dispTotal = 0;
+    console.log(meals);
     for (let i = 0; i < meals.length; i++) {
       if (meals[i].station === 'YYZ') {
         dispTotal +=
@@ -192,13 +269,15 @@ const ExpensesTable = () => {
         {meals.map((item) => {
           if (item.station === 'YYZ') {
             return (
-              <tr key={item.index}>
-                <td></td>
-                <td>{item.meals.includes('B') && caExpenses.breakfast}</td>
-                <td>{item.meals.includes('L') && caExpenses.lunch}</td>
-                <td>{item.meals.includes('D') && caExpenses.dinner}</td>
-                <td>{item.meals.includes('S') && caExpenses.snack}</td>
-              </tr>
+              item.meals && (
+                <tr key={item.index}>
+                  <td></td>
+                  <td>{item.meals.includes('B') && caExpenses.breakfast}</td>
+                  <td>{item.meals.includes('L') && caExpenses.lunch}</td>
+                  <td>{item.meals.includes('D') && caExpenses.dinner}</td>
+                  <td>{item.meals.includes('S') && caExpenses.snack}</td>
+                </tr>
+              )
             );
           } else if (item.station === 'int') {
             return (
@@ -231,7 +310,9 @@ const ExpensesTable = () => {
 
         <tr className="table-primary">
           <td>Total:</td>
-          <td colSpan={4}>${displayTotal}</td>
+          <td colSpan={4}>
+            {/* <Total displayTotal={Number(displayTotal)} /> */}${displayTotal}
+          </td>
         </tr>
       </tbody>
     </table>

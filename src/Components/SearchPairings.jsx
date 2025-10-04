@@ -19,7 +19,7 @@ dayjs.extend(customParseFormat);
 function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
-  const [pairingNumber, setPairingNumber] = useState('T5002');
+  const [pairingNumber, setPairingNumber] = useState('T5001');
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
@@ -32,6 +32,58 @@ function SearchPairings(props) {
       // console.log('Valid, one result');
     }
   };
+
+  // async function checkAllPairings() {
+  //   const request = window.indexedDB.open('PairingsDB', 1);
+
+  //   request.onsuccess = (event) => {
+  //     const db = event.target.result;
+  //     const tx = db.transaction(['pairings'], 'readonly');
+  //     const pairingsStore = tx.objectStore('pairings');
+  //     const getAllRequest = pairingsStore.getAll();
+
+  //     getAllRequest.onsuccess = () => {
+  //       const pairings = getAllRequest.result;
+  //       pairings.forEach((pairing) => {
+  //         console.log(pairing.pairingNumber);
+  //         // 1. Dispatch or call your calculation logic here
+  //         dispatch(
+  //           initializePairing({
+  //             id: pairing.id,
+  //             pairingNumber: pairing.pairingNumber,
+  //             pairingOperates: pairing.pairingOperates,
+  //             pairingPurser: pairing.pairingPurser,
+  //             pairingFA: pairing.pairingFA,
+  //             pairingBL: pairing.pairingBL,
+  //             pairingGP: pairing.pairingGP,
+  //             pairingGY: pairing.pairingGY,
+  //             pairingDates: pairing.pairingDates,
+  //             pairingLanguages: pairing.pairingLanguages,
+  //             blockCredit: pairing.blockCredit,
+  //             cicoAmount: pairing.cicoAmount,
+  //             tafb: pairing.tafb,
+  //             totalAllowance: pairing.totalAllowance,
+  //             totalCredit: pairing.totalCredit,
+  //             totalDuty: pairing.totalDuty,
+  //           })
+  //         );
+  //         dispatch(processSequence(pairing.sequence));
+  //       });
+
+  //       // 2. Compare calculated to pairing.totalAllowance (or other parsed value)
+  //       // Example:
+  //       // if (calculated !== pairing.totalAllowance) {
+  //       //   console.log(`Mismatch for ${pairing.pairingNumber}: calculated=${calculated}, stored=${pairing.totalAllowance}`);
+  //       // }
+  //     };
+
+  //     getAllRequest.onerror = (event) => {
+  //       console.error('Error fetching pairings:', event.target.error);
+  //     };
+
+  //     tx.oncomplete = () => db.close();
+  //   };
+  // }
 
   const handleSearchClick = () => {
     dispatch(
@@ -67,26 +119,6 @@ function SearchPairings(props) {
       request.onsuccess = () => {
         setPairingSearchResult(true);
         if (request.result) {
-          // dispatch(
-          //   initializePairing({
-          //     id: 0,
-          //     pairingNumber: '',
-          //     pairingOperates: '',
-          //     pairingPurser: '',
-          //     pairingFA: '',
-          //     pairingBL: '',
-          //     pairingGP: '',
-          //     pairingGY: '',
-          //     pairingDates: '',
-          //     pairingLanguages: '',
-          //     blockCredit: '',
-          //     cicoAmount: '',
-          //     tafb: '',
-          //     totalAllowance: '',
-          //     totalCredit: '',
-          //     totalDuty: '',
-          //   })
-          // );
           dispatch(
             initializePairing({
               id: request.result.id,
@@ -155,6 +187,7 @@ function SearchPairings(props) {
               onChange={(e) => handlePairingNumberChange(e)}
             />
             <div className="btn btn-primary" onClick={handleSearchClick}>
+              {/* <div className="btn btn-primary" onClick={checkAllPairings}> */}
               Search
             </div>
           </div>
