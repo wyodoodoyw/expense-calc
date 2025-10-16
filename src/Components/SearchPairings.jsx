@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-// import { TimePicker } from '@mui/x-date-pickers';
 import { useDispatch } from 'react-redux';
 import {
   initializePairing,
@@ -11,6 +10,7 @@ import IntPairing from '../features/pairing/IntPairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import getAllPairingNumbers from '../modules/getAllPairingNumbers';
 
 dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
@@ -23,6 +23,8 @@ function SearchPairings(props) {
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
+  // const allPairingNos = getAllPairingNumbers();
+  // console.log(allPairingNos);
 
   const handlePairingNumberChange = (e) => {
     const value = e.target.value;
@@ -32,58 +34,6 @@ function SearchPairings(props) {
       // console.log('Valid, one result');
     }
   };
-
-  // async function checkAllPairings() {
-  //   const request = window.indexedDB.open('PairingsDB', 1);
-
-  //   request.onsuccess = (event) => {
-  //     const db = event.target.result;
-  //     const tx = db.transaction(['pairings'], 'readonly');
-  //     const pairingsStore = tx.objectStore('pairings');
-  //     const getAllRequest = pairingsStore.getAll();
-
-  //     getAllRequest.onsuccess = () => {
-  //       const pairings = getAllRequest.result;
-  //       pairings.forEach((pairing) => {
-  //         console.log(pairing.pairingNumber);
-  //         // 1. Dispatch or call your calculation logic here
-  //         dispatch(
-  //           initializePairing({
-  //             id: pairing.id,
-  //             pairingNumber: pairing.pairingNumber,
-  //             pairingOperates: pairing.pairingOperates,
-  //             pairingPurser: pairing.pairingPurser,
-  //             pairingFA: pairing.pairingFA,
-  //             pairingBL: pairing.pairingBL,
-  //             pairingGP: pairing.pairingGP,
-  //             pairingGY: pairing.pairingGY,
-  //             pairingDates: pairing.pairingDates,
-  //             pairingLanguages: pairing.pairingLanguages,
-  //             blockCredit: pairing.blockCredit,
-  //             cicoAmount: pairing.cicoAmount,
-  //             tafb: pairing.tafb,
-  //             totalAllowance: pairing.totalAllowance,
-  //             totalCredit: pairing.totalCredit,
-  //             totalDuty: pairing.totalDuty,
-  //           })
-  //         );
-  //         dispatch(processSequence(pairing.sequence));
-  //       });
-
-  //       // 2. Compare calculated to pairing.totalAllowance (or other parsed value)
-  //       // Example:
-  //       // if (calculated !== pairing.totalAllowance) {
-  //       //   console.log(`Mismatch for ${pairing.pairingNumber}: calculated=${calculated}, stored=${pairing.totalAllowance}`);
-  //       // }
-  //     };
-
-  //     getAllRequest.onerror = (event) => {
-  //       console.error('Error fetching pairings:', event.target.error);
-  //     };
-
-  //     tx.oncomplete = () => db.close();
-  //   };
-  // }
 
   const handleSearchClick = () => {
     dispatch(
@@ -153,6 +103,11 @@ function SearchPairings(props) {
     };
   };
 
+  const submitHandler = (e) => {
+    e.preventDefault();
+    handleSearchClick();
+  };
+
   return (
     <div className="accordion-item">
       <h2 className="accordion-header">
@@ -168,7 +123,7 @@ function SearchPairings(props) {
           <strong className="ms-3">Search for an existing pairing.</strong>
         </button>
       </h2>
-      <form className="mx-3">
+      <form onSubmit={submitHandler} className="mx-3">
         <div
           className={
             'mb-3 accordion-collapse ' +

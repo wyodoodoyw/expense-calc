@@ -3,7 +3,9 @@ import dayjs from 'dayjs';
 const timeFormat = 'HH:mm';
 
 const calcMealsDomArrival = (arrivalTime, dutyEnd) => {
-  const time = dayjs(arrivalTime, timeFormat);
+  const time = dayjs()
+    .set('hour', arrivalTime.slice(0, -2))
+    .set('minute', arrivalTime.slice(-2));
   const duty = dayjs()
     .set('hour', dutyEnd.slice(0, -2))
     .set('minute', dutyEnd.slice(-2));
