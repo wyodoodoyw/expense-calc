@@ -22,32 +22,14 @@ const ExpensesTable = () => {
   const [displayTotal, setDisplayTotal] = useState(0);
 
   useEffect(() => {
-    processLayovers();
     getExpenseseFromDB('YYZ', setCaExpenses);
     determineIntlStation();
-  }, []);
-
-  useEffect(() => {
-    processLayovers();
-    determineIntlStation();
+    calculateMeals();
   }, [p]);
 
   useEffect(() => {
     calculateDisplayTotal();
   }, [meals, caExpenses, intlExpenses]);
-
-  useEffect(() => {
-    if (
-      p.pairingNumber &&
-      !displayTotal.isNaN &&
-      displayTotal !== '0.00' &&
-      displayTotal !== p.totalAllowance
-    ) {
-      console.log(
-        `${p.pairingNumber}: Display total ${displayTotal} is different from clculated totalAllowance ${p.totalAllowance}`
-      );
-    }
-  }, [displayTotal]);
 
   const determineIntlStation = () => {
     for (let i = 0; i < seq.length; i++) {
@@ -55,18 +37,11 @@ const ExpensesTable = () => {
         // International Layover
         setStation(seq[i].layoverStation);
         getExpenseseFromDB(seq[i].layoverStation, setIntlExpenses);
-      } else if (
-        canadian_airport_codes.includes(seq[i].departureStation) &&
-        canadian_airport_codes.includes(seq[i].arrivalStation)
-      ) {
-        // Pairing includes domestic flight with PD
-        console.log(`Implement domestic PD here.`);
-        console.log('Can check if flight includes mealExpenses.');
       }
     }
   };
 
-  const processLayovers = () => {
+  const calculateMeals = () => {
     setMeals([]);
     if (seq.length === 2) {
       //no international layover, no expenses
@@ -135,7 +110,6 @@ const ExpensesTable = () => {
           //   seq[i].departureTime
           // );
           // domMeals += calcMealsDomArrival(seq[i].arrivalTime, seq[i].dutyEnd);
-          console.log(seq[i].mealExpenses);
           setMeals((prev) => [
             ...prev,
             {

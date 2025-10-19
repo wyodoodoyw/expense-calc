@@ -1,12 +1,10 @@
 import dayjs from 'dayjs';
+import stringToTime from '../modules/stringToTime';
 
 const timeFormat = 'HHmm';
 
 const calcMealsIntDept = (deptTime) => {
-  // const time = dayjs(deptTime, timeFormat);
-  const time = dayjs()
-    .set('hour', Number(deptTime.slice(0, 2)))
-    .set('minute', Number(deptTime.slice(-2)));
+  const time = stringToTime(deptTime);
 
   if (
     time.isAfter(dayjs('07:00', timeFormat), 'minute') &&
@@ -27,7 +25,7 @@ const calcMealsIntDept = (deptTime) => {
     time.isAfter(dayjs('22:00', timeFormat), 'minute') &&
     time.isBefore(dayjs('01:00', timeFormat).add(1, 'day'), 'minutes')
   ) {
-    return 'BL';
+    return 'BLDS';
   }
 };
 

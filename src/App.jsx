@@ -18,7 +18,6 @@ function App() {
   const [pairingsUploaded, setPairingsUploaded] = useState(true);
 
   useEffect(() => {
-    // test('T5002');
     checkDBExists();
   }, []);
 
