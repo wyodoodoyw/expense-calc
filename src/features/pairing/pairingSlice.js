@@ -61,8 +61,11 @@ export const pairingSlice = createSlice({
 
       // update previous layover
       const l = state.sequence.find((l) => l.index === index - 1);
-      const diff = calculateTimeDifference(value, l.layoverEnd);
-      l.layoverLength = adjustLayoverLength(l.layoverLength, diff);
+      l.layoverLength = adjustLayoverLength(
+        value,
+        l.layoverEnd,
+        l.layoverLength
+      );
       l.layoverEnd = value;
     },
 

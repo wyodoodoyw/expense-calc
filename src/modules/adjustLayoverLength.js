@@ -1,18 +1,40 @@
-const adjustLayoverLength = (layoverLength, diff) => {
-  let hours = Number(layoverLength.slice(0, 2)) + diff.hours;
-  let minutes = Number(layoverLength.slice(-2)) + diff.minutes;
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
 
-  if (minutes >= 60) {
-    hours += Math.floor(minutes / 60);
-    minutes -= 60;
-  }
+dayjs.extend(duration);
 
-  if (minutes < 0) {
-    hours -= Math.floor(minutes / 60);
-    minutes = 60 + minutes;
-  }
+const calculateTimeDifference = (updatedTime, prevTime) => {
+  const updatedTimeDayJs = dayjs()
+    .set('hour', updatedTime.slice(0, 2))
+    .set('minute', updatedTime.slice(-2));
 
-  return `${hours}${minutes}`;
+  const prevTimeDayJs = dayjs()
+    .set('hour', prevTime.slice(0, 2))
+    .set('minute', prevTime.slice(-2));
+
+  return updatedTimeDayJs.diff(prevTimeDayJs);
+};
+
+const adjustLayoverLength = (updatedTime, prevTime, layoverLength) => {
+  const difference = dayjs.duration(
+    calculateTimeDifference(updatedTime, prevTime)
+  );
+
+  const layoverHours = Number(layoverLength.slice(0, 2));
+  const layoverMinutes = Number(layoverLength.slice(-2));
+  const layoverDays = Math.floor(layoverHours / 24);
+  const layoverHoursRemaining = layoverHours % 24;
+
+  const layoverDuration = dayjs.duration({
+    days: layoverDays,
+    hours: layoverHoursRemaining,
+    minutes: layoverMinutes,
+  });
+
+  const result = layoverDuration.add(difference);
+  return `${result.days() * 24 + result.hours()}${result
+    .minutes()
+    .toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}`;
 };
 
 export default adjustLayoverLength;
