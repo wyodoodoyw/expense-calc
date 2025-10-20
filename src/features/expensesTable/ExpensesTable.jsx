@@ -22,8 +22,8 @@ const ExpensesTable = () => {
   const [displayTotal, setDisplayTotal] = useState(0);
 
   useEffect(() => {
-    getExpenseseFromDB('YYZ', setCaExpenses);
     determineIntlStation();
+    getExpenseseFromDB('YYZ', setCaExpenses);
     calculateMeals();
   }, [p]);
 
