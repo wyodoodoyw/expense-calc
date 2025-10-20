@@ -8,14 +8,14 @@ import test from './tests';
 
 function App() {
   // Production
-  // const [clicked, setClicked] = useState(false);
-  // const [expensesUploaded, setExpensesUploaded] = useState(false);
-  // const [pairingsUploaded, setPairingsUploaded] = useState(false);
+  const [clicked, setClicked] = useState(false);
+  const [expensesUploaded, setExpensesUploaded] = useState(false);
+  const [pairingsUploaded, setPairingsUploaded] = useState(false);
 
   // Development
-  const [clicked, setClicked] = useState(true);
-  const [expensesUploaded, setExpensesUploaded] = useState(true);
-  const [pairingsUploaded, setPairingsUploaded] = useState(true);
+  // const [clicked, setClicked] = useState(true);
+  // const [expensesUploaded, setExpensesUploaded] = useState(true);
+  // const [pairingsUploaded, setPairingsUploaded] = useState(true);
 
   useEffect(() => {
     checkDBExists();

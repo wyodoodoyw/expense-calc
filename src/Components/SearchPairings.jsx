@@ -148,9 +148,13 @@ function SearchPairings(props) {
           </div>
         </div>
       </form>
-      {pairingSearchResult && pairingNumber.includes('T5') && <IntPairing />}
+      {pairingSearchResult && pairingNumber.includes(`/(C[5|M5|T5|V5/)`) && (
+        <IntPairing />
+      )}
 
-      {pairingSearchResult && !pairingNumber.includes('T5') && <Pairing />}
+      {pairingSearchResult && !pairingNumber.includes(`/(C[5|M5|T5|V5/)`) && (
+        <Pairing />
+      )}
     </div>
   );
 }
