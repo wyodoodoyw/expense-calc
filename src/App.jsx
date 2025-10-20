@@ -9,13 +9,13 @@ import test from './tests';
 function App() {
   // Production
   const [clicked, setClicked] = useState(false);
-  const [expensesUploaded, setExpensesUploaded] = useState(false);
   const [pairingsUploaded, setPairingsUploaded] = useState(false);
+  const [expensesUploaded, setExpensesUploaded] = useState(false);
 
   // Development
   // const [clicked, setClicked] = useState(true);
-  // const [expensesUploaded, setExpensesUploaded] = useState(true);
   // const [pairingsUploaded, setPairingsUploaded] = useState(true);
+  // const [expensesUploaded, setExpensesUploaded] = useState(true);
 
   useEffect(() => {
     checkDBExists();
@@ -25,16 +25,14 @@ function App() {
     // check if ExpensesDB exists and skip uploading if so
     const exRequest = window.indexedDB.open('ExpensesDB');
     exRequest.onsuccess = (e) => {
-      if (e.target.result.oldVersion > 0) {
-        console.log('Exists!');
+      if (e.target.result.oldVersion !== 1) {
         setPairingsUploaded(true);
       }
     };
     // check if PairingsDB exists and skip uploading if so
     const paRequest = window.indexedDB.open('PairingsDB');
     paRequest.onsuccess = (e) => {
-      if (e.target.result.oldVersion > 0) {
-        console.log('Exists!');
+      if (e.target.result.oldVersion !== 1) {
         setExpensesUploaded(true);
       }
     };
