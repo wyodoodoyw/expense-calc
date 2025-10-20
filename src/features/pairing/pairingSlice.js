@@ -78,9 +78,11 @@ export const pairingSlice = createSlice({
 
       // update next layover
       const l = state.sequence.find((l) => l.index === index + 1);
-      // l.layoverLength += stringToTime(value)
-      //   .subtract(stringToTime(l.layoverLength))
-      //   .format('HHmm');
+      l.layoverLength = adjustLayoverLength(
+        l.layoverStart,
+        value,
+        l.layoverLength
+      );
       l.layoverStart = value;
     },
 
