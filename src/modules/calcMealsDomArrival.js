@@ -1,14 +1,11 @@
 import dayjs from 'dayjs';
+import stringToTime from './stringToTime';
 
 const timeFormat = 'HH:mm';
 
 const calcMealsDomArrival = (arrivalTime, dutyEnd) => {
-  const time = dayjs()
-    .set('hour', arrivalTime.slice(0, -2))
-    .set('minute', arrivalTime.slice(-2));
-  const duty = dayjs()
-    .set('hour', dutyEnd.slice(0, -2))
-    .set('minute', dutyEnd.slice(-2));
+  const time = stringToTime(arrivalTime);
+  const duty = stringToTime(dutyEnd);
 
   if (
     time.isAfter(dayjs('18:30', timeFormat), 'minute') &&

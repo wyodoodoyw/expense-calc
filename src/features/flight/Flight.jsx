@@ -6,6 +6,7 @@ import {
   updateFlightArrival,
 } from '../pairing/pairingSlice';
 import dayjs from 'dayjs';
+import stringToTime from '../../modules/stringToTime';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import { useState } from 'react';
@@ -21,12 +22,8 @@ function Flight(props) {
 
   const dispatch = useDispatch();
 
-  const departureTime = dayjs()
-    .set('hour', f.departureTime.slice(0, -2))
-    .set('minute', f.departureTime.slice(-2));
-  const arrivalTime = dayjs()
-    .set('hour', f.arrivalTime.slice(0, -2))
-    .set('minute', f.arrivalTime.slice(-2));
+  const departureTime = stringToTime(f.departureTime);
+  const arrivalTime = stringToTime(f.arrivalTime);
 
   const handleTimeChange = ({ target }) => {
     // handle changes to flight times

@@ -3,12 +3,19 @@ import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import canadian_airport_codes from '../../data/canadian_airport_codes';
 import getExpenseseFromDB from '../../modules/getExpensesFromDB';
-// import getExpenseseFromDB from '../../modules/newGetExp';
-import calcMealsDomDept from '../../modules/calcMealsDomDept';
+import stringToTime from '../../modules/stringToTime';
+import calculateDisplayTotal from '../../modules/calculateDisplayTotal';
+
+// Domestic protions
+// import calcMealsDomDept from '../../modules/calcMealsDomDept';
 import calcMealsDomArrival from '../../modules/calcMealsDomArrival';
+import calcMealsDomAfterInt from '../../modules/calcMealsDomAfterInt';
+import calcMealsDomBeforeInt from '../../modules/calcMealsDomBeforeInt';
+//International layover
+import calcMealsIntLayover from '../../modules/calcMealsIntLayover';
 import calcMealsIntDept from '../../modules/calcMealsIntDept';
 import calcMealsIntArrival from '../../modules/calcMealsIntArrival';
-import calcLayoverDays from '../../modules/calcLayoverDays';
+// import calcLayoverDays from '../../modules/calcLayoverDays';
 
 const ExpensesTable = () => {
   const p = useSelector((state) => state.pairing);
@@ -28,8 +35,28 @@ const ExpensesTable = () => {
   }, [p]);
 
   useEffect(() => {
-    calculateDisplayTotal();
-  }, [meals, caExpenses, intlExpenses]);
+    calculateDisplayTotal(
+      meals,
+      caExpenses,
+      intlExpenses,
+      numLayovers,
+      setDisplayTotal
+    );
+  }, [meals, caExpenses, intlExpenses, numLayovers]);
+
+  // useEffect(() => {
+  //   if (
+  //     Number(displayTotal) !== Number(p.totalAllowance) &&
+  //     Number(displayTotal) !== 0 &&
+  //     Number(displayTotal) !== 0.0 &&
+  //     !isNaN(displayTotal) &&
+  //     Number(displayTotal) !== numLayovers * 5.05
+  //   ) {
+  //     console.log(
+  //       `Pairing: ${p.pairingNumber}: displayTotal: ${displayTotal} !== totalAllowance: ${p.totalAllowance}`
+  //     );
+  //   }
+  // }, [displayTotal]);
 
   const determineIntlStation = () => {
     for (let i = 0; i < seq.length; i++) {
@@ -47,14 +74,60 @@ const ExpensesTable = () => {
       //no international layover, no expenses
       return;
     }
+
     for (let i = 0; i < seq.length; i++) {
       if (seq[i].hotelInfo && seq[i].isInt) {
         // International Layover
-        calculateIntLayover(
+        calcMealsIntLayover(
           seq[i].layoverStart,
           seq[i].layoverEnd,
-          seq[i].layoverLength
+          seq[i].layoverLength,
+          setMeals
         );
+      } else if (
+        i === 0 &&
+        canadian_airport_codes.includes(seq[i].arrivalAirport) &&
+        canadian_airport_codes.includes(seq[i].departureAirport) &&
+        !seq[i + 1].hotelInfo
+      ) {
+        // Domestic Flight at beginning of pairing
+        const newMeals = calcMealsDomBeforeInt(
+          seq[i].dutyStart,
+          seq[i + 1].departureTime
+        );
+        {
+          newMeals &&
+            setMeals((prev) => [
+              ...prev,
+              {
+                index: i,
+                meals: newMeals,
+                station: 'YYZ',
+              },
+            ]);
+        }
+      } else if (
+        i === 0 &&
+        canadian_airport_codes.includes(seq[i].arrivalAirport) &&
+        canadian_airport_codes.includes(seq[i].departureAirport) &&
+        seq[i + 1].hotelInfo
+      ) {
+        // Domestic Flight at beginning of pairing, prior to Domestic Layover
+        const newMeals = calcMealsDomBeforeInt(
+          seq[i].dutyStart,
+          stringToTime(seq[i].arrivalTime).add(15, 'minutes').format('HHmm')
+        );
+        {
+          newMeals &&
+            setMeals((prev) => [
+              ...prev,
+              {
+                index: i,
+                meals: newMeals,
+                station: 'YYZ',
+              },
+            ]);
+        }
       } else if (
         i === 1 &&
         canadian_airport_codes.includes(seq[i].layoverStation)
@@ -79,45 +152,49 @@ const ExpensesTable = () => {
           seq[seq.length - 2].layoverEnd,
           seq[seq.length - 2].layoverLength
         );
-      }
-    }
-    for (let i = 0; i < seq.length; i++) {
-      if (
+      } else if (
+        i === seq.length - 1 &&
         canadian_airport_codes.includes(seq[i].arrivalAirport) &&
         canadian_airport_codes.includes(seq[i].departureAirport) &&
-        seq[i].flightTime >= 60
+        !seq[i - 1].hotelInfo
       ) {
-        // Domestic Flight with meal entitlements.
-        if (i === 0) {
-          let domMeals = calcMealsDomDept(
-            seq[i].dutyStart,
-            seq[i].departureTime
-          );
-          // ***** UPDATE TO BE CALCULATED *****
-          // domMeals += calcMealsDomArrival(seq[i].arrivalTime, seq[i].dutyEnd);
-          setMeals((prev) => [
-            ...prev,
-            {
-              index: i,
-              meals: seq[i].mealExpenses[0],
-              station: 'YYZ',
-            },
-          ]);
-        } else if (i === seq.length - 1) {
-          // ***** UPDATE TO BE CALCULATED *****
-          // let domMeals = calcMealsDomDept(
-          //   seq[i].dutyStart,
-          //   seq[i].departureTime
-          // );
-          // domMeals += calcMealsDomArrival(seq[i].arrivalTime, seq[i].dutyEnd);
-          setMeals((prev) => [
-            ...prev,
-            {
-              index: i,
-              meals: seq[i].mealExpenses[0],
-              station: 'YYZ',
-            },
-          ]);
+        // Domestic flight at end of pairing
+        const newMeals = calcMealsDomAfterInt(
+          seq[i - 1].arrivalTime,
+          seq[i].dutyEnd
+        );
+        {
+          newMeals &&
+            setMeals((prev) => [
+              ...prev,
+              {
+                index: i,
+                meals: newMeals,
+                station: 'YYZ',
+              },
+            ]);
+        }
+      } else if (
+        i === seq.length - 1 &&
+        canadian_airport_codes.includes(seq[i].arrivalAirport) &&
+        canadian_airport_codes.includes(seq[i].departureAirport) &&
+        seq[i - 1].hotelInfo
+      ) {
+        // Domestic flight following domestic layover at end of pairing
+        const newMeals = calcMealsDomAfterInt(
+          stringToTime(seq[i].arrivalTime).subtract(1, 'hour').format('HHmm'),
+          seq[i].dutyEnd
+        );
+        {
+          newMeals &&
+            setMeals((prev) => [
+              ...prev,
+              {
+                index: i,
+                meals: newMeals,
+                station: 'YYZ',
+              },
+            ]);
         }
       }
     }
@@ -130,7 +207,11 @@ const ExpensesTable = () => {
     layoverStart,
     layoverLength
   ) => {
-    const deptMeals = calcMealsDomDept(dutyStart, domDeptTime);
+    const deptMeals = calcMealsDomBeforeInt(
+      dutyStart,
+      domDeptTime,
+      intDeptTime
+    );
     if (deptMeals) {
       setMeals((prev) => [
         ...prev,
@@ -205,55 +286,58 @@ const ExpensesTable = () => {
     }
   };
 
-  const calculateIntLayover = (start, end, length) => {
-    const startMeals = calcMealsIntArrival(start);
-    if (startMeals) {
-      setMeals((prev) => [
-        ...prev,
-        {
-          index: prev.length,
-          meals: calcMealsIntArrival(start),
-          station: 'int',
-        },
-      ]);
-    }
+  // const calculateIntLayover = (start, end, length) => {
+  // const startMeals = calcMealsIntArrival(start);
+  // if (startMeals) {
+  //   setMeals((prev) => [
+  //     ...prev,
+  //     {
+  //       index: prev.length,
+  //       meals: calcMealsIntArrival(start),
+  //       station: 'int',
+  //     },
+  //   ]);
+  // }
+  // // Adjust for full days on layover
+  // for (let i = 1; i <= calcLayoverDays(start, end, length); i++) {
+  //   setMeals((prev) => [
+  //     ...prev,
+  //     { index: prev.length, meals: 'BLDS', station: 'int' },
+  //   ]);
+  // }
+  // const endMeals = calcMealsIntDept(end);
+  // if (endMeals) {
+  //   setMeals((prev) => [
+  //     ...prev,
+  //     { index: prev.length, meals: endMeals, station: 'int' },
+  //   ]);
+  // }
+  // };
 
-    // Adjust for full days on layover
-    for (let i = 1; i <= calcLayoverDays(start, end, length); i++) {
-      setMeals((prev) => [
-        ...prev,
-        { index: prev.length, meals: 'BLDS', station: 'int' },
-      ]);
-    }
-    const endMeals = calcMealsIntDept(end);
-    if (endMeals) {
-      setMeals((prev) => [
-        ...prev,
-        { index: prev.length, meals: endMeals, station: 'int' },
-      ]);
-    }
-  };
-
-  const calculateDisplayTotal = () => {
-    let dispTotal = 0;
-    for (let i = 0; i < meals.length; i++) {
-      if (meals[i].station === 'YYZ') {
-        dispTotal +=
-          (meals[i].meals.includes('B') && Number(caExpenses.breakfast)) +
-          (meals[i].meals.includes('L') && Number(caExpenses.lunch)) +
-          (meals[i].meals.includes('D') && Number(caExpenses.dinner)) +
-          (meals[i].meals.includes('S') && Number(caExpenses.snack));
-      } else if (meals[i].station === 'int') {
-        dispTotal +=
-          (meals[i].meals.includes('B') && Number(intlExpenses.breakfast)) +
-          (meals[i].meals.includes('L') && Number(intlExpenses.lunch)) +
-          (meals[i].meals.includes('D') && Number(intlExpenses.dinner)) +
-          (meals[i].meals.includes('S') && Number(intlExpenses.snack));
-      }
-    }
-    dispTotal += numLayovers * 5.05;
-    setDisplayTotal(dispTotal.toFixed(2));
-  };
+  // const calculateDisplayTotal = () => {
+  //   try {
+  //     let dispTotal = 0;
+  //     for (let i = 0; i < meals.length; i++) {
+  //       if (meals[i].station === 'YYZ') {
+  //         dispTotal +=
+  //           (meals[i].meals.includes('B') && Number(caExpenses.breakfast)) +
+  //           (meals[i].meals.includes('L') && Number(caExpenses.lunch)) +
+  //           (meals[i].meals.includes('D') && Number(caExpenses.dinner)) +
+  //           (meals[i].meals.includes('S') && Number(caExpenses.snack));
+  //       } else if (meals[i].station === 'int') {
+  //         dispTotal +=
+  //           (meals[i].meals.includes('B') && Number(intlExpenses.breakfast)) +
+  //           (meals[i].meals.includes('L') && Number(intlExpenses.lunch)) +
+  //           (meals[i].meals.includes('D') && Number(intlExpenses.dinner)) +
+  //           (meals[i].meals.includes('S') && Number(intlExpenses.snack));
+  //       }
+  //     }
+  //     dispTotal += numLayovers * 5.05;
+  //     setDisplayTotal(dispTotal.toFixed(2));
+  //   } catch (err) {
+  //     console.log(`Error: ${err}`);
+  //   }
+  // };
 
   return (
     <table className="table table-striped table-bordered mt-3 text-center ">
@@ -271,7 +355,7 @@ const ExpensesTable = () => {
             return (
               item.meals && (
                 <tr key={item.index}>
-                  <td></td>
+                  <td>🇨🇦</td>
                   <td>{item.meals.includes('B') && caExpenses.breakfast}</td>
                   <td>{item.meals.includes('L') && caExpenses.lunch}</td>
                   <td>{item.meals.includes('D') && caExpenses.dinner}</td>

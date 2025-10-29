@@ -8,7 +8,7 @@ import test from './tests';
 
 function App() {
   // Production
-  const [clicked, setClicked] = useState(false);
+  const [clicked, setClicked] = useState(true);
   const [pairingsUploaded, setPairingsUploaded] = useState(false);
   const [expensesUploaded, setExpensesUploaded] = useState(false);
 

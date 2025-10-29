@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import na_sun_airports from '../../data/na_sun_airports';
 import international_airport_codes from '../../data/international_airport_codes';
 import dayjs from 'dayjs';
+import stringToTime from '../../modules/stringToTime';
 import isBetween from 'dayjs/plugin/isBetween';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -21,14 +22,10 @@ function Layover(props) {
 
   // Previous Flight
   const prevFlight = pairing.sequence[index - 1];
-  const layoverStart = dayjs()
-    .set('hour', prevFlight.arrivalTime.slice(0, -2))
-    .set('minute', prevFlight.arrivalTime.slice(-2));
+  const layoverStart = stringToTime(prevFlight.arrivalTime);
   // Next Flight
   const nextFlight = pairing.sequence[index + 1];
-  const layoverEnd = dayjs()
-    .set('hour', nextFlight.departureTime.slice(0, -2))
-    .set('minute', nextFlight.departureTime.slice(-2));
+  const layoverEnd = stringToTime(nextFlight.departureTime);
 
   const calculateFullDays = () => {
     let hours =

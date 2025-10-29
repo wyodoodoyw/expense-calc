@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import stringToTime from './stringToTime';
 import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
 import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
 import aircraft from '../data/aircraft';
@@ -47,9 +48,7 @@ const parseAsFlight = (line, index, isLastFlight) => {
   newFlight.flightTime = numbers[3];
 
   if (index === 0 && !newFlight.isDeadhead) {
-    const time = dayjs()
-      .set('hour', newFlight.departureTime.slice(0, -2))
-      .set('minute', newFlight.departureTime.slice(-2));
+    const time = stringToTime(newFlight.departureTime);
     switch (newFlight.aircraft) {
       case '767':
         newFlight.dutyStart = time
@@ -98,21 +97,15 @@ const parseAsFlight = (line, index, isLastFlight) => {
         break;
     }
   } else if (index === 0 && newFlight.isDeadhead) {
-    const time = dayjs()
-      .set('hour', newFlight.departureTime.slice(0, -2))
-      .set('minute', newFlight.departureTime.slice(-2));
+    const time = stringToTime(newFlight.departureTime);
     newFlight.dutyStart = time.subtract(30, 'minute').format('HHmm');
   }
 
   if (isLastFlight && !newFlight.isDeadhead) {
-    const time = dayjs()
-      .set('hour', newFlight.arrivalTime.slice(0, -2))
-      .set('minute', newFlight.arrivalTime.slice(-2));
+    const time = stringToTime(newFlight.arrivalTime);
     newFlight.dutyEnd = time.add(15, 'minute').format('HHmm');
   } else if (isLastFlight && newFlight.isDeadhead) {
-    const time = dayjs()
-      .set('hour', newFlight.arrivalTime.slice(0, -2))
-      .set('minute', newFlight.arrivalTime.slice(-2));
+    const time = stringToTime(newFlight.arrivalTime);
     newFlight.dutyEnd = time.format('HHmm');
   }
 

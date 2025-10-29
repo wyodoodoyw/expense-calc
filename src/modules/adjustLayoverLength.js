@@ -1,17 +1,12 @@
 import dayjs from 'dayjs';
+import stringToTime from './stringToTime';
 import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(duration);
 
 const calculateTimeDifference = (updatedTime, prevTime) => {
-  const updatedTimeDayJs = dayjs()
-    .set('hour', updatedTime.slice(0, 2))
-    .set('minute', updatedTime.slice(-2));
-
-  const prevTimeDayJs = dayjs()
-    .set('hour', prevTime.slice(0, 2))
-    .set('minute', prevTime.slice(-2));
-
+  const updatedTimeDayJs = stringToTime(updatedTime);
+  const prevTimeDayJs = stringToTime(prevTime);
   return updatedTimeDayJs.diff(prevTimeDayJs);
 };
 
