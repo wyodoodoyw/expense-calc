@@ -4,7 +4,8 @@ import Accordion from './Components/Accordion';
 import { useState, useEffect } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import test from './tests';
+// import test from './tests';
+import runCheckAllPairings from './tests/test';
 
 function App() {
   // Production
@@ -18,7 +19,9 @@ function App() {
   // const [expensesUploaded, setExpensesUploaded] = useState(true);
 
   useEffect(() => {
+    console.clear();
     checkDBExists();
+    runCheckAllPairings('T5001', 'T6000');
   }, []);
 
   const checkDBExists = () => {

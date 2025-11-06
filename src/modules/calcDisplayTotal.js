@@ -1,10 +1,16 @@
-const calculateDisplayTotal = (
+/**
+ * @param {Array} meals - array of { index, meals: 'BLDS', station: 'YYZ'|'int' }
+ * @param {Object} caExpenses - { breakfast, lunch, dinner, snack }
+ * @param {Object} intlExpenses - { breakfast, lunch, dinner, snack }
+ * @param {Number} numLayovers
+ * @returns {Number} total allowance rounded to 2 decimals
+ */
+export default function calculateDisplayTotal(
   meals,
   caExpenses,
   intlExpenses,
   numLayovers
-  // setDisplayTotal
-) => {
+) {
   try {
     if (!Array.isArray(meals)) return 0;
     const toNum = (v) => {
@@ -32,13 +38,8 @@ const calculateDisplayTotal = (
     total += (Number(numLayovers) || 0) * 5.05;
 
     return Number(total.toFixed(2));
-
-    // setDisplayTotal(total.toFixed(2));
-    // return;
   } catch (err) {
     console.error('calcDisplayTotal error:', err);
     return 0;
   }
-};
-
-export default calculateDisplayTotal;
+}
