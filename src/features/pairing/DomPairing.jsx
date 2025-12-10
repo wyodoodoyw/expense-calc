@@ -1,12 +1,11 @@
 /* eslint-disable react/prop-types */
-// import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
-import ExpensesTable from '../expensesTable/ExpensesTable';
+import DomExpensesTable from '../expensesTable/DomExpensesTable';
 
-function Pairing() {
+function DomPairing() {
   const p = useSelector((state) => state.pairing);
   const sequence = p.sequence;
 
@@ -39,7 +38,7 @@ function Pairing() {
           sequence.map((current, index) => {
             if (!current.hotelInfo) {
               // flight
-              <p key={index}>xx{JSON.stringify(current)}</p>;
+              <p key={index}>{JSON.stringify(current)}</p>;
               return <Flight key={index} index={index} />;
             } else if (current.hotelInfo) {
               // layover
@@ -61,13 +60,8 @@ function Pairing() {
         <div className="col-3">TAFB/PTEB {p.tafb}</div>
         <div className="col-3">TOTAL - {p.totalCredit}</div>
       </div>
-      {p.pairingNumber}
-      {/* {!p.pairingNumber.includes('T5') && <ExpensesTable />} */}
-
-      {/* <p className="me-3 small text-end">
-        * The prices above represent the US amounts minus the Canadian amounts.
-      </p> */}
+      <DomExpensesTable />
     </div>
   );
 }
-export default Pairing;
+export default DomPairing;

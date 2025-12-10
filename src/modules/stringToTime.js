@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 const stringToTime = (timeString) => {
+  timeString = timeString.replace(':', '');
   if (timeString) {
     return dayjs()
       .set('hour', timeString.slice(0, -2))

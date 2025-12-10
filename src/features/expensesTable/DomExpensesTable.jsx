@@ -5,7 +5,7 @@ import getExpenseseFromDB from '../../modules/getExpensesFromDB';
 import getMealsFromSequence from '../../modules/getMealsFromSequence';
 import calculateDisplayTotal from '../../modules/calculateDisplayTotal';
 
-const ExpensesTable = () => {
+const DomExpensesTable = () => {
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
   const numLayovers = p.layoverCount;
@@ -13,51 +13,51 @@ const ExpensesTable = () => {
   const [meals, setMeals] = useState([]);
   const [station, setStation] = useState('');
   const [caExpenses, setCaExpenses] = useState({});
-  const [intlExpenses, setIntlExpenses] = useState({});
+  const [usaExpenses, setUsaExpenses] = useState({});
   const [displayTotal, setDisplayTotal] = useState(0);
 
   useEffect(() => {
-    const { meals: derivedMeals, station: intlStation } = getMealsFromSequence(
+    const { meals: derivedMeals, station: usaStation } = getMealsFromSequence(
       seq || []
     );
     setMeals(derivedMeals);
-    setStation(intlStation);
+    setStation(usaStation);
 
-    // fetch CA expenses (base) and fetch intl expenses only if station found
+    // fetch CA expenses (base) and fetch usa expenses only if station found
     getExpenseseFromDB('YYZ', setCaExpenses);
-    if (intlStation) {
-      getExpenseseFromDB(intlStation, setIntlExpenses);
+    if (usaStation) {
+      getExpenseseFromDB('MCO', setUsaExpenses);
     } else {
-      setIntlExpenses({});
+      setUsaExpenses({});
     }
   }, [p]);
 
   useEffect(() => {
     const hasMeals = Array.isArray(meals) && meals.length > 0;
-    const needsIntl = hasMeals && meals.some((m) => m.station === 'int');
+    const needsUsa = hasMeals && meals.some((m) => m.station === 'usa');
     const needsCa = hasMeals && meals.some((m) => m.station === 'YYZ');
 
     const caLoaded = Object.keys(caExpenses || {}).length > 0;
-    const intlLoaded = Object.keys(intlExpenses || {}).length > 0;
+    const usaLoaded = Object.keys(usaExpenses || {}).length > 0;
 
     if (!hasMeals) {
       setDisplayTotal(0);
       return;
     }
 
-    if ((needsCa && !caLoaded) || (needsIntl && !intlLoaded)) {
+    if ((needsCa && !caLoaded) || (needsUsa && !usaLoaded)) {
       // wait until required expenses are loaded
       return;
     }
 
-    const total = calculateDisplayTotal(
+    const total = calculateDomDisplayTotal(
       meals,
       caExpenses,
-      intlExpenses,
+      usaExpenses,
       numLayovers
     );
     setDisplayTotal(total.toFixed(2));
-  }, [meals, caExpenses, intlExpenses, numLayovers]);
+  }, [meals, caExpenses, usaExpenses, numLayovers]);
 
   return (
     <table className="table table-striped table-bordered mt-3 text-center ">
@@ -83,25 +83,23 @@ const ExpensesTable = () => {
                 </tr>
               )
             );
-          } else if (item.station === 'int') {
+          } else if (item.station === 'usa') {
             return (
               <tr key={item.index}>
-                <td>{station}</td>
+                <td>🇺🇸</td>
                 <td>
                   {item.meals &&
                     item.meals.includes('B') &&
-                    intlExpenses.breakfast}
+                    usaExpenses.breakfast}
                 </td>
                 <td>
-                  {item.meals && item.meals.includes('L') && intlExpenses.lunch}
+                  {item.meals && item.meals.includes('L') && usaExpenses.lunch}
                 </td>
                 <td>
-                  {item.meals &&
-                    item.meals.includes('D') &&
-                    intlExpenses.dinner}
+                  {item.meals && item.meals.includes('D') && usaExpenses.dinner}
                 </td>
                 <td>
-                  {item.meals && item.meals.includes('S') && intlExpenses.snack}
+                  {item.meals && item.meals.includes('S') && usaExpenses.snack}
                 </td>
               </tr>
             );
@@ -114,13 +112,11 @@ const ExpensesTable = () => {
 
         <tr className="table-primary">
           <td>Total:</td>
-          <td colSpan={4}>
-            {/* <Total displayTotal={Number(displayTotal)} /> */}${displayTotal}
-          </td>
+          <td colSpan={4}>${displayTotal}</td>
         </tr>
       </tbody>
     </table>
   );
 };
 
-export default ExpensesTable;
+export default DomExpensesTable;

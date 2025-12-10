@@ -185,6 +185,21 @@ function asNumber(v) {
 export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   console.info('checkAllPairings: starting...');
   const pairings = await fetchAllPairings();
+  const prefix = max[0];
+  const num = max.slice(-4);
+  const newMax = `${prefix}${(Number(num) + 1).toString()}`;
+  let minIdx = -1;
+  let maxIdx = -1;
+  for (let i = 0; i < pairings.length; i++) {
+    const p = pairings[i];
+    if (p.pairingNumber === min) {
+      minIdx = i;
+    }
+    if (p.pairingNumber === newMax) {
+      maxIdx = i;
+    }
+  }
+  const slicedPairings = pairings.slice(minIdx, maxIdx);
   if (!pairings || pairings.length === 0) {
     console.info('No pairings found in PairingsDB.');
     return;
@@ -258,7 +273,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   }
 
   console.info(
-    `checkAllPairings: done. Pairings processed: ${pairings.length}, mismatches: ${mismatchCount}`
+    `checkAllPairings: done. Pairings processed: ${slicedPairings.length}, mismatches: ${mismatchCount}`
   );
   return { total: pairings.length, mismatches: mismatchCount };
 }

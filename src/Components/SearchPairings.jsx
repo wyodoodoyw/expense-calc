@@ -5,7 +5,7 @@ import {
   initializePairing,
   processSequence,
 } from '../features/pairing/pairingSlice';
-import Pairing from '../features/pairing/Pairing';
+import DomPairing from '../features/pairing/DomPairing';
 import IntPairing from '../features/pairing/IntPairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -142,7 +142,6 @@ function SearchPairings(props) {
               onChange={(e) => handlePairingNumberChange(e)}
             />
             <div className="btn btn-primary" onClick={handleSearchClick}>
-              {/* <div className="btn btn-primary" onClick={checkAllPairings}> */}
               Search
             </div>
           </div>
@@ -153,7 +152,7 @@ function SearchPairings(props) {
       )}
 
       {pairingSearchResult &&
-        !pairingNumber.search(`/(C|M|T|V)[6789][0-9]{3}/`) && <Pairing />}
+        !pairingNumber.search(`/(C|M|T|V)[6789][0-9]{3}/`) && <DomPairing />}
     </div>
   );
 }
