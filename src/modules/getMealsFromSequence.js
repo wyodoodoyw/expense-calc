@@ -35,6 +35,33 @@ export default function getMealsFromSequence(seq = []) {
     const cur = seq[i];
     if (!cur) continue;
 
+    // SPECIAL CASE: GRU-EZE shuttle
+    if (cur.departureAirport == 'GRU' && cur.arrivalAirport == 'EZE') {
+      const mealsFirstLayover = calcMealsIntLayover(
+        seq[i - 2].arrivalTime,
+        seq[i].departureTime,
+        seq[i - 1].layoverLength
+      );
+      const mealsSecondLayover = calcMealsIntLayover(
+        seq[i + 1].arrivalTime,
+        seq[i + 3].departureTime,
+        seq[i + 2].layoverLength
+      );
+      if (Array.isArray(mealsFirstLayover)) {
+        mealsFirstLayover.forEach((m) => {
+          if (typeof m === 'string') pushMeal(m, 'YYZ');
+          else if (m && m.meals) pushMeal(m.meals, m.station || 'YYZ');
+        });
+      }
+      if (Array.isArray(mealsSecondLayover)) {
+        mealsSecondLayover.forEach((m) => {
+          if (typeof m === 'string') pushMeal(m, 'YYZ');
+          else if (m && m.meals) pushMeal(m.meals, m.station || 'YYZ');
+        });
+      }
+      return { meals, station: 'GRU' };
+    }
+
     // Find first international leg, outbound from Canada
     if (
       cur &&
@@ -71,7 +98,7 @@ export default function getMealsFromSequence(seq = []) {
       const item = seq[j];
       if (!item) continue;
       if (item.dutyTime) {
-        segmentLength = addDutyDuration(segmentLength, item.dutyTime);
+        segmentLength = addDutyDuration(segmentLength, item.flightTime);
       }
 
       if (item.hotelInfo && item.layoverLength) {
@@ -104,6 +131,11 @@ export default function getMealsFromSequence(seq = []) {
 
   //--- STEP 3: Calculate meals for international layover.
   const station = seq[intLayoverIndex].layoverStation;
+  const layoverEnd = seq[intLayoverIndex].layoverEnd;
+
+  // if () {
+
+  // }
 
   const layoverMeals = calcMealsIntLayover(
     seq[intLayoverIndex].layoverStart,
@@ -135,7 +167,7 @@ export default function getMealsFromSequence(seq = []) {
       }
 
       if (item.dutyTime) {
-        segmentLength = addDutyDuration(segmentLength, item.dutyTime);
+        segmentLength = addDutyDuration(segmentLength, item.flightTime);
       }
     }
 

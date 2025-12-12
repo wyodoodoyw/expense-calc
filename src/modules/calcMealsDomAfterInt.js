@@ -53,6 +53,7 @@ const getEndMeals = (domesticArrival, dutyEnd) => {
     meals += 'B';
   } else if (
     !duty.isBefore(stringToTime('01:00'), 'minute') &&
+    !arrival.isAfter(stringToTime('04:00'), 'minute') &&
     arrival.isAfter(stringToTime('01:00'), 'minutes') &&
     duty.isAfter(stringToTime('01:00'), 'minutes')
   ) {

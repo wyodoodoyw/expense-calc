@@ -20,23 +20,23 @@ const followingLayover = (end) => {
   const time = stringToTime(end);
 
   if (
-    time.isAfter(stringToTime('07:00'), 'minute') &&
+    time.isAfter(stringToTime('06:59'), 'minute') &&
     time.isBefore(stringToTime('11:29'), 'minutes')
   ) {
     return 'B';
   } else if (
-    time.isAfter(stringToTime('11:30'), 'minute') &&
+    time.isAfter(stringToTime('11:29'), 'minute') &&
     time.isBefore(stringToTime('16:59'), 'minutes')
   ) {
     return 'BL';
   } else if (
-    time.isAfter(stringToTime('17:00'), 'minute') &&
+    time.isAfter(stringToTime('16:59'), 'minute') &&
     time.isBefore(stringToTime('21:59'), 'minutes')
   ) {
     return 'BLD';
   } else if (
-    time.isAfter(stringToTime('22:00'), 'minute') &&
-    time.isBefore(stringToTime('01:00').add(1, 'day'), 'minutes')
+    time.isAfter(stringToTime('21:59'), 'minute') ||
+    time.isBefore(stringToTime('01:00'), 'minute')
   ) {
     return 'BLDS';
   }
