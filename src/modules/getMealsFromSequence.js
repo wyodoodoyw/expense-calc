@@ -7,6 +7,7 @@ import addDutyDuration from './addDutyDuration';
 import calcMealsDomBeforeInt from './calcMealsDomBeforeInt';
 import calcMealsDomAfterInt from './calcMealsDomAfterInt';
 import calcMealsIntLayover from './calcMealsIntLayover';
+import getShortDutyMeals from './getShortDutyMeals';
 
 export default function getMealsFromSequence(seq = []) {
   // Always return an object so callers can destructure safely
@@ -15,9 +16,13 @@ export default function getMealsFromSequence(seq = []) {
   }
   const meals = [];
 
-  let intOutboundIndex = -1;
-  let intInboundIndex = -1;
-  let intLayoverIndex = -1;
+  let intOutboundIndex = null;
+  let intInboundIndex = null;
+  let intLayoverIndex = null;
+
+  let intOutboundIndex2 = null;
+  let intInboundIndex2 = null;
+  let intLayoverIndex2 = null;
 
   // push meals to meal array
   const pushMeal = (mealStr, st = 'int') => {
@@ -27,6 +32,15 @@ export default function getMealsFromSequence(seq = []) {
       meals: mealStr,
       station: st,
     });
+  };
+
+  const pushMeals = (arr) => {
+    if (Array.isArray(arr)) {
+      arr.forEach((m) => {
+        if (typeof m === 'string') pushMeal(m, 'YYZ');
+        else if (m && m.meals) pushMeal(m.meals, m.station || 'YYZ');
+      });
+    }
   };
 
   //--- STEP 1: Loop through sequence to identify domestic segment prior to international departure (starting index, ending index),
@@ -66,17 +80,24 @@ export default function getMealsFromSequence(seq = []) {
     if (
       cur &&
       canadian_airport_codes.includes(cur.departureAirport) &&
-      international_airport_codes.includes(cur.arrivalAirport)
+      international_airport_codes.includes(cur.arrivalAirport) &&
+      !intOutboundIndex
     ) {
       intOutboundIndex = i;
+    } else if (
+      cur &&
+      canadian_airport_codes.includes(cur.departureAirport) &&
+      international_airport_codes.includes(cur.arrivalAirport) &&
+      intOutboundIndex
+    ) {
+      // second international outbound leg found
     }
-
-    // Find last international leg, inbound to Canada
     if (
       cur &&
       international_airport_codes.includes(cur.departureAirport) &&
       canadian_airport_codes.includes(cur.arrivalAirport)
     ) {
+      // Find last international leg, inbound to Canada
       intInboundIndex = i;
     }
 
@@ -97,8 +118,12 @@ export default function getMealsFromSequence(seq = []) {
     for (let j = 0; j < intOutboundIndex; j++) {
       const item = seq[j];
       if (!item) continue;
-      if (item.dutyTime) {
+      if (item.flightTime) {
         segmentLength = addDutyDuration(segmentLength, item.flightTime);
+        if (item.isDeadhead) {
+          segmentLength = addDutyDuration(segmentLength, item.flightTime);
+          // console.log(`segmentLength for DH: ${segmentLength}`);
+        }
       }
 
       if (item.hotelInfo && item.layoverLength) {
@@ -111,21 +136,25 @@ export default function getMealsFromSequence(seq = []) {
     const outboundDept =
       seq[intOutboundIndex] && seq[intOutboundIndex].departureTime;
 
-    if (dutyStart && outboundDept) {
-      const domMealsBeforeInt = calcMealsDomBeforeInt(
-        dutyStart,
-        firstDept,
-        outboundDept,
-        segmentLength
+    if (Number(segmentLength.slice(0, -2)) < 17) {
+      console.log(
+        `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
       );
-
-      if (Array.isArray(domMealsBeforeInt)) {
-        domMealsBeforeInt.forEach((m) => {
-          if (typeof m === 'string') pushMeal(m, 'YYZ');
-          else if (m && m.meals) pushMeal(m.meals, m.station || 'YYZ');
-        });
+      if (dutyStart && outboundDept) {
+        const domMealsAfterInt = getShortDutyMeals(dutyStart, outboundDept);
+        domMealsAfterInt && pushMeals([domMealsAfterInt]);
+        console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
       }
-      // console.log(`domMealsBeforeInt: ${JSON.stringify(domMealsBeforeInt)}`);
+    } else {
+      if (dutyStart && outboundDept) {
+        const domMealsBeforeInt = calcMealsDomBeforeInt(
+          dutyStart,
+          firstDept,
+          outboundDept,
+          segmentLength
+        );
+        domMealsBeforeInt && pushMeals(domMealsBeforeInt);
+      }
     }
   }
 
@@ -133,41 +162,33 @@ export default function getMealsFromSequence(seq = []) {
   const station = seq[intLayoverIndex].layoverStation;
   const layoverEnd = seq[intLayoverIndex].layoverEnd;
 
-  // if () {
-
-  // }
-
   const layoverMeals = calcMealsIntLayover(
     seq[intLayoverIndex].layoverStart,
     seq[intLayoverIndex].layoverEnd,
     seq[intLayoverIndex].layoverLength
   );
 
-  // if helper returned a string or array, add it
-  // if (layoverMeals) pushMeal(layoverMeals, 'int');
-
-  if (Array.isArray(layoverMeals)) {
-    layoverMeals.forEach((m) => {
-      if (typeof m === 'string') pushMeal(m, 'int');
-      else if (m && m.meals) pushMeal(m.meals, m.station || 'int');
-    });
-  }
+  layoverMeals && pushMeals(layoverMeals);
 
   //--- STEP 4: Loop through domestic segment following international arrival to determine start time, end time, and length,
   //--- then calculate meals for the segment.
 
-  if (intInboundIndex >= 0 && intInboundIndex !== seq.length - 1) {
+  if (intInboundIndex && intInboundIndex !== seq.length - 1) {
     let segmentLength = '0';
 
     for (let j = intInboundIndex + 1; j < seq.length; j++) {
       const item = seq[j];
       if (!item) continue;
+
       if (item.hotelInfo && item.layoverLength) {
         segmentLength = addDutyDuration(segmentLength, item.layoverLength);
       }
 
-      if (item.dutyTime) {
+      if (item.flightTime && item.isDeadhead) {
         segmentLength = addDutyDuration(segmentLength, item.flightTime);
+        segmentLength = addDutyDuration(segmentLength, item.flightTime);
+      } else if (item.flightTime && !item.isDeadhead) {
+        segmentLength = addDutyDuration(segmentLength, item.dutyTime);
       }
     }
 
@@ -175,27 +196,39 @@ export default function getMealsFromSequence(seq = []) {
       seq[intInboundIndex] && seq[intInboundIndex].arrivalTime;
     const finalArrival = seq[seq.length - 1] && seq[seq.length - 1].arrivalTime;
     const finalDutyEnd = seq[seq.length - 1] && seq[seq.length - 1].dutyEnd;
+    let domMealsAfterInt;
 
-    if (arrivalTime && finalArrival && finalDutyEnd) {
-      const domMealsAfterInt = calcMealsDomAfterInt(
-        arrivalTime,
-        finalArrival,
-        finalDutyEnd,
-        segmentLength
+    if (Number(segmentLength.slice(0, -2)) < 17) {
+      console.log(
+        `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
       );
+      if (arrivalTime && finalDutyEnd) {
+        const domMealsAfterInt = getShortDutyMeals(arrivalTime, finalDutyEnd);
+        domMealsAfterInt && pushMeals([domMealsAfterInt]);
+        // console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
+      }
+    } else {
+      // console.log(
+      //   `arrivalTime: ${arrivalTime}, finalArrival: ${finalArrival}, finalDuty: ${finalDutyEnd}, segmentLength: ${segmentLength}`
+      // );
 
-      // console.log(`domMealsAfterInt: ${JSON.stringify(domMealsAfterInt)}`);
+      if (arrivalTime && finalArrival && finalDutyEnd) {
+        domMealsAfterInt = calcMealsDomAfterInt(
+          arrivalTime,
+          finalArrival,
+          finalDutyEnd,
+          segmentLength
+        );
 
-      if (Array.isArray(domMealsAfterInt)) {
-        domMealsAfterInt.forEach((m) => {
-          if (typeof m === 'string') pushMeal(m, 'YYZ');
-          else if (m && m.meals) pushMeal(m.meals, m.station || 'YYZ');
-        });
+        // console.log(`domMealsAfterInt: ${JSON.stringify(domMealsAfterInt)}`);
+
+        domMealsAfterInt && pushMeals(domMealsAfterInt);
       }
     }
   }
 
   if (meals) {
+    // console.log(`{meals, station}: ${JSON.stringify(meals, station)}`);
     return { meals, station };
   } else {
     return;
