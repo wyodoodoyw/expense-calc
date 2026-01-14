@@ -61,12 +61,14 @@ export default function getMealsFromSequence(seq = []) {
         seq[i + 3].departureTime,
         seq[i + 2].layoverLength
       );
+
       if (Array.isArray(mealsFirstLayover)) {
         mealsFirstLayover.forEach((m) => {
           if (typeof m === 'string') pushMeal(m, 'YYZ');
           else if (m && m.meals) pushMeal(m.meals, m.station || 'YYZ');
         });
       }
+
       if (Array.isArray(mealsSecondLayover)) {
         mealsSecondLayover.forEach((m) => {
           if (typeof m === 'string') pushMeal(m, 'YYZ');
@@ -137,13 +139,13 @@ export default function getMealsFromSequence(seq = []) {
       seq[intOutboundIndex] && seq[intOutboundIndex].departureTime;
 
     if (Number(segmentLength.slice(0, -2)) < 17) {
-      console.log(
-        `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
-      );
+      // console.log(
+      //   `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
+      // );
       if (dutyStart && outboundDept) {
         const domMealsAfterInt = getShortDutyMeals(dutyStart, outboundDept);
         domMealsAfterInt && pushMeals([domMealsAfterInt]);
-        console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
+        // console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
       }
     } else {
       if (dutyStart && outboundDept) {
@@ -199,9 +201,9 @@ export default function getMealsFromSequence(seq = []) {
     let domMealsAfterInt;
 
     if (Number(segmentLength.slice(0, -2)) < 17) {
-      console.log(
-        `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
-      );
+      // console.log(
+      //   `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
+      // );
       if (arrivalTime && finalDutyEnd) {
         const domMealsAfterInt = getShortDutyMeals(arrivalTime, finalDutyEnd);
         domMealsAfterInt && pushMeals([domMealsAfterInt]);

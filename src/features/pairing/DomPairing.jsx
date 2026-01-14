@@ -1,13 +1,26 @@
 /* eslint-disable react/prop-types */
 import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
-import DomExpensesTable from '../expensesTable/DomExpensesTable';
+// import DomExpensesTable from '../expensesTable/DomExpensesTable';
+import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
+import ExpensesTable from '../expensesTable/ExpensesTable';
 
 function DomPairing() {
   const p = useSelector((state) => state.pairing);
-  const sequence = p.sequence;
+  const seq = p.sequence;
+
+  const [meals, setMeals] = useState([]);
+  const [station, setStation] = useState('');
+
+  useEffect(() => {
+    const { meals: derivedMeals, station: intlStation } =
+      getMealsFromSequenceDom(seq || []);
+    setMeals(derivedMeals);
+    setStation(station);
+  }, [seq]);
 
   return (
     <div className="text-start font-monospace">
@@ -34,8 +47,8 @@ function DomPairing() {
       </div>
 
       <div className="row mt-3 ms-3">
-        {sequence &&
-          sequence.map((current, index) => {
+        {seq &&
+          seq.map((current, index) => {
             if (!current.hotelInfo) {
               // flight
               <p key={index}>{JSON.stringify(current)}</p>;
@@ -60,7 +73,7 @@ function DomPairing() {
         <div className="col-3">TAFB/PTEB {p.tafb}</div>
         <div className="col-3">TOTAL - {p.totalCredit}</div>
       </div>
-      <DomExpensesTable />
+      <ExpensesTable meals={meals} station={station} />
     </div>
   );
 }

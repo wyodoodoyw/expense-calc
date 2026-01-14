@@ -3,9 +3,11 @@ import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import getExpenseseFromDB from '../../modules/getExpensesFromDB';
 import getMealsFromSequence from '../../modules/getMealsFromSequence';
+import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../../modules/calculateDisplayTotal';
 
 const ExpensesTable = () => {
+  // const { meals, station } = props;
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
   const numLayovers = p.layoverCount;
@@ -13,22 +15,31 @@ const ExpensesTable = () => {
   const [meals, setMeals] = useState([]);
   const [station, setStation] = useState('');
   const [caExpenses, setCaExpenses] = useState({});
+  const [usExpenses, setUsExpenses] = useState({});
   const [intlExpenses, setIntlExpenses] = useState({});
   const [displayTotal, setDisplayTotal] = useState(0);
 
   useEffect(() => {
-    const { meals: derivedMeals, station: intlStation } = getMealsFromSequence(
-      seq || []
-    );
-    setMeals(derivedMeals);
-    setStation(intlStation);
+    if (Number(p.pairingNumber.slice(-4)) < 8000) {
+      const { meals: derivedMeals, station: intlStation } =
+        getMealsFromSequence(seq || []);
+      setMeals(derivedMeals);
+      setStation(intlStation);
 
-    // fetch CA expenses (base) and fetch intl expenses only if station found
-    getExpenseseFromDB('YYZ', setCaExpenses);
-    if (intlStation) {
-      getExpenseseFromDB(intlStation, setIntlExpenses);
+      // fetch CA expenses (base) and fetch intl expenses only if station found
+      getExpenseseFromDB('YYZ', setCaExpenses);
+      if (station) {
+        getExpenseseFromDB(station, setIntlExpenses);
+      } else {
+        setIntlExpenses({});
+      }
     } else {
-      setIntlExpenses({});
+      const { meals: derivedMeals, station: intlStation } =
+        getMealsFromSequenceDom(seq || []);
+      setMeals(derivedMeals);
+
+      // fetch CA expenses (base) and fetch intl expenses only if station found
+      getExpenseseFromDB('YYZ', setCaExpenses);
     }
   }, [p]);
 

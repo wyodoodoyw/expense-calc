@@ -29,7 +29,7 @@ const getShortDutyMeals = (dutyStart, dutyEnd) => {
   if (
     start.isBefore(stringToTime('23:00'), 'minutes') &&
     end.isAfter(stringToTime('01:00'), 'minutes') &&
-    !end.isBefore(stringToTime('22:59'), 'minute')
+    !end.isAfter(stringToTime('09:00'), 'minute')
   ) {
     meals += 'S';
   }

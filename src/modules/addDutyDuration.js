@@ -1,30 +1,10 @@
 const addDutyDuration = (duration1, duration2) => {
-  let hours1 = '0';
-  let hours2 = '0';
-  const minutes1 = Number(duration1.slice(-2));
-  const minutes2 = Number(duration2.slice(-2));
-
-  switch (duration1.length) {
-    case 3:
-      hours1 = Number(duration1.slice(0, 1));
-      break;
-    case 4:
-      hours1 = Number(duration1.slice(0, 2));
-      break;
-    default:
-      break;
-  }
-
-  switch (duration2.length) {
-    case 3:
-      hours2 = Number(duration2.slice(0, 1));
-      break;
-    case 4:
-      hours2 = Number(duration2.slice(0, 2));
-      break;
-    default:
-      break;
-  }
+  // console.log(`duration1: ${duration1}`);
+  // console.log(`duration2: ${duration2}`);
+  const hours1 = Number(duration1.slice(0, -2)) || 0;
+  const hours2 = Number(duration2.slice(0, -2)) || 0;
+  const minutes1 = Number(duration1.slice(-2)) || 0;
+  const minutes2 = Number(duration2.slice(-2) || 0);
 
   let durationHours = hours1 + hours2;
   let durationMinutes = minutes1 + minutes2;
@@ -34,10 +14,32 @@ const addDutyDuration = (duration1, duration2) => {
     durationMinutes = durationMinutes % 60;
   }
 
-  return `${durationHours.toString()}${durationMinutes.toLocaleString('en-US', {
-    minimumIntegerDigits: 2,
-    useGrouping: false,
-  })}`;
+  if (durationHours > 0) {
+    // console.log(
+    //   `${durationHours.toString()}${durationMinutes.toLocaleString('en-US', {
+    //     minimumIntegerDigits: 2,
+    //     useGrouping: false,
+    //   })}`
+    // );
+    return `${durationHours.toString()}${durationMinutes.toLocaleString(
+      'en-US',
+      {
+        minimumIntegerDigits: 2,
+        useGrouping: false,
+      }
+    )}`;
+  } else {
+    // console.log(
+    //   `${durationMinutes.toLocaleString('en-US', {
+    //     minimumIntegerDigits: 2,
+    //     useGrouping: false,
+    //   })}`
+    // );
+    return `${durationMinutes.toLocaleString('en-US', {
+      minimumIntegerDigits: 2,
+      useGrouping: false,
+    })}`;
+  }
 };
 
 export default addDutyDuration;

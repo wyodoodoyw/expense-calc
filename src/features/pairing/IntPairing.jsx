@@ -1,13 +1,26 @@
 /* eslint-disable react/prop-types */
 import { useSelector } from 'react-redux';
+import { useEffect, useState } from 'react';
 
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
 import ExpensesTable from '../expensesTable/ExpensesTable';
+import getMealsFromSequence from '../../modules/getMealsFromSequence';
 
 function IntPairing() {
   const p = useSelector((state) => state.pairing);
-  const sequence = p.sequence;
+  const seq = p.sequence;
+
+  // const [meals, setMeals] = useState([]);
+  // const [station, setStation] = useState('');
+
+  // useEffect(() => {
+  //   const { meals: derivedMeals, station: intlStation } = getMealsFromSequence(
+  //     seq || []
+  //   );
+  //   setMeals(derivedMeals);
+  //   setStation(intlStation);
+  // }, [seq]);
 
   return (
     <div className="text-start font-monospace">
@@ -34,8 +47,8 @@ function IntPairing() {
       </div>
 
       <div className="row mt-3 ms-3">
-        {sequence &&
-          sequence.map((current, index) => {
+        {seq &&
+          seq.map((current, index) => {
             if (!current.hotelInfo) {
               // flight
               <p key={index}>xx{JSON.stringify(current)}</p>;
@@ -60,6 +73,7 @@ function IntPairing() {
         <div className="col-3">TAFB/PTEB {p.tafb}</div>
         <div className="col-3">TOTAL - {p.totalCredit}</div>
       </div>
+      {/* <ExpensesTable meals={meals} station={station} /> */}
       <ExpensesTable />
     </div>
   );
