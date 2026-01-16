@@ -40,6 +40,7 @@ const ExpensesTable = () => {
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
       getExpenseseFromDB('YYZ', setCaExpenses);
+      getExpenseseFromDB('MCO', setUsExpenses);
     }
   }, [p]);
 
@@ -87,10 +88,22 @@ const ExpensesTable = () => {
               item.meals && (
                 <tr key={item.index}>
                   <td>🇨🇦</td>
-                  <td>{item.meals.includes('B') && caExpenses.breakfast}</td>
-                  <td>{item.meals.includes('L') && caExpenses.lunch}</td>
-                  <td>{item.meals.includes('D') && caExpenses.dinner}</td>
-                  <td>{item.meals.includes('S') && caExpenses.snack}</td>
+                  <td>
+                    {item.meals.includes('B') && caExpenses.breakfast} ||{' '}
+                    {item.meals.includes('C') && usExpenses.breakfast}
+                  </td>
+                  <td>
+                    {item.meals.includes('L') && caExpenses.lunch} ||{' '}
+                    {item.meals.includes('M') && usExpenses.lunch}
+                  </td>
+                  <td>
+                    {item.meals.includes('D') && caExpenses.dinner} ||{' '}
+                    {item.meals.includes('E') && usExpenses.dinner}
+                  </td>
+                  <td>
+                    {item.meals.includes('S') && caExpenses.snack}||{' '}
+                    {item.meals.includes('T') && usExpenses.snack}
+                  </td>
                 </tr>
               )
             );
