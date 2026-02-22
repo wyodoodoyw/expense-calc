@@ -8,8 +8,9 @@
 export default function calculateDisplayTotal(
   meals,
   caExpenses,
+  usExpenses,
   intlExpenses,
-  numLayovers
+  numLayovers,
 ) {
   try {
     if (!Array.isArray(meals)) return 0;
@@ -23,11 +24,17 @@ export default function calculateDisplayTotal(
     meals.forEach((m) => {
       if (!m || !m.meals) return;
       const mealStr = m.meals || '';
+      console.log(`mealStr: ${mealStr}`);
       if (m.station === 'YYZ') {
         total += mealStr.includes('B') ? toNum(caExpenses.breakfast) : 0;
         total += mealStr.includes('L') ? toNum(caExpenses.lunch) : 0;
         total += mealStr.includes('D') ? toNum(caExpenses.dinner) : 0;
         total += mealStr.includes('S') ? toNum(caExpenses.snack) : 0;
+      } else if (m.station === 'MCO') {
+        total += mealStr.includes('C') ? toNum(usExpenses.breakfast) : 0;
+        total += mealStr.includes('M') ? toNum(usExpenses.lunch) : 0;
+        total += mealStr.includes('E') ? toNum(usExpenses.dinner) : 0;
+        total += mealStr.includes('T') ? toNum(usExpenses.snack) : 0;
       } else if (m.station === 'int') {
         total += mealStr.includes('B') ? toNum(intlExpenses.breakfast) : 0;
         total += mealStr.includes('L') ? toNum(intlExpenses.lunch) : 0;

@@ -1,4 +1,5 @@
 import getMealsFromSequence from '../modules/getMealsFromSequence';
+import getMealsFromSequenceDom from '../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../modules/calcDisplayTotal';
 
 const calcNumLayovers = (s) => {
@@ -40,20 +41,6 @@ const getAllFromStore = (db, storeName) =>
     }
   });
 
-// const getFromStoreByKey = (db, storeName, key) =>
-//   new Promise((resolve, reject) => {
-//     try {
-//       const tx = db.transaction([storeName], 'readonly');
-//       const store = tx.objectStore(storeName);
-//       const req = store.get(key);
-//       req.onsuccess = () => resolve(req.result);
-//       req.onerror = (e) => reject(e.target.error);
-//       tx.oncomplete = () => db.close();
-//     } catch (err) {
-//       reject(err);
-//     }
-//   });
-
 /* Try to fetch expense rates for a station. We try a direct key-get first,
    otherwise fall back to scanning all records for a matching station field. */
 async function fetchExpensesForStation(station) {
@@ -75,28 +62,7 @@ async function fetchExpensesForStation(station) {
 
       const store = db.transaction(s, 'readonly').objectStore(s);
 
-      // 1) try direct get by primary key
-      // const maybe = await new Promise((resolve, reject) => {
-      //   try {
-      //     const tx = db.transaction(s, 'readonly');
-      //     const req = tx.objectStore(s).get(station);
-      //     req.onsuccess = () => {
-      //       console.log(
-      //         'fetchExpensesForStation: found by key:',
-      //         station,
-      //         req.result
-      //       );
-      //       resolve(req.result);
-      //     };
-      //     req.onerror = () => reject(req.error);
-      //   } catch (err) {
-      //     reject(err);
-      //   }
-      // }).catch(() => undefined);
-
-      // if (maybe) return normalize(maybe);
-
-      // 2) try lookups by known indexes (if the store defines them)
+      //--- Try lookups by known indexes (if the store defines them)
       for (const idxName of indexCandidates) {
         if (!store.indexNames || !store.indexNames.contains(idxName)) continue;
 
@@ -117,29 +83,6 @@ async function fetchExpensesForStation(station) {
 
         if (byIndex) return normalize(byIndex);
       }
-
-      // 3) fallback: scan all records
-      //   const all = await new Promise((resolve) => {
-      //     try {
-      //       const tx = db.transaction(s, 'readonly');
-      //       const req = tx.objectStore(s).getAll();
-      //       req.onsuccess = () => {
-      //         // console.log(req.result);
-      //         resolve(req.result || []);
-      //       };
-      //       req.onerror = () => resolve([]);
-      //     } catch (err) {
-      //       resolve([]);
-      //     }
-      //   }).catch(() => []);
-
-      //   const found = (all || []).find(
-      //     (r) =>
-      //       r.station === station ||
-      //       r.code === station ||
-      //       (r.city && r.city.toUpperCase() === station.toUpperCase())
-      //   );
-      //   if (found) return normalize(found);
     }
 
     return {};
@@ -205,75 +148,132 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
     return;
   }
 
-  // preload CA base rates once
+  // preload CA/US base rates once
   const caRates = await fetchExpensesForStation('YYZ');
+  const usRates = await fetchExpensesForStation('MCO');
 
   let mismatchCount = 0;
 
-  for (const pairing of pairings) {
-    if (pairing.pairingNumber >= min && pairing.pairingNumber <= max) {
+  for (const p of pairings) {
+    if (p.pairingNumber >= min && p.pairingNumber <= max) {
       try {
-        const seq = pairing.sequence || [];
-        const numLayovers = calcNumLayovers(seq) || 0;
-        const parsedAllowance = asNumber(pairing.totalAllowance);
-        const { meals, station: intlStation } = getMealsFromSequence(seq || []);
-
-        const intlRates = await fetchExpensesForStation(intlStation);
-
-        const calc = calculateDisplayTotal(
-          meals || [],
-          caRates || {},
-          intlRates || {},
-          numLayovers || 0
-        );
-        // console.log(
-        //   `expenses line 130: ca/$${JSON.stringify(
-        //     caRates
-        //   )}, in/$${JSON.stringify(intlRates)}, calc: ${calc}`
-        // );
-        const calcRounded = Number(calc);
-
-        const diff = Math.abs(calcRounded - parsedAllowance);
-        const isMismatch =
-          diff > 0.01 && !(isNaN(calcRounded) && isNaN(parsedAllowance));
-
-        if (isMismatch) {
-          mismatchCount++;
-          console.warn(
-            `Mismatch: Pairing ${
-              pairing.pairingNumber || pairing.id || '<unknown>'
-            } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
-              2
-            )}`
+        if (
+          Number(p.pairingNumber.slice(-4)) >= 5000 &&
+          Number(p.pairingNumber.slice(-4)) < 7000
+        ) {
+          const seq = p.sequence || [];
+          const numLayovers = calcNumLayovers(seq) || 0;
+          const parsedAllowance = asNumber(p.totalAllowance);
+          const { meals, station: intlStation } = getMealsFromSequence(
+            seq || [],
           );
-          if (logAll) {
-            console.log('  meals:', meals);
-            console.log('  intlStation:', intlStation);
-            console.log('  caRates:', caRates);
-            console.log('  intlRates:', intlRates);
-            console.log('  pairing raw:', pairing);
-          }
-        } else {
-          if (logAll) {
-            console.info(
-              `OK: Pairing ${
-                pairing.pairingNumber || pairing.id || '<unknown>'
-              } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`
+
+          const intlRates = await fetchExpensesForStation(intlStation);
+
+          const calc = calculateDisplayTotal(
+            meals || [],
+            caRates || {},
+            null, //usRates
+            intlRates || {},
+            numLayovers || 0,
+          );
+          // console.log(
+          //   `expenses line 130: ca/$${JSON.stringify(
+          //     caRates
+          //   )}, in/$${JSON.stringify(intlRates)}, calc: ${calc}`
+          // );
+          const calcRounded = Number(calc);
+
+          const diff = Math.abs(calcRounded - parsedAllowance);
+          const isMismatch =
+            diff > 0.01 && !(isNaN(calcRounded) && isNaN(parsedAllowance));
+
+          if (isMismatch) {
+            mismatchCount++;
+            console.warn(
+              `Mismatch: Pairing ${
+                p.pairingNumber || p.id || '<unknown>'
+              } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
+                2,
+              )}`,
             );
+            if (logAll) {
+              console.log('  meals:', meals);
+              console.log('  intlStation:', intlStation);
+              console.log('  caRates:', caRates);
+              console.log('  intlRates:', intlRates);
+              console.log('  pairing raw:', p);
+            }
+          } else {
+            if (logAll) {
+              console.info(
+                `OK: Pairing ${
+                  p.pairingNumber || p.id || '<unknown>'
+                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
+              );
+            }
+          }
+        } else if (Number(p.pairingNumber.slice(-4)) >= 7000) {
+          const seq = p.sequence || [];
+          const numLayovers = calcNumLayovers(seq) || 0;
+          const parsedAllowance = asNumber(p.totalAllowance);
+          const { meals, station: usStation } = getMealsFromSequenceDom(
+            seq || [],
+          );
+
+          const calc = calculateDisplayTotal(
+            meals || [],
+            caRates || {},
+            usRates || {},
+            null, // intlRates
+            numLayovers || 0,
+          );
+          // console.log(
+          //   `expenses line 130: ca/$${JSON.stringify(
+          //     caRates
+          //   )}, in/$${JSON.stringify(intlRates)}, calc: ${calc}`
+          // );
+          const calcRounded = Number(calc);
+          console.log(`test: ${calcRounded} vs ${parsedAllowance}`);
+
+          const diff = Math.abs(calcRounded - parsedAllowance);
+          const isMismatch =
+            diff > 0.01 && !(isNaN(calcRounded) && isNaN(parsedAllowance));
+
+          if (isMismatch) {
+            mismatchCount++;
+            console.warn(
+              `Mismatch: Pairing ${
+                p.pairingNumber || p.id || '<unknown>'
+              } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
+                2,
+              )}`,
+            );
+            if (logAll) {
+              console.log('  meals:', meals);
+              console.log('  usStation:', usStation);
+              console.log('  caRates:', caRates);
+              console.log('  usRates:', usRates);
+              console.log('  pairing raw:', p);
+            }
+          } else {
+            if (logAll) {
+              console.info(
+                `OK: Pairing ${
+                  p.pairingNumber || p.id || '<unknown>'
+                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
+              );
+            }
           }
         }
       } catch (err) {
-        console.error(
-          'Error processing pairing',
-          pairing && pairing.pairingNumber,
-          err
-        );
+        console.error('Error processing pairing', p && p.pairingNumber, err);
       }
     }
   }
 
   console.info(
-    `checkAllPairings: done. Pairings processed: ${slicedPairings.length}, mismatches: ${mismatchCount}`
+    `checkAllPairings: done. Pairings processed: ${slicedPairings.length}, mismatches: ${mismatchCount}`,
   );
   return { total: pairings.length, mismatches: mismatchCount };
 }

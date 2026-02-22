@@ -16,8 +16,9 @@ function DomPairing() {
   const [station, setStation] = useState('');
 
   useEffect(() => {
-    const { meals: derivedMeals, station: intlStation } =
-      getMealsFromSequenceDom(seq || []);
+    const { meals: derivedMeals, station: station } = getMealsFromSequenceDom(
+      seq || [],
+    );
     setMeals(derivedMeals);
     setStation(station);
   }, [seq]);

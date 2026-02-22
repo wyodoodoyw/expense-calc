@@ -19,7 +19,7 @@ dayjs.extend(customParseFormat);
 function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
-  const [pairingNumber, setPairingNumber] = useState('T5001');
+  const [pairingNumber, setPairingNumber] = useState('T8001');
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
@@ -54,7 +54,7 @@ function SearchPairings(props) {
         totalAllowance: '',
         totalCredit: '',
         totalDuty: '',
-      })
+      }),
     );
 
     const request = window.indexedDB.open('PairingsDB', 1);
@@ -87,7 +87,7 @@ function SearchPairings(props) {
               totalAllowance: request.result.totalAllowance,
               totalCredit: request.result.totalCredit,
               totalDuty: request.result.totalDuty,
-            })
+            }),
           );
           dispatch(processSequence(request.result.sequence));
         }

@@ -20,7 +20,7 @@ const ExpensesTable = () => {
   const [displayTotal, setDisplayTotal] = useState(0);
 
   useEffect(() => {
-    if (Number(p.pairingNumber.slice(-4)) < 8000) {
+    if (Number(p.pairingNumber.slice(-4)) < 7000) {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
       setMeals(derivedMeals);
@@ -34,8 +34,8 @@ const ExpensesTable = () => {
         setIntlExpenses({});
       }
     } else {
-      const { meals: derivedMeals, station: intlStation } =
-        getMealsFromSequenceDom(seq || []);
+      const { meals: derivedMeals, station: derivedStation } =
+        getMealsFromSequenceDom(seq || [], p.tafb);
       setMeals(derivedMeals);
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
@@ -66,7 +66,7 @@ const ExpensesTable = () => {
       meals,
       caExpenses,
       intlExpenses,
-      numLayovers
+      numLayovers,
     );
     setDisplayTotal(total.toFixed(2));
   }, [meals, caExpenses, intlExpenses, numLayovers]);
@@ -82,55 +82,61 @@ const ExpensesTable = () => {
           <th>Snack</th>
         </tr>
 
-        {meals.map((item) => {
-          if (item.station === 'YYZ') {
-            return (
-              item.meals && (
+        {meals &&
+          meals.map((item) => {
+            if (item.station === 'YYZ') {
+              return (
+                item.meals && (
+                  <tr key={item.index}>
+                    <td>🇨🇦</td>
+                    <td>
+                      {(item.meals.includes('B') && caExpenses.breakfast) ||
+                        (item.meals.includes('C') &&
+                          usExpenses.breakfast + '*')}
+                    </td>
+                    <td>
+                      {(item.meals.includes('L') && caExpenses.lunch) ||
+                        (item.meals.includes('M') && usExpenses.lunch + '*')}
+                    </td>
+                    <td>
+                      {(item.meals.includes('D') && caExpenses.dinner) ||
+                        (item.meals.includes('E') && usExpenses.dinner)}
+                    </td>
+                    <td>
+                      {(item.meals.includes('S') && caExpenses.snack) ||
+                        (item.meals.includes('T') && usExpenses.snack)}
+                    </td>
+                  </tr>
+                )
+              );
+            } else if (item.station === 'int') {
+              return (
                 <tr key={item.index}>
-                  <td>🇨🇦</td>
+                  <td>{station}</td>
                   <td>
-                    {item.meals.includes('B') && caExpenses.breakfast} ||{' '}
-                    {item.meals.includes('C') && usExpenses.breakfast}
+                    {item.meals &&
+                      item.meals.includes('B') &&
+                      intlExpenses.breakfast}
                   </td>
                   <td>
-                    {item.meals.includes('L') && caExpenses.lunch} ||{' '}
-                    {item.meals.includes('M') && usExpenses.lunch}
+                    {item.meals &&
+                      item.meals.includes('L') &&
+                      intlExpenses.lunch}
                   </td>
                   <td>
-                    {item.meals.includes('D') && caExpenses.dinner} ||{' '}
-                    {item.meals.includes('E') && usExpenses.dinner}
+                    {item.meals &&
+                      item.meals.includes('D') &&
+                      intlExpenses.dinner}
                   </td>
                   <td>
-                    {item.meals.includes('S') && caExpenses.snack}||{' '}
-                    {item.meals.includes('T') && usExpenses.snack}
+                    {item.meals &&
+                      item.meals.includes('S') &&
+                      intlExpenses.snack}
                   </td>
                 </tr>
-              )
-            );
-          } else if (item.station === 'int') {
-            return (
-              <tr key={item.index}>
-                <td>{station}</td>
-                <td>
-                  {item.meals &&
-                    item.meals.includes('B') &&
-                    intlExpenses.breakfast}
-                </td>
-                <td>
-                  {item.meals && item.meals.includes('L') && intlExpenses.lunch}
-                </td>
-                <td>
-                  {item.meals &&
-                    item.meals.includes('D') &&
-                    intlExpenses.dinner}
-                </td>
-                <td>
-                  {item.meals && item.meals.includes('S') && intlExpenses.snack}
-                </td>
-              </tr>
-            );
-          }
-        })}
+              );
+            }
+          })}
         <tr className="table-secondary">
           <td>CI/CO:</td>
           <td colSpan={4}>{(numLayovers * 5.05).toFixed(2)}</td>
