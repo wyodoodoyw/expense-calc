@@ -34,8 +34,10 @@ const ExpensesTable = () => {
         setIntlExpenses({});
       }
     } else {
-      const { meals: derivedMeals, station: derivedStation } =
-        getMealsFromSequenceDom(seq || [], p.tafb);
+      const { meals: derivedMeals } = getMealsFromSequenceDom(
+        seq || [],
+        p.tafb,
+      );
       setMeals(derivedMeals);
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
@@ -65,11 +67,12 @@ const ExpensesTable = () => {
     const total = calculateDisplayTotal(
       meals,
       caExpenses,
+      usExpenses,
       intlExpenses,
       numLayovers,
     );
     setDisplayTotal(total.toFixed(2));
-  }, [meals, caExpenses, intlExpenses, numLayovers]);
+  }, [meals, caExpenses, usExpenses, intlExpenses, numLayovers]);
 
   return (
     <table className="table table-striped table-bordered mt-3 text-center ">

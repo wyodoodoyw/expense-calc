@@ -2,6 +2,8 @@ import getMealsFromSequence from '../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../modules/calcDisplayTotal';
 
+let numberOfTests = 0;
+
 const calcNumLayovers = (s) => {
   let layoverCount = 0;
   for (let i = 0; i < s.length; i++) {
@@ -143,6 +145,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
     }
   }
   const slicedPairings = pairings.slice(minIdx, maxIdx);
+  numberOfTests = slicedPairings.length;
   if (!pairings || pairings.length === 0) {
     console.info('No pairings found in PairingsDB.');
     return;
@@ -177,11 +180,6 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             intlRates || {},
             numLayovers || 0,
           );
-          // console.log(
-          //   `expenses line 130: ca/$${JSON.stringify(
-          //     caRates
-          //   )}, in/$${JSON.stringify(intlRates)}, calc: ${calc}`
-          // );
           const calcRounded = Number(calc);
 
           const diff = Math.abs(calcRounded - parsedAllowance);
@@ -219,6 +217,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
           const parsedAllowance = asNumber(p.totalAllowance);
           const { meals, station: usStation } = getMealsFromSequenceDom(
             seq || [],
+            p.tafb,
           );
 
           const calc = calculateDisplayTotal(
@@ -228,13 +227,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             null, // intlRates
             numLayovers || 0,
           );
-          // console.log(
-          //   `expenses line 130: ca/$${JSON.stringify(
-          //     caRates
-          //   )}, in/$${JSON.stringify(intlRates)}, calc: ${calc}`
-          // );
           const calcRounded = Number(calc);
-          console.log(`test: ${calcRounded} vs ${parsedAllowance}`);
 
           const diff = Math.abs(calcRounded - parsedAllowance);
           const isMismatch =
@@ -273,7 +266,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   }
 
   console.info(
-    `checkAllPairings: done. Pairings processed: ${slicedPairings.length}, mismatches: ${mismatchCount}`,
+    `checkAllPairings: done. Pairings processed: ${numberOfTests}, mismatches: ${mismatchCount}`,
   );
   return { total: pairings.length, mismatches: mismatchCount };
 }

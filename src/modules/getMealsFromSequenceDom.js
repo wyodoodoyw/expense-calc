@@ -3,7 +3,7 @@ import stringToTime from './stringToTime';
 
 export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   // Always return an object so callers can destructure safely
-  if (!Array.isArray(seq) || seq.length === 0) {
+  if (!Array.isArray(seq) || seq.length === 0 || !pairingLength) {
     return { meals: [], station: '' };
   }
   const meals = [];
@@ -13,8 +13,8 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     if (!dutyStart || !deptTime) return '';
 
     if (
-      stringToTime(dutyStart).isBefore(stringToTime('08:01')) &&
-      stringToTime(deptTime).isBefore(stringToTime('08:01'))
+      stringToTime(dutyStart).isBefore(stringToTime('08:00')) &&
+      stringToTime(deptTime).isBefore(stringToTime('08:00'))
     ) {
       return 'BLDS';
     } else if (
@@ -69,8 +69,8 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     let mealStr = '';
 
     if (
-      stringToTime(dutyStart).isBefore(stringToTime('08:01')) &&
-      stringToTime(deptTime).isBefore(stringToTime('08:01')) &&
+      stringToTime(dutyStart).isBefore(stringToTime('08:00')) &&
+      stringToTime(deptTime).isBefore(stringToTime('08:00')) &&
       stringToTime(arrTime).isAfter(stringToTime('09:30')) &&
       stringToTime(dutyEnd).isAfter(stringToTime('09:30'))
     ) {
@@ -101,7 +101,6 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     ) {
       mealStr += 'S';
     }
-    console.log(`shortDutyMeals: ${mealStr}`);
     return mealStr;
   };
 
@@ -125,6 +124,7 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   // };
 
   //--- STEP 1: Handle short duty days
+
   if (pairingLength && Number(pairingLength) <= 1700) {
     const dutyStart = seq[0].dutyStart;
     const deptTime = seq[0].departureTime;
