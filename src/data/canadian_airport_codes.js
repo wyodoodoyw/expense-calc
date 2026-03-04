@@ -15,6 +15,7 @@ export default [
   'YQX',
   'YQY',
   'YQM',
+  'YSJ',
   'YUL',
   'YVR',
   'YWG',
