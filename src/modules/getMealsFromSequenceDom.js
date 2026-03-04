@@ -128,7 +128,21 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   //   }
   // };
 
-  //--- STEP 1: Handle short duty days
+  //--- STEP 1: Handle Night Flights
+  if (
+    pairingLength &&
+    Number(pairingLength) <= 1400 &&
+    seq.lenght == 2 &&
+    stringToTime(seq[1].arrivalTime).isAfter(stringToTime('04:00')) &&
+    stringToTime(seq[1].arrivalTime).isBefore(stringToTime('08:00'))
+  ) {
+    return {
+      meals: [{ index: 0, meals: 'DS', station: 'YYZ' }],
+      station: 'YYZ',
+    };
+  }
+
+  //--- STEP 2: Handle short duty days
 
   if (pairingLength && Number(pairingLength) <= 1700) {
     const dutyStart = seq[0].dutyStart;
@@ -152,7 +166,7 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     }
   }
 
-  //--- STEP 2: Calculate meals for the first day
+  //--- STEP 3: Calculate meals for the first day
   const firstDay = getDeptMeals(seq[0].dutyStart, seq[0].departureTime);
   // console.log(`firstDay: ${firstDay}`);
   firstDay && pushMeal(firstDay, 'YYZ');
@@ -175,7 +189,7 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   // console.log(`lastDay: ${lastDay}`);
   lastDay && pushMeal(lastDay, 'YYZ');
 
-  //--- STEP 4: Update meals for any flight arriving or leaving USA
+  //--- STEP 5: Update meals for any flight arriving or leaving USA
 
   // console.log(`meals: ${JSON.stringify(meals)}`);
   if (meals) {

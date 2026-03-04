@@ -1,20 +1,12 @@
 import { useState } from 'react';
-import extractTextFromPDF from '../modules/pdf-parser-client-side';
+import extractTextFromPDF from '../modules/pdfPairingsParser';
 import cutStringAfterInclusive from '../modules/cutStringAfterInclusive';
 import parse from '../modules/parse';
-
-// import { ClipLoader } from 'react-spinners';
-
-// import cutStringAfterExclusive from '../cutStringAfterExclusive';
-// import cutStringBeforeExclusive from '../cutStringBeforeExclusive';
-// import all_airports from '../data/all_airports';
-// import parseAsFlight from '../modules/parseAsFlight';
-// import parseAsLayover from '../modules/parseAsLayover';
 
 const PairingFileUploader = (props) => {
   const { setPairingsUploaded } = props;
   const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     if (e.target.files) {
@@ -23,7 +15,7 @@ const PairingFileUploader = (props) => {
   };
 
   const handleUpload = async () => {
-    setLoading(!loading);
+    // setLoading(!loading);
     // delete existing DB
     const request = window.indexedDB.deleteDatabase('PairingsDB');
     request.onsuccess = () => {
@@ -45,7 +37,7 @@ const PairingFileUploader = (props) => {
       const firstPairingNumber = text.match(/(C|M|T|V)[0-9]{4}/)[0];
       text = cutStringAfterInclusive(text, firstPairingNumber);
       const pairings = text.match(
-        /(C[0-9]{4}|M[0-9]{4}|T[0-9]{4}|V[0-9]{4})[a-zA-Z0-9 .,!?/()\-$*]*/g
+        /(C[0-9]{4}|M[0-9]{4}|T[0-9]{4}|V[0-9]{4})[a-zA-Z0-9 .,!?/()\-$*]*/g,
       );
 
       for (let i = 0; i <= pairings.length; i++) {
@@ -63,7 +55,6 @@ const PairingFileUploader = (props) => {
             parse(pairing);
           }
         }
-        setLoading(!loading);
       }
     }
   };
