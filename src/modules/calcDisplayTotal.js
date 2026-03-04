@@ -12,6 +12,7 @@ export default function calculateDisplayTotal(
   intlExpenses,
   numLayovers,
 ) {
+  if (!numLayovers) numLayovers = 0;
   try {
     if (!Array.isArray(meals)) return 0;
     const toNum = (v) => {
@@ -24,11 +25,13 @@ export default function calculateDisplayTotal(
     meals.forEach((m) => {
       if (!m || !m.meals) return;
       const mealStr = m.meals || '';
+      // console.log(`Calculating meal: station=${m.station}, meals=${mealStr}`);
       if (m.station === 'YYZ' || m.station === 'MCO') {
         total += mealStr.includes('B') ? toNum(caExpenses.breakfast) : 0;
         total += mealStr.includes('L') ? toNum(caExpenses.lunch) : 0;
         total += mealStr.includes('D') ? toNum(caExpenses.dinner) : 0;
         total += mealStr.includes('S') ? toNum(caExpenses.snack) : 0;
+        //
         total += mealStr.includes('C') ? toNum(usExpenses.breakfast) : 0;
         total += mealStr.includes('M') ? toNum(usExpenses.lunch) : 0;
         total += mealStr.includes('E') ? toNum(usExpenses.dinner) : 0;
@@ -40,8 +43,10 @@ export default function calculateDisplayTotal(
         total += mealStr.includes('S') ? toNum(intlExpenses.snack) : 0;
       }
     });
-    total += (Number(numLayovers) || 0) * 5.05;
-
+    // console.log(`total thus far: ${total.toFixed(2)}`);
+    // console.log(`numLayovers: ${numLayovers}, + ${numLayovers * 5.05}`);
+    total += (numLayovers || 0) * 5.05;
+    // console.log(`total to fixed: ${total.toFixed(2)}`);
     return Number(total.toFixed(2));
   } catch (err) {
     console.error('calcDisplayTotal error:', err);

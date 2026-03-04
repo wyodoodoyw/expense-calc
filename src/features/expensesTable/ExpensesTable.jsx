@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import getExpenseseFromDB from '../../modules/getExpensesFromDB';
 import getMealsFromSequence from '../../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
-import calculateDisplayTotal from '../../modules/calculateDisplayTotal';
+import calculateDisplayTotal from '../../modules/calcDisplayTotal';
 
 const ExpensesTable = () => {
   // const { meals, station } = props;
@@ -19,10 +19,14 @@ const ExpensesTable = () => {
   const [intlExpenses, setIntlExpenses] = useState({});
   const [displayTotal, setDisplayTotal] = useState(0);
 
+  // console.log(`numLayovers 13: ${numLayovers}`);
+
   useEffect(() => {
+    // INTERNATIONAL PAIRINGS
     if (Number(p.pairingNumber.slice(-4)) < 7000) {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
+      // console.log(`derivedMeals: ${meals ? JSON.stringify(meals) : 'none'}`);
       setMeals(derivedMeals);
       setStation(intlStation);
 
@@ -33,18 +37,20 @@ const ExpensesTable = () => {
       } else {
         setIntlExpenses({});
       }
+      // DOMESTIC AND TB PAIRINGS
     } else {
       const { meals: derivedMeals } = getMealsFromSequenceDom(
         seq || [],
         p.tafb,
       );
-      setMeals(derivedMeals);
+      // console.log(`derivedMeals: ${meals ? JSON.stringify(meals) : 'none'}`);
+      setMeals(derivedMeals || []);
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
       getExpenseseFromDB('YYZ', setCaExpenses);
       getExpenseseFromDB('MCO', setUsExpenses);
     }
-  }, [p]);
+  }, [p, seq, station]);
 
   useEffect(() => {
     const hasMeals = Array.isArray(meals) && meals.length > 0;
@@ -59,7 +65,14 @@ const ExpensesTable = () => {
       return;
     }
 
-    if ((needsCa && !caLoaded) || (needsIntl && !intlLoaded)) {
+    // console.log(`numLayovers 66: ${numLayovers}`);
+
+    if (
+      (needsCa && !caLoaded) ||
+      (needsIntl && !intlLoaded) ||
+      !meals ||
+      numLayovers === undefined
+    ) {
       // wait until required expenses are loaded
       return;
     }
@@ -71,6 +84,7 @@ const ExpensesTable = () => {
       intlExpenses,
       numLayovers,
     );
+    // console.log(`total (ExpTable): ${total}`);
     setDisplayTotal(total.toFixed(2));
   }, [meals, caExpenses, usExpenses, intlExpenses, numLayovers]);
 
@@ -147,9 +161,7 @@ const ExpensesTable = () => {
 
         <tr className="table-primary">
           <td>Total:</td>
-          <td colSpan={4}>
-            {/* <Total displayTotal={Number(displayTotal)} /> */}${displayTotal}
-          </td>
+          <td colSpan={4}>${displayTotal}</td>
         </tr>
       </tbody>
     </table>

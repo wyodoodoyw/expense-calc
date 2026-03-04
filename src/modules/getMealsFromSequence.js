@@ -54,12 +54,12 @@ export default function getMealsFromSequence(seq = []) {
       const mealsFirstLayover = calcMealsIntLayover(
         seq[i - 2].arrivalTime,
         seq[i].departureTime,
-        seq[i - 1].layoverLength
+        seq[i - 1].layoverLength,
       );
       const mealsSecondLayover = calcMealsIntLayover(
         seq[i + 1].arrivalTime,
         seq[i + 3].departureTime,
-        seq[i + 2].layoverLength
+        seq[i + 2].layoverLength,
       );
 
       if (Array.isArray(mealsFirstLayover)) {
@@ -153,7 +153,7 @@ export default function getMealsFromSequence(seq = []) {
           dutyStart,
           firstDept,
           outboundDept,
-          segmentLength
+          segmentLength,
         );
         domMealsBeforeInt && pushMeals(domMealsBeforeInt);
       }
@@ -167,7 +167,7 @@ export default function getMealsFromSequence(seq = []) {
   const layoverMeals = calcMealsIntLayover(
     seq[intLayoverIndex].layoverStart,
     seq[intLayoverIndex].layoverEnd,
-    seq[intLayoverIndex].layoverLength
+    seq[intLayoverIndex].layoverLength,
   );
 
   layoverMeals && pushMeals(layoverMeals);
@@ -219,7 +219,7 @@ export default function getMealsFromSequence(seq = []) {
           arrivalTime,
           finalArrival,
           finalDutyEnd,
-          segmentLength
+          segmentLength,
         );
 
         // console.log(`domMealsAfterInt: ${JSON.stringify(domMealsAfterInt)}`);
@@ -233,6 +233,6 @@ export default function getMealsFromSequence(seq = []) {
     // console.log(`{meals, station}: ${JSON.stringify(meals, station)}`);
     return { meals, station };
   } else {
-    return;
+    return { meals: [], station };
   }
 }

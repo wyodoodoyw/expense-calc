@@ -4,7 +4,7 @@ import stringToTime from './stringToTime';
 export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   // Always return an object so callers can destructure safely
   if (!Array.isArray(seq) || seq.length === 0 || !pairingLength) {
-    return { meals: [], station: '' };
+    return { meals: [], station: null };
   }
   const meals = [];
   const station = 'YYZ';
@@ -101,7 +101,12 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     ) {
       mealStr += 'S';
     }
-    return mealStr;
+
+    if (mealStr) {
+      return mealStr;
+    } else {
+      return '';
+    }
   };
 
   // push meals to meal array
@@ -143,7 +148,7 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     if (shortDutyMeals) {
       return { meals, station };
     } else {
-      return;
+      return { meals: [], station: null };
     }
   }
 
@@ -177,6 +182,6 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     // console.log(`{meals, station}: ${JSON.stringify(meals, station)}`);
     return { meals, station };
   } else {
-    return;
+    return { meals: [], station: null };
   }
 }

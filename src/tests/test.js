@@ -178,7 +178,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             caRates || {},
             null, //usRates
             intlRates || {},
-            numLayovers || 0,
+            numLayovers || undefined,
           );
           const calcRounded = Number(calc);
 
@@ -215,6 +215,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
           const seq = p.sequence || [];
           const numLayovers = calcNumLayovers(seq) || 0;
           const parsedAllowance = asNumber(p.totalAllowance);
+
           const { meals, station: usStation } = getMealsFromSequenceDom(
             seq || [],
             p.tafb,
@@ -225,7 +226,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             caRates || {},
             usRates || {},
             null, // intlRates
-            numLayovers || 0,
+            numLayovers || undefined,
           );
           const calcRounded = Number(calc);
 

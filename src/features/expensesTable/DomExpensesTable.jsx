@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import getExpenseseFromDB from '../../modules/getExpensesFromDB';
 import getMealsFromSequence from '../../modules/getMealsFromSequence';
-import calculateDisplayTotal from '../../modules/calculateDisplayTotal';
+import calculateDisplayTotal from '../../modules/calcDisplayTotal';
 
 const DomExpensesTable = () => {
   const p = useSelector((state) => state.pairing);
@@ -18,7 +18,7 @@ const DomExpensesTable = () => {
 
   useEffect(() => {
     const { meals: derivedMeals, station: usaStation } = getMealsFromSequence(
-      seq || []
+      seq || [],
     );
     setMeals(derivedMeals);
     setStation(usaStation);
@@ -50,11 +50,12 @@ const DomExpensesTable = () => {
       return;
     }
 
-    const total = calculateDomDisplayTotal(
+    const total = calculateDisplayTotal(
       meals,
       caExpenses,
       usaExpenses,
-      numLayovers
+      null, //intlExpenses
+      numLayovers,
     );
     setDisplayTotal(total.toFixed(2));
   }, [meals, caExpenses, usaExpenses, numLayovers]);
