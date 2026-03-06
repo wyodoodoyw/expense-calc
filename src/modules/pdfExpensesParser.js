@@ -23,7 +23,7 @@ async function extractExpensesFromPDF(file) {
       const page = await pdf.getPage(pageNumber);
       const textContent = await page.getTextContent();
       let pageText = [];
-      let firstIdx = 0;
+      let firstExpenseIdx = 0;
 
       // remove ' ', '', and '$' items from textContent
       for (let i = 0; i < textContent.items.length; i++) {
@@ -39,12 +39,12 @@ async function extractExpensesFromPDF(file) {
         const item = pageText[i];
 
         if (item.str.includes('Algiers')) {
-          firstIdx = i;
+          firstExpenseIdx = i;
           break;
         }
       }
 
-      pageText = pageText.splice(firstIdx, pageText.length);
+      pageText = pageText.splice(firstExpenseIdx, pageText.length);
 
       // break up pageText Array into array of destinations
       let extracted = [];

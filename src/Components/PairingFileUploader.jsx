@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import extractTextFromPDF from '../modules/pdfPairingsParser';
-import cutStringAfterInclusive from '../modules/cutStringAfterInclusive';
+import extractPairingsFromPDF from '../modules/pdfPairingsParser';
+// import cutStringAfterInclusive from '../modules/cutStringAfterInclusive';
 import parse from '../modules/parse';
 
 const PairingFileUploader = (props) => {
@@ -30,31 +30,13 @@ const PairingFileUploader = (props) => {
 
     if (file) {
       // Read pdf file
-      let text = await extractTextFromPDF(file);
-      text && setPairingsUploaded(true);
+      let pairingsArray = await extractPairingsFromPDF(file);
+      pairingsArray && setPairingsUploaded(true);
 
-      // Remove header
-      const firstPairingNumber = text.match(/(C|M|T|V)[0-9]{4}/)[0];
-      text = cutStringAfterInclusive(text, firstPairingNumber);
-      const pairings = text.match(
-        /(C[0-9]{4}|M[0-9]{4}|T[0-9]{4}|V[0-9]{4})[a-zA-Z0-9 .,!?/()\-$*]*/g,
-      );
+      console.log(pairingsArray[0]);
 
-      for (let i = 0; i <= pairings.length; i++) {
-        if (i < pairings.length) {
-          const pairing = pairings[i];
-          // const pairingNo = pairing.match(/T[0-9]{4}/g)[0];
-          // console.log((pairingNo);
-          if (pairing === '' || pairing === ' ' || pairing === null) {
-            //pass
-          } else if (pairing.includes('==')) {
-            //pass
-            // } else if (pairingNo === 'T5147') {
-          } else if (pairing.length > 2) {
-            // console.log(pairing);
-            parse(pairing);
-          }
-        }
+      for (let i = 0; i <= pairingsArray.length - 1; i++) {
+        parse(pairingsArray[i], i);
       }
     }
   };

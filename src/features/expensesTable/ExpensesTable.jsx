@@ -23,7 +23,7 @@ const ExpensesTable = () => {
 
   useEffect(() => {
     // INTERNATIONAL PAIRINGS
-    if (Number(p.pairingNumber.slice(-4)) < 7000) {
+    if (Number(p.pairingNumber) < 7000) {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
       // console.log(`derivedMeals: ${meals ? JSON.stringify(meals) : 'none'}`);

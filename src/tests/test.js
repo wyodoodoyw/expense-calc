@@ -137,10 +137,10 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   let maxIdx = -1;
   for (let i = 0; i < pairings.length; i++) {
     const p = pairings[i];
-    if (p.pairingNumber === min) {
+    if (p.pairingIdentifier === min) {
       minIdx = i;
     }
-    if (p.pairingNumber === newMax) {
+    if (p.pairingIdentifier === newMax) {
       maxIdx = i;
     }
   }
@@ -158,12 +158,9 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   let mismatchCount = 0;
 
   for (const p of pairings) {
-    if (p.pairingNumber >= min && p.pairingNumber <= max) {
+    if (p.pairingIdentifier >= min && p. <= max) {
       try {
-        if (
-          Number(p.pairingNumber.slice(-4)) >= 5000 &&
-          Number(p.pairingNumber.slice(-4)) < 7000
-        ) {
+        if (p.pairingNumber >= 5000 && p.pairingNumber < 7000) {
           const seq = p.sequence || [];
           const numLayovers = calcNumLayovers(seq) || 0;
           const parsedAllowance = asNumber(p.totalAllowance);
@@ -190,7 +187,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             mismatchCount++;
             console.warn(
               `Mismatch: Pairing ${
-                p.pairingNumber || p.id || '<unknown>'
+                p.pairingIdentifier || p.id || '<unknown>'
               } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
                 2,
               )}`,
@@ -206,12 +203,12 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             if (logAll) {
               console.info(
                 `OK: Pairing ${
-                  p.pairingNumber || p.id || '<unknown>'
+                  p.pairingIdentifier || p.id || '<unknown>'
                 } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
               );
             }
           }
-        } else if (Number(p.pairingNumber.slice(-4)) >= 7000) {
+        } else if (p.pairingNumber >= 7000) {
           const seq = p.sequence || [];
           const numLayovers = calcNumLayovers(seq) || 0;
           const parsedAllowance = asNumber(p.totalAllowance);
@@ -238,7 +235,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             mismatchCount++;
             console.warn(
               `Mismatch: Pairing ${
-                p.pairingNumber || p.id || '<unknown>'
+                p.pairingIdentifier || p.id || '<unknown>'
               } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
                 2,
               )}`,
@@ -254,14 +251,18 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
             if (logAll) {
               console.info(
                 `OK: Pairing ${
-                  p.pairingNumber || p.id || '<unknown>'
+                  p.pairingIdentifier || p.id || '<unknown>'
                 } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
               );
             }
           }
         }
       } catch (err) {
-        console.error('Error processing pairing', p && p.pairingNumber, err);
+        console.error(
+          'Error processing pairing',
+          p && p.pairingIdentifier,
+          err,
+        );
       }
     }
   }

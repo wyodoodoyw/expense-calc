@@ -72,7 +72,9 @@ function SearchPairings(props) {
           dispatch(
             initializePairing({
               id: request.result.id,
+              pairingIdentifier: request.result.pairingIdentifier,
               pairingNumber: request.result.pairingNumber,
+              ifsBase: request.result.ifsBase,
               pairingOperates: request.result.pairingOperates,
               pairingPurser: request.result.pairingPurser,
               pairingFA: request.result.pairingFA,

@@ -1,52 +1,62 @@
-import dayjs from 'dayjs';
 import stringToTime from './stringToTime';
-import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
-import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
+import other_airlines from '../data/other_airlines';
+// import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
+// import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
 import aircraft from '../data/aircraft';
 
-const parseAsFlight = (line, index, isLastFlight) => {
+const parseAsFlight = (array, index, isLastFlight) => {
   const newFlight = {
     index: index,
+    isFlight: true,
   };
 
-  // Find occurance of aircraft designator, parse substring prior to it
-  let regExpression = '';
-  if (aircraft) {
-    for (let i = 0; i < aircraft.length; i++) {
-      if (i === 0) {
-        regExpression += `${aircraft[i]}`;
-      } else {
-        regExpression += `|${aircraft[i]}`;
-      }
-    }
+  // Day of week operated
+  let daysOfWeek = [];
+  for (let i = 0; i < array[0].length; i++) {
+    const day = array[0][i];
+    daysOfWeek.push(day);
   }
-  // const regex = new RegExp(String.raw`[0-9]{3}|(77P${otherAirlines})`, 'g');
-  const regex = new RegExp(String.raw`(${regExpression})`, 'g');
-  let threeDigits = line.match(regex);
-  if (threeDigits) {
-    for (let i = 0; i < threeDigits.length; i++) {
-      if (aircraft.includes(threeDigits[i])) {
-        newFlight.aircraft = threeDigits[i];
-        break;
-      }
-    }
+  newFlight.daysOfWeek = daysOfWeek;
+
+  console.log(array[1]);
+  // isDHD
+  if (array[1].includes('DHD')) {
+    newFlight.isDeadhead = true;
+  } else {
+    newFlight.isDeadhead = false;
   }
-  let days = cutStringBeforeExclusive(line, newFlight.aircraft);
-  newFlight.daysOfWeek = days.match(/[0-9]/g);
-  // Remove substring that has been parsed above
-  line = cutStringAfterExclusive(line, newFlight.aircraft);
 
-  line.includes('DHD')
-    ? (newFlight.isDeadhead = true)
-    : (newFlight.isDeadhead = false);
-  line = line.replace('DHD', '');
+  // Aircraft type, flight number
+  if (
+    newFlight.isDeadhead &&
+    other_airlines.includes(array[1].substring(0, 3))
+  ) {
+    newFlight.aircraft = array[1].substring(0, 3);
+    newFlight.flightNumber = array[1].substring(6);
+  } else if (
+    newFlight.isDeadhead &&
+    !other_airlines.includes(array[1].substring(0, 3))
+  ) {
+    newFlight.aircraft = array[1].substring(0, 3);
+    newFlight.flightNumber = array[2];
+  } else {
+    newFlight.aircraft = array[1];
+    newFlight.flightNumber = array[2];
+  }
 
-  const numbers = line.match(/[0-9]{1,4}/g);
-  newFlight.flightNumber = numbers[0];
-  newFlight.departureTime = numbers[1];
-  newFlight.arrivalTime = numbers[2];
-  newFlight.flightTime = numbers[3];
+  // Flight information
+  newFlight.departureAirport = array[3].substring(0, 3);
+  newFlight.departureTime = array[3].substring(4);
+  newFlight.arrivalAirport = array[4].substring(0, 3);
+  newFlight.arrivalTime = array[4].substring(4);
+  newFlight.flightTime = array[5];
+  newFlight.dutyTime = array[6];
+  if (array[7] && array[7].match(/[0-9]{3,4}/g)) {
+    newFlight.layoverLength = array[7];
+  }
+  // newFlight.mealsOnboard = array[(7, array.length - 1)];
 
+  // Calculate duty start and duty end
   if (index === 0 && !newFlight.isDeadhead) {
     const time = stringToTime(newFlight.departureTime);
     switch (newFlight.aircraft) {
@@ -109,51 +119,6 @@ const parseAsFlight = (line, index, isLastFlight) => {
     newFlight.dutyEnd = time.format('HHmm');
   }
 
-  if (numbers[4]) {
-    newFlight.dutyTime = numbers[4];
-  }
-  if (numbers[5]) {
-    newFlight.layoverLength = numbers[5];
-  }
-
-  const airports = line.match(/[A-Z]{3}/g);
-  newFlight.departureAirport = airports[0];
-  newFlight.arrivalAirport = airports[1];
-
-  // Remove substring that has been parsed above
-  line = cutStringAfterExclusive(line, numbers[0]);
-  line = cutStringAfterExclusive(line, numbers[1]);
-  line = cutStringAfterExclusive(line, numbers[2]);
-  if (numbers[5]) {
-    line = cutStringAfterExclusive(line, numbers[5]);
-  } else if (numbers[4]) {
-    line = cutStringAfterExclusive(line, numbers[4]);
-  } else {
-    line = cutStringAfterExclusive(line, numbers[3]);
-  }
-
-  // console.log(`line: ${line}`);
-  if (line && line.match(/[A-Z]{2}/g)) {
-    if (line.match(/(HB|CB|HL|HD|FB|SS)/g)) {
-      const mealsOnboard = line.match(/[A-Z]{2}/g);
-      newFlight.mealsOnboard = mealsOnboard;
-      line = cutStringAfterExclusive(
-        line,
-        mealsOnboard[mealsOnboard.length - 1]
-      );
-    } else if (line.match(/B|L|D|S/g)) {
-      const mealExpenses = line.match(/[A-Z]{2}/g);
-      newFlight.mealExpenses = mealExpenses;
-      line = cutStringAfterExclusive(
-        line,
-        mealExpenses[mealExpenses.length - 1]
-      );
-    }
-  }
-
-  if (line !== ' ') {
-    newFlight.mealExpenses = line.trim();
-  }
   return newFlight;
 };
 

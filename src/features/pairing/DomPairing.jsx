@@ -27,7 +27,7 @@ function DomPairing() {
     <div className="text-start font-monospace">
       <div className="row mt-4">
         <div className="col-6 ps-5">
-          {p.pairingNumber} OPERATES/OPER- {p.pairingOperates}
+          {p.pairingIdentifier} OPERATES/OPER- {p.pairingOperates}
         </div>
         <div className="col-6 text-end pe-5"></div>
       </div>
