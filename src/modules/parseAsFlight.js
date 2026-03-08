@@ -1,16 +1,15 @@
 import stringToTime from './stringToTime';
+import all_airports from '../data/all_airports';
 import other_airlines from '../data/other_airlines';
-// import cutStringAfterExclusive from '../modules/cutStringAfterExclusive';
-// import cutStringBeforeExclusive from '../modules/cutStringBeforeExclusive';
 import aircraft from '../data/aircraft';
 
 const parseAsFlight = (array, index, isLastFlight) => {
-  const newFlight = {
+  let newFlight = {
     index: index,
-    isFlight: true,
+    type: 'flight',
   };
 
-  // Day of week operated
+  // Days of week operated
   let daysOfWeek = [];
   for (let i = 0; i < array[0].length; i++) {
     const day = array[0][i];
@@ -18,45 +17,87 @@ const parseAsFlight = (array, index, isLastFlight) => {
   }
   newFlight.daysOfWeek = daysOfWeek;
 
-  console.log(array[1]);
-  // isDHD
-  if (array[1].includes('DHD')) {
-    newFlight.isDeadhead = true;
-  } else {
-    newFlight.isDeadhead = false;
-  }
-
-  // Aircraft type, flight number
-  if (
-    newFlight.isDeadhead &&
-    other_airlines.includes(array[1].substring(0, 3))
-  ) {
+  // Determine which array elements contain flight information
+  if (all_airports.includes(array[2].substring(0, 3))) {
+    // isDHD
+    if (array[1].includes('DHD')) {
+      newFlight.isDeadhead = true;
+    }
     newFlight.aircraft = array[1].substring(0, 3);
     newFlight.flightNumber = array[1].substring(6);
-  } else if (
-    newFlight.isDeadhead &&
-    !other_airlines.includes(array[1].substring(0, 3))
-  ) {
+
+    // Flight information
+    newFlight.departureAirport = array[2].substring(0, 3);
+    newFlight.departureTime = array[2].substring(4);
+    newFlight.arrivalAirport = array[3].substring(0, 3);
+    newFlight.arrivalTime = array[3].substring(4);
+    newFlight.flightTime = array[4];
+    newFlight.dutyTime = array[5];
+    if (array[6] && array[6].match(/[0-9]{3,4}/g)) {
+      newFlight.layoverLength = array[6];
+    }
+
+    // onboard meals
+    if (array[7]) {
+      newFlight.mealsOnboard = array.slice(7, array.length).join(' ');
+    }
+  } else if (all_airports.includes(array[3].substring(0, 3))) {
+    // isDHD
+    if (array[1].includes('DHD')) {
+      newFlight.isDeadhead = true;
+    } else {
+      newFlight.isDeadhead = false;
+    }
     newFlight.aircraft = array[1].substring(0, 3);
     newFlight.flightNumber = array[2];
-  } else {
-    newFlight.aircraft = array[1];
-    newFlight.flightNumber = array[2];
+
+    // Flight information
+    newFlight.departureAirport = array[3].substring(0, 3);
+    newFlight.departureTime = array[3].substring(4);
+    newFlight.arrivalAirport = array[4].substring(0, 3);
+    newFlight.arrivalTime = array[4].substring(4);
+    newFlight.flightTime = array[5];
+    newFlight.dutyTime = array[6];
+    if (array[7] && array[7].match(/[0-9]{3,4}/g)) {
+      newFlight.layoverLength = array[7];
+    }
+
+    // onboard meals
+    if (array[8]) {
+      newFlight.mealsOnboard = array.slice(8, array.length).join(' ');
+    }
+  } else if (all_airports.includes(array[4].substring(0, 3))) {
+    for (let i = 0; i < array[1].length; i++) {
+      const day = array[1][i];
+      newFlight.daysOfWeek.push(day);
+    }
+
+    if (array[2].includes('DHD')) {
+      newFlight.isDeadhead = true;
+    } else {
+      newFlight.isDeadhead = false;
+    }
+    newFlight.aircraft = array[2].substring(0, 3);
+    newFlight.flightNumber = array[3];
+
+    // Flight information
+    newFlight.departureAirport = array[4].substring(0, 3);
+    newFlight.departureTime = array[4].substring(4);
+    newFlight.arrivalAirport = array[5].substring(0, 3);
+    newFlight.arrivalTime = array[5].substring(4);
+    newFlight.flightTime = array[6];
+    newFlight.dutyTime = array[7];
+    if (array[8] && array[8].match(/[0-9]{3,4}/g)) {
+      newFlight.layoverLength = array[8];
+    }
+
+    // onboard meals
+    if (array[9]) {
+      newFlight.mealsOnboard = array.slice(9, array.length).join(' ');
+    }
   }
 
-  // Flight information
-  newFlight.departureAirport = array[3].substring(0, 3);
-  newFlight.departureTime = array[3].substring(4);
-  newFlight.arrivalAirport = array[4].substring(0, 3);
-  newFlight.arrivalTime = array[4].substring(4);
-  newFlight.flightTime = array[5];
-  newFlight.dutyTime = array[6];
-  if (array[7] && array[7].match(/[0-9]{3,4}/g)) {
-    newFlight.layoverLength = array[7];
-  }
-  // newFlight.mealsOnboard = array[(7, array.length - 1)];
-
-  // Calculate duty start and duty end
+  // calculate duty start for first flight of pairing
   if (index === 0 && !newFlight.isDeadhead) {
     const time = stringToTime(newFlight.departureTime);
     switch (newFlight.aircraft) {
@@ -111,8 +152,12 @@ const parseAsFlight = (array, index, isLastFlight) => {
     newFlight.dutyStart = time.subtract(30, 'minute').format('HHmm');
   }
 
+  // calculate duty end for last flight of pairing
   if (isLastFlight && !newFlight.isDeadhead) {
     const time = stringToTime(newFlight.arrivalTime);
+    console.log(
+      `arrival time: ${newFlight.arrivalTime} ${newFlight.pairingIdentifier}`,
+    );
     newFlight.dutyEnd = time.add(15, 'minute').format('HHmm');
   } else if (isLastFlight && newFlight.isDeadhead) {
     const time = stringToTime(newFlight.arrivalTime);

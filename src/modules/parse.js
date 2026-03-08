@@ -6,6 +6,7 @@ import international_airport_codes from '../data/international_airport_codes';
 import parseAsFlight from '../modules/parseAsFlight';
 import parseAsLayover from '../modules/parseAsLayover';
 import addPairingToDB from '../modules/addPairingToDB';
+import aircraft from '../data/aircraft';
 
 const parse = (pairing, i) => {
   let errorPairingNumber = null;
@@ -66,12 +67,12 @@ const parse = (pairing, i) => {
     newPairing.pairingLanguages = languages;
   }
 
-  let blockIdx = undefined;
-  let tafbIdx = undefined;
-  for (let i = 2; i < pairing.length; i++) {
+  // BLOCK/H-VOL Line
+  let blockIdx = null;
+  let tafbIdx = null;
+  for (let i = 3; i < pairing.length; i++) {
     const array = pairing[i];
 
-    // BLOCK/H-VOL Line
     if (array[0].includes('BLOCK')) {
       blockIdx = i;
       newPairing.blockCredit = array[1];
@@ -102,79 +103,100 @@ const parse = (pairing, i) => {
 
     //TAFB Line
     if (array[0].includes('TAFB')) {
-      tafbIdx = 1;
+      tafbIdx = i;
       newPairing.tafb = array[1];
       newPairing.totalCredit = array[3];
     }
+  }
 
-    // Calendar of dates the pairing operates
-    let calendar = [];
-    if (i > tafbIdx) {
-      calendar.push(array[0]);
-    }
-    if (i === pairing.length - 1 && calendar.length > 0) {
-      newPairing.calendar = calendar;
+  // calendar of dates
+  pairing[tafbIdx + 1] = pairing.slice(tafbIdx + 1).flat();
+  pairing.splice(tafbIdx + 2);
+  newPairing.calendar = pairing[tafbIdx + 1];
+
+  // DPG Line, if exists
+  for (let i = 3; i < pairing.length; i++) {
+    const array = pairing[i];
+
+    if (
+      pairing[i + 1] &&
+      pairing[i + 1].length >= 1 &&
+      pairing[i + 1][0].includes('BLOCK') &&
+      array[0].includes('DPG')
+    ) {
+      blockIdx -= 1;
     }
   }
 
-  const pairingSequence = [];
-  let sequenceIdx = 0;
-
+  // combine multiple days of week into one string
   for (let i = 2; i < blockIdx; i++) {
     const array = pairing[i];
 
-    // if (i === 2) {
-    //   const flight = parseAsFlight(array, pairingSequence.length, false);
-    //   pairingSequence.push(flight);
-    // } else if (i === blockIdx - 1) {
-    //   const flight = parseAsFlight(array, pairingSequence.length, true);
-    //   pairingSequence.push(flight);
-    // } else
-    if (array.length === 1 && array[0].includes('DPG')) {
-      newPairing.pairingDPG = array[0].replace('-DPG', '').trim();
-    } else if (
-      other_airlines.includes(array[1].substring(0, 3)) &&
-      array[1].includes('DHD')
-    ) {
-      parseAsFlight(array, pairingSequence.length, i === blockIdx - 1);
-    } else if (
-      all_airports.includes(array[3].slice(0, 3)) &&
-      all_airports.includes(array[4].slice(0, 3))
-    ) {
-      const flight = parseAsFlight(array, i, i === blockIdx - 1); //i === blockIdx - 1 indicates last flight
-      pairingSequence.push(flight);
-    } else {
-      const layover = parseAsLayover(sequenceIdx, array);
-      pairingSequence.push(layover);
+    if (aircraft.includes(array[1])) {
+      // no action needed
+    } else if (aircraft.includes(array[2])) {
+      array[0] = `${array[0]}${array[1]}`;
+      array.splice(1, 1);
+      pairing[i] = array;
+    } else if (aircraft.includes(array[3])) {
+      array[0] = `${array[0]}${array[1]}${array[2]}`;
+      array.splice(1, 2);
+      pairing[i] = array;
     }
-    sequenceIdx++;
   }
 
+  // parse sequence of flights and layovers
+  const pairingSequence = [];
+  // for (let i = 2; i < blockIdx; i++) {
+  //   const array = pairing[i];
+  //   if (
+  //     (array.length > 3 &&
+  //       array[2].match(/[A-Z]{3}/g) &&
+  //       array[3].match(/[A-Z]{3}/g)) ||
+  //     (array.length > 4 &&
+  //       array[3].match(/[A-Z]{3}/g) &&
+  //       array[4].match(/[A-Z]{3}/g)) ||
+  //     (array.length > 5 &&
+  //       array[4].match(/[A-Z]{3}/g) &&
+  //       array[5].match(/[A-Z]{3}/g))
+  //   ) {
+  //     const flight = parseAsFlight(
+  //       array,
+  //       pairingSequence.length,
+  //       i === blockIdx - 1, // last flight in sequence, true or false
+  //     );
+  //     pairingSequence.push(flight);
+  //   } else {
+  //     const layover = parseAsLayover(pairingSequence.length, array);
+  //     pairingSequence.push(layover);
+  //   }
+  // }
+
   // Add info for Layovers based on [i-1] and [i+1]
-  for (let i = 1; i < pairingSequence.length; i++) {
-    if (pairingSequence[i].isLayover) {
-      // Layover
-      // pairingSequence[i].layoverStart = pairingSequence[i - 1].arrivalTime;
-      // pairingSequence[i].layoverEnd = pairingSequence[i + 1].departureTime;
-      // pairingSequence[i].layoverLength = pairingSequence[i - 1].layoverLength;
-      // pairingSequence[i].layoverStation = pairingSequence[i - 1].arrivalAirport;
-      // if (american_airport_codes.includes(pairingSequence[i].layoverStation)) {
-      //   pairing.isUS = true;
-      // } else if (
-      //   international_airport_codes.includes(pairingSequence[i].layoverStation)
-      // ) {
-      //   pairing.isInt = true;
-      // } else if (
-      //   canadian_airport_codes.includes(pairingSequence[i].layoverStation)
-      // ) {
-      //   pairing.isDom = true;
-      // } else {
-      //   throw new Error(
-      //     `Error parsing additional layover info: ${errorPairingNumber}`,
-      //   );
-      // }
-    }
-  }
+  // for (let i = 1; i < pairingSequence.length; i++) {
+  //   if (pairingSequence[i].isLayover) {
+  //     // Layover
+  //     pairingSequence[i].layoverStart = pairingSequence[i - 1].arrivalTime;
+  //     pairingSequence[i].layoverEnd = pairingSequence[i + 1].departureTime;
+  //     pairingSequence[i].layoverLength = pairingSequence[i - 1].layoverLength;
+  //     pairingSequence[i].layoverStation = pairingSequence[i - 1].arrivalAirport;
+  //     if (american_airport_codes.includes(pairingSequence[i].layoverStation)) {
+  //       pairing.isUS = true;
+  //     } else if (
+  //       international_airport_codes.includes(pairingSequence[i].layoverStation)
+  //     ) {
+  //       pairing.isInt = true;
+  //     } else if (
+  //       canadian_airport_codes.includes(pairingSequence[i].layoverStation)
+  //     ) {
+  //       pairing.isDom = true;
+  //     } else {
+  //       throw new Error(
+  //         `Error parsing additional layover info: ${errorPairingNumber}`,
+  //       );
+  //     }
+  //   }
+  // }
   newPairing.sequence = pairingSequence;
   addPairingToDB(newPairing);
   return;

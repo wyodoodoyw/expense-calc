@@ -5,8 +5,7 @@ const addPairingToDB = (newPairing) => {
     const db = event.target.result;
     const tx = db.transaction(['pairings'], 'readwrite');
     const pairingsStore = tx.objectStore('pairings');
-    const pairingNumberIndex = pairingsStore.index('pairingNumber');
-    // const countryIndex = pairingsStore.index('country_code');
+    const pairingNumberIndex = pairingsStore.index('pairingIdentifier');
 
     pairingsStore.put(newPairing);
   };
@@ -17,7 +16,7 @@ const addPairingToDB = (newPairing) => {
       keyPath: 'id',
       autoIncrement: true,
     });
-    pairingsStore.createIndex('pairingNumber', 'pairingNumber', {
+    pairingsStore.createIndex('pairingIdentifier', 'pairingIdentifier', {
       multiEntry: true,
     });
   };

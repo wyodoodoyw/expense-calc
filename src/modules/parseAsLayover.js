@@ -2,7 +2,7 @@
 const parseAsLayover = (index, line) => {
   const newLayover = {
     index: index,
-    isLayover: true,
+    type: 'layover',
   };
 
   if (line[0].includes('DPG')) {

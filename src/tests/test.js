@@ -158,7 +158,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   let mismatchCount = 0;
 
   for (const p of pairings) {
-    if (p.pairingIdentifier >= min && p. <= max) {
+    if (p.pairingIdentifier >= min && p.pairingIdentifier <= max) {
       try {
         if (p.pairingNumber >= 5000 && p.pairingNumber < 7000) {
           const seq = p.sequence || [];

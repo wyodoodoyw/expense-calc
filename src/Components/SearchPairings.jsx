@@ -63,7 +63,7 @@ function SearchPairings(props) {
       const db = event.target.result;
       const tx = db.transaction(['pairings'], 'readonly');
       const pairingsStore = tx.objectStore('pairings');
-      const pairingNumberIndex = pairingsStore.index('pairingNumber');
+      const pairingNumberIndex = pairingsStore.index('pairingIdentifier');
       const request = pairingNumberIndex.get(pairingNumber);
 
       request.onsuccess = () => {
