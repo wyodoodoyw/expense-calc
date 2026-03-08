@@ -134,43 +134,55 @@ const parse = (pairing, i) => {
 
     if (aircraft.includes(array[1])) {
       // no action needed
-    } else if (aircraft.includes(array[2])) {
+    } else if (array[2] && aircraft.includes(array[2].substring(0, 3))) {
       array[0] = `${array[0]}${array[1]}`;
       array.splice(1, 1);
       pairing[i] = array;
-    } else if (aircraft.includes(array[3])) {
+    } else if (array[3] && aircraft.includes(array[3].substring(0, 3))) {
       array[0] = `${array[0]}${array[1]}${array[2]}`;
       array.splice(1, 2);
       pairing[i] = array;
     }
   }
 
+  // split instances of aircraft/DHD airline and flight number in same element
+  for (let i = 2; i < blockIdx; i++) {
+    let array = pairing[i];
+    if (array[1].substring(0, 3).match(/[A-Z0-9]{3}/g) && array[1].length > 6) {
+      const oldElement = array[1];
+      const arrayEnd = array.splice(2);
+      array[1] = oldElement.substring(0, 6);
+      array[2] = oldElement.substring(6).trim();
+      array.splice(3);
+      array = [...array, ...arrayEnd];
+      pairing[i] = array;
+    }
+  }
   // parse sequence of flights and layovers
   const pairingSequence = [];
-  // for (let i = 2; i < blockIdx; i++) {
-  //   const array = pairing[i];
-  //   if (
-  //     (array.length > 3 &&
-  //       array[2].match(/[A-Z]{3}/g) &&
-  //       array[3].match(/[A-Z]{3}/g)) ||
-  //     (array.length > 4 &&
-  //       array[3].match(/[A-Z]{3}/g) &&
-  //       array[4].match(/[A-Z]{3}/g)) ||
-  //     (array.length > 5 &&
-  //       array[4].match(/[A-Z]{3}/g) &&
-  //       array[5].match(/[A-Z]{3}/g))
-  //   ) {
-  //     const flight = parseAsFlight(
-  //       array,
-  //       pairingSequence.length,
-  //       i === blockIdx - 1, // last flight in sequence, true or false
-  //     );
-  //     pairingSequence.push(flight);
-  //   } else {
-  //     const layover = parseAsLayover(pairingSequence.length, array);
-  //     pairingSequence.push(layover);
-  //   }
-  // }
+  for (let i = 2; i < blockIdx; i++) {
+    const array = pairing[i];
+    if (array[1].substring(0, 3).match(/[A-Z0-9]{3}/g) && array[1].length > 6) {
+      console.log(array[1]);
+    }
+    // if (
+    //   array.length > 3 &&
+    //   array[1].match(/[A-Z]{3}/g) &&
+    //   all_airports.includes(array[2]) &&
+    //   array[2].match(/[A-Z]{3}/g) &&
+    //   all_airports.includes(array[3])
+    // ) {
+    //   const flight = parseAsFlight(
+    //     array,
+    //     pairingSequence.length,
+    //     i === blockIdx - 1, // last flight in sequence, true or false
+    //   );
+    //   pairingSequence.push(flight);
+    // } else {
+    //   const layover = parseAsLayover(pairingSequence.length, array);
+    //   pairingSequence.push(layover);
+    // }
+  }
 
   // Add info for Layovers based on [i-1] and [i+1]
   // for (let i = 1; i < pairingSequence.length; i++) {

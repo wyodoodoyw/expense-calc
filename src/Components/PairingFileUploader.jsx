@@ -33,7 +33,7 @@ const PairingFileUploader = (props) => {
       let pairingsArray = await extractPairingsFromPDF(file);
       pairingsArray && setPairingsUploaded(true);
 
-      console.log(pairingsArray[1]);
+      console.log(pairingsArray[72]);
 
       for (let i = 0; i <= pairingsArray.length - 1; i++) {
         parse(pairingsArray[i], i);
