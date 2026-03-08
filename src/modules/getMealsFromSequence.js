@@ -20,10 +20,6 @@ export default function getMealsFromSequence(seq = []) {
   let intInboundIndex = null;
   let intLayoverIndex = null;
 
-  let intOutboundIndex2 = null;
-  let intInboundIndex2 = null;
-  let intLayoverIndex2 = null;
-
   // push meals to meal array
   const pushMeal = (mealStr, st = 'int') => {
     if (!mealStr) return;
@@ -86,13 +82,6 @@ export default function getMealsFromSequence(seq = []) {
       !intOutboundIndex
     ) {
       intOutboundIndex = i;
-    } else if (
-      cur &&
-      canadian_airport_codes.includes(cur.departureAirport) &&
-      international_airport_codes.includes(cur.arrivalAirport) &&
-      intOutboundIndex
-    ) {
-      // second international outbound leg found
     }
     if (
       cur &&
@@ -108,9 +97,6 @@ export default function getMealsFromSequence(seq = []) {
       intLayoverIndex = i;
     }
   }
-  // console.log(
-  //   `getMealsFromSequence IntOutbound: ${intOutboundIndex}, intLayover: ${intLayoverIndex}, intInbound: ${intInboundIndex}`
-  // );
 
   //--- STEP 2: Loop through domestic segment prior to international departure to determine start time, end time, and length,
   //--- then calculate meals for the segment.
@@ -162,7 +148,6 @@ export default function getMealsFromSequence(seq = []) {
 
   //--- STEP 3: Calculate meals for international layover.
   const station = seq[intLayoverIndex].layoverStation;
-  const layoverEnd = seq[intLayoverIndex].layoverEnd;
 
   const layoverMeals = calcMealsIntLayover(
     seq[intLayoverIndex].layoverStart,
@@ -231,7 +216,7 @@ export default function getMealsFromSequence(seq = []) {
 
   if (meals) {
     // console.log(`{meals, station}: ${JSON.stringify(meals, station)}`);
-    return { meals, station };
+    return { meals, station: station };
   } else {
     return { meals: [], station };
   }

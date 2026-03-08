@@ -26,6 +26,7 @@ export default function calculateDisplayTotal(
       if (!m || !m.meals) return;
       const mealStr = m.meals || '';
       // console.log(`Calculating meal: station=${m.station}, meals=${mealStr}`);
+      // console.log(JSON.stringify(intlExpenses));
       if (m.station === 'YYZ' || m.station === 'MCO') {
         total += mealStr.includes('B') ? toNum(caExpenses.breakfast) : 0;
         total += mealStr.includes('L') ? toNum(caExpenses.lunch) : 0;

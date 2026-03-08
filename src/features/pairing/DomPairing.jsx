@@ -36,7 +36,8 @@ function DomPairing() {
         <div className="col-6 ps-5">
           Crew: {p.pairingPurser && `P${p.pairingPurser}  `}
           {p.pairingFA && `FA${p.pairingFA}  `}
-          {p.pairingGP && `GJ${p.pairingGP}  `}
+          {p.pairingGJ && `GJ${p.pairingGJ}  `}
+          {p.pairingGP && `GP${p.pairingGP}  `}
           {p.pairingGY && `GY${p.pairingGY}`}
         </div>
         <div className="col-6 text-end pe-5">

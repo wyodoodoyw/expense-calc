@@ -32,6 +32,7 @@ export const pairingSlice = createSlice({
       pairingPurser: action.payload.pairingPurser,
       pairingFA: action.payload.pairingFA,
       pairingBL: action.payload.pairingBL,
+      pairingGJ: action.payload.pairingGJ,
       pairingGP: action.payload.pairingGP,
       pairingGY: action.payload.pairingGY,
       pairingDates: action.payload.pairingDates,

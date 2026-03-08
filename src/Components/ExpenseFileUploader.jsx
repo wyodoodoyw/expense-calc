@@ -104,11 +104,11 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
         airport_codes: [],
         country_code: line[1],
         expenses: {
-          breakfast: line[line.length - 5],
-          lunch: line[line.length - 4],
-          dinner: line[line.length - 3],
-          snack: line[line.length - 2],
-          day: line[line.length - 1],
+          breakfast: line[line.length - 5].replace('$', ''),
+          lunch: line[line.length - 4].replace('$', ''),
+          dinner: line[line.length - 3].replace('$', ''),
+          snack: line[line.length - 2].replace('$', ''),
+          day: line[line.length - 1].replace('$', ''),
         },
         bracelet_provided: false,
         previous_allowance: line[3],
@@ -142,7 +142,7 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
         // Read pdf file
         let array = await extractExpensesFromPDF(file, 'custom');
         array && setExpensesUploaded(true);
-        console.log(array);
+        // console.log(array);
 
         // Parse each destination depending on expenses or bracelet
         for (let i = 0; i < array.length; i++) {

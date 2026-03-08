@@ -1,4 +1,3 @@
-// import cutStringAfterExclusive from './cutStringAfterExclusive';
 const parseAsLayover = (index, line) => {
   const newLayover = {
     index: index,

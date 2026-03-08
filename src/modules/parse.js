@@ -59,6 +59,9 @@ const parse = (pairing, i) => {
     if (position.match(/GJ[0-9]{2}/g)) {
       newPairing.pairingGJ = position.match(/GJ[0-9]{2}/g)[0].replace('GJ', '');
     }
+    if (position.match(/GP[0-9]{2}/g)) {
+      newPairing.pairingGJ = position.match(/GP[0-9]{2}/g)[0].replace('GP', '');
+    }
     if (position.match(/GY[0-9]{2}/g)) {
       newPairing.pairingGY = position.match(/GY[0-9]{2}/g)[0].replace('GY', '');
     }
@@ -208,6 +211,13 @@ const parse = (pairing, i) => {
         pairingSequence[i].layoverLength = pairingSequence[i - 1].layoverLength;
         pairingSequence[i].layoverStation =
           pairingSequence[i - 1].arrivalAirport;
+      }
+      if (
+        international_airport_codes.includes(pairingSequence[i].layoverStation)
+      ) {
+        pairingSequence[i].isInt = true;
+      } else {
+        pairingSequence[i].isInt = false;
       }
     }
   } catch (err) {

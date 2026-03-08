@@ -27,6 +27,7 @@ const ExpensesTable = () => {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
       // console.log(`derivedMeals: ${meals ? JSON.stringify(meals) : 'none'}`);
+      // console.log(station);
       setMeals(derivedMeals);
       setStation(intlStation);
 
@@ -55,9 +56,11 @@ const ExpensesTable = () => {
   useEffect(() => {
     const hasMeals = Array.isArray(meals) && meals.length > 0;
     const needsIntl = hasMeals && meals.some((m) => m.station === 'int');
+    const needsUSA = hasMeals && meals.some((m) => m.station === 'MCO');
     const needsCa = hasMeals && meals.some((m) => m.station === 'YYZ');
 
     const caLoaded = Object.keys(caExpenses || {}).length > 0;
+    const usLoaded = Object.keys(usExpenses || {}).length > 0;
     const intlLoaded = Object.keys(intlExpenses || {}).length > 0;
 
     if (!hasMeals) {
@@ -69,6 +72,7 @@ const ExpensesTable = () => {
 
     if (
       (needsCa && !caLoaded) ||
+      (needsUSA && !usLoaded) ||
       (needsIntl && !intlLoaded) ||
       !meals ||
       numLayovers === undefined
@@ -77,6 +81,9 @@ const ExpensesTable = () => {
       return;
     }
 
+    // console.log(
+    //   `${JSON.stringify(meals)} ${JSON.stringify(caExpenses)} ${JSON.stringify(usExpenses)} ${JSON.stringify(intlExpenses)} ${numLayovers}`,
+    // );
     const total = calculateDisplayTotal(
       meals,
       caExpenses,
