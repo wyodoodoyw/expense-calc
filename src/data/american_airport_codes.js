@@ -26,8 +26,10 @@ export default [
   'PDX',
   'PHX',
   'RSQ',
+  'SAN',
   'SEA',
   'SFO',
   'SLC',
+  'SMF',
   'TPA',
 ];

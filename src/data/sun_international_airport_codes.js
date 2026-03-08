@@ -12,6 +12,7 @@ export default [
   'LIH',
   'OGG', //Hawaii
   'PLS', //Providenciales
+  'POS',
   'PTP', // Pointe-à-Pitre
   'PTY', // Panama City
   'SJU', // Puerto Rico

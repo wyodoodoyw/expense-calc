@@ -10,6 +10,7 @@ export default [
   'MEX',
   'PVR',
   'SJD',
+  'MTY', // Mexico
   'ZIH', // Mexico
   'GCM', // Grand Cayman
   'GGT', // George Town, Bahamas

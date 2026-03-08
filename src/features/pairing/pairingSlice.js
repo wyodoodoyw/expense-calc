@@ -24,8 +24,11 @@ export const pairingSlice = createSlice({
   reducers: {
     initializePairing: (state, action) => ({
       id: action.payload.id,
+      pairingIdentifier: action.payload.pairingIdentifier,
       pairingNumber: action.payload.pairingNumber,
-      pairingOperates: action.payload.pairingOperates,
+      ifsBase: action.payload.ifsBase,
+      pairingOperatesStart: action.payload.pairingOperatesStart,
+      pairingOperatesEnd: action.payload.pairingOperatesEnd,
       pairingPurser: action.payload.pairingPurser,
       pairingFA: action.payload.pairingFA,
       pairingBL: action.payload.pairingBL,
@@ -64,7 +67,7 @@ export const pairingSlice = createSlice({
       l.layoverLength = adjustLayoverLength(
         value,
         l.layoverEnd,
-        l.layoverLength
+        l.layoverLength,
       );
       l.layoverEnd = value;
     },
@@ -81,7 +84,7 @@ export const pairingSlice = createSlice({
       l.layoverLength = adjustLayoverLength(
         l.layoverStart,
         value,
-        l.layoverLength
+        l.layoverLength,
       );
       l.layoverStart = value;
     },

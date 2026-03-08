@@ -155,9 +155,9 @@ const parseAsFlight = (array, index, isLastFlight) => {
   // calculate duty end for last flight of pairing
   if (isLastFlight && !newFlight.isDeadhead) {
     const time = stringToTime(newFlight.arrivalTime);
-    console.log(
-      `arrival time: ${newFlight.arrivalTime} ${newFlight.pairingIdentifier}`,
-    );
+    // console.log(
+    //   `arrival time: ${newFlight.arrivalTime} ${newFlight.pairingIdentifier}`,
+    // );
     newFlight.dutyEnd = time.add(15, 'minute').format('HHmm');
   } else if (isLastFlight && newFlight.isDeadhead) {
     const time = stringToTime(newFlight.arrivalTime);

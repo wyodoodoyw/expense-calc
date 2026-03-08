@@ -48,17 +48,26 @@ const parse = (pairing, i) => {
   let languages = [];
   for (let i = 0; i < array.length; i++) {
     const position = array[i];
-    if (position.includes('P')) {
-      newPairing.pairingPurser = position.replace('P', '');
-    } else if (position.includes('FA')) {
-      newPairing.pairingFA = position.replace('FA', '');
-    } else if (position.includes('BL')) {
-      newPairing.pairingBL = position.replace('BL', '');
-    } else if (position.includes('GJ')) {
-      newPairing.pairingGP = position.replace('GJ', '');
-    } else if (position.includes('GY')) {
-      newPairing.pairingGY = position.replace('GY', '');
-    } else {
+    if (position.match(/P\s[0-9]{2}/g)) {
+      newPairing.pairingPurser = position
+        .match(/P [0-9]{2}/g)[0]
+        .replace('P ', '');
+    }
+    if (position.match(/FA[0-9]{2}/g)) {
+      newPairing.pairingFA = position.match(/FA[0-9]{2}/g)[0].replace('FA', '');
+    }
+    if (position.match(/GJ[0-9]{2}/g)) {
+      newPairing.pairingGJ = position.match(/GJ[0-9]{2}/g)[0].replace('GJ', '');
+    }
+    if (position.match(/GY[0-9]{2}/g)) {
+      newPairing.pairingGY = position.match(/GY[0-9]{2}/g)[0].replace('GY', '');
+    }
+    if (
+      !position.match(/P\s[0-9]{2}/g) &&
+      !position.match(/FA[0-9]{2}/g) &&
+      !position.match(/GJ[0-9]{2}/g) &&
+      !position.match(/GY[0-9]{2}/g)
+    ) {
       languages.push(position);
     }
   }
@@ -70,7 +79,7 @@ const parse = (pairing, i) => {
   // BLOCK/H-VOL Line
   let blockIdx = null;
   let tafbIdx = null;
-  for (let i = 3; i < pairing.length; i++) {
+  for (let i = 4; i < pairing.length; i++) {
     const array = pairing[i];
 
     if (array[0].includes('BLOCK')) {
@@ -92,7 +101,7 @@ const parse = (pairing, i) => {
           .replace('CICO)', '');
         newPairing.totalAllowance = array[array.length - 1];
       } else {
-        newPairing.pairindDPG = undefined;
+        newPairing.pairingDPG = undefined;
         newPairing.totalDuty = array[2];
         newPairing.cicoAmount = array[3]
           .replace('(INC-$', '')
@@ -128,13 +137,20 @@ const parse = (pairing, i) => {
     }
   }
 
+  if (i === 1690) {
+    // console.log(JSON.stringify(pairing));
+    console.log(pairing);
+  }
+
   // combine multiple days of week into one string
   for (let i = 2; i < blockIdx; i++) {
-    const array = pairing[i];
+    let array = pairing[i];
 
-    if (aircraft.includes(array[1])) {
-      // no action needed
-    } else if (array[2] && aircraft.includes(array[2].substring(0, 3))) {
+    if (
+      array[2] &&
+      aircraft.includes(array[2].substring(0, 3)) &&
+      !all_airports.includes(array[3].substring(0, 3))
+    ) {
       array[0] = `${array[0]}${array[1]}`;
       array.splice(1, 1);
       pairing[i] = array;
@@ -158,57 +174,51 @@ const parse = (pairing, i) => {
       pairing[i] = array;
     }
   }
+
   // parse sequence of flights and layovers
   const pairingSequence = [];
   for (let i = 2; i < blockIdx; i++) {
     const array = pairing[i];
-    if (array[1].substring(0, 3).match(/[A-Z0-9]{3}/g) && array[1].length > 6) {
-      console.log(array[1]);
+    if (
+      array.length > 5 &&
+      array[3].match(/[A-Z]{3}/g) &&
+      all_airports.includes(array[3].substring(0, 3)) &&
+      array[4].match(/[A-Z]{3}/g) &&
+      all_airports.includes(array[4].substring(0, 3))
+    ) {
+      const flight = parseAsFlight(
+        array,
+        pairingSequence.length,
+        i === blockIdx - 1, // last flight in sequence, true or false
+      );
+      pairingSequence.push(flight);
+    } else {
+      const layover = parseAsLayover(pairingSequence.length, array);
+      pairingSequence.push(layover);
     }
-    // if (
-    //   array.length > 3 &&
-    //   array[1].match(/[A-Z]{3}/g) &&
-    //   all_airports.includes(array[2]) &&
-    //   array[2].match(/[A-Z]{3}/g) &&
-    //   all_airports.includes(array[3])
-    // ) {
-    //   const flight = parseAsFlight(
-    //     array,
-    //     pairingSequence.length,
-    //     i === blockIdx - 1, // last flight in sequence, true or false
-    //   );
-    //   pairingSequence.push(flight);
-    // } else {
-    //   const layover = parseAsLayover(pairingSequence.length, array);
-    //   pairingSequence.push(layover);
-    // }
   }
 
   // Add info for Layovers based on [i-1] and [i+1]
-  // for (let i = 1; i < pairingSequence.length; i++) {
-  //   if (pairingSequence[i].isLayover) {
-  //     // Layover
-  //     pairingSequence[i].layoverStart = pairingSequence[i - 1].arrivalTime;
-  //     pairingSequence[i].layoverEnd = pairingSequence[i + 1].departureTime;
-  //     pairingSequence[i].layoverLength = pairingSequence[i - 1].layoverLength;
-  //     pairingSequence[i].layoverStation = pairingSequence[i - 1].arrivalAirport;
-  //     if (american_airport_codes.includes(pairingSequence[i].layoverStation)) {
-  //       pairing.isUS = true;
-  //     } else if (
-  //       international_airport_codes.includes(pairingSequence[i].layoverStation)
-  //     ) {
-  //       pairing.isInt = true;
-  //     } else if (
-  //       canadian_airport_codes.includes(pairingSequence[i].layoverStation)
-  //     ) {
-  //       pairing.isDom = true;
-  //     } else {
-  //       throw new Error(
-  //         `Error parsing additional layover info: ${errorPairingNumber}`,
-  //       );
-  //     }
-  //   }
-  // }
+  try {
+    for (let i = 1; i < pairingSequence.length; i++) {
+      if (pairingSequence[i].type === 'layover') {
+        // Layover
+        pairingSequence[i].layoverStart = pairingSequence[i - 1].arrivalTime;
+        pairingSequence[i].layoverEnd = pairingSequence[i + 1].departureTime;
+        pairingSequence[i].layoverLength = pairingSequence[i - 1].layoverLength;
+        pairingSequence[i].layoverStation =
+          pairingSequence[i - 1].arrivalAirport;
+      }
+    }
+  } catch (err) {
+    console.warn(
+      'Error parsing additional layover information. ',
+      newPairing.pairingIdentifier,
+      i,
+      err,
+    );
+  }
+
   newPairing.sequence = pairingSequence;
   addPairingToDB(newPairing);
   return;

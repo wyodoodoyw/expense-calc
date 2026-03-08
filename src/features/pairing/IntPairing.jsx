@@ -5,28 +5,18 @@ import { useEffect, useState } from 'react';
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
 import ExpensesTable from '../expensesTable/ExpensesTable';
-import getMealsFromSequence from '../../modules/getMealsFromSequence';
+// import getMealsFromSequence from '../../modules/getMealsFromSequence';
 
 function IntPairing() {
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
 
-  // const [meals, setMeals] = useState([]);
-  // const [station, setStation] = useState('');
-
-  // useEffect(() => {
-  //   const { meals: derivedMeals, station: intlStation } = getMealsFromSequence(
-  //     seq || []
-  //   );
-  //   setMeals(derivedMeals);
-  //   setStation(intlStation);
-  // }, [seq]);
-
   return (
     <div className="text-start font-monospace">
       <div className="row mt-4">
         <div className="col-6 ps-5">
-          {p.pairingIdentifier} OPERATES/OPER- {p.pairingOperates}
+          {p.pairingIdentifier} OPERATES/OPER- {p.pairingOperatesStart} -{' '}
+          {p.pairingOperatesEnd}
         </div>
         <div className="col-6 text-end pe-5"></div>
       </div>
