@@ -11,15 +11,18 @@ const getBeginMeals = (intArrival) => {
 
   let meals = '';
 
-  if (time.isBefore(stringToTime('12:30'), 'minutes')) {
+  if (time.isBefore(stringToTime('08:00'), 'minutes')) {
     meals += 'BLDS';
   } else if (
-    time.isAfter(stringToTime('12:30'), 'minutes') &&
-    time.isBefore(stringToTime('13:31'), 'minutes')
+    time.isBefore(stringToTime('12:30'), 'minutes')
+    // &&
+    // time.isBefore(stringToTime('13:31'), 'minutes')
   ) {
     meals += 'LDS';
-  } else if (time.isAfter(stringToTime('13:30'), 'minutes')) {
+  } else if (time.isBefore(stringToTime('17:00'), 'minutes')) {
     meals += 'DS';
+  } else if (time.isBefore(stringToTime('23:00', 'minutes'))) {
+    meals += 'S';
   }
   return meals;
 };
@@ -28,9 +31,6 @@ const getEndMeals = (domesticArrival, dutyEnd) => {
   const arrival = stringToTime(domesticArrival);
   const duty = stringToTime(dutyEnd);
 
-  // console.log(
-  //   `arrival: ${arrival.format('HH:mm')}, duty: ${duty.format('HH:mm')}`
-  // );
   let meals = '';
 
   if (
@@ -102,7 +102,7 @@ const calcMealsDomAfterInt = (
   internationalArrival,
   domesticArrival,
   dutyEnd,
-  segmentLength
+  segmentLength,
 ) => {
   // console.log(
   //   `internationalArrival: ${internationalArrival}, domesticArrival: ${domesticArrival}, dutyEnd: ${dutyEnd}, segmentLength: ${segmentLength}`
@@ -126,7 +126,7 @@ const calcMealsDomAfterInt = (
   const days = calcLayoverDays(
     internationalArrival,
     domesticArrival,
-    segmentLength
+    segmentLength,
   );
   // console.log(`days: ${days}`);
   for (let i = 1; i <= days; i++) {

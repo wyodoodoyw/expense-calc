@@ -49,23 +49,27 @@ const getEndMeals = (internationalDept) => {
 
   let meals = '';
   if (
-    time.isAfter(stringToTime('06:59'), 'minute') &&
-    time.isBefore(stringToTime('11:30'), 'minute')
-  ) {
-    meals += 'B';
-  } else if (
-    time.isAfter(stringToTime('11:29'), 'minute') &&
-    time.isBefore(stringToTime('17:00'), 'minute')
-  ) {
-    meals += 'BL';
-  } else if (
-    time.isAfter(stringToTime('16:59'), 'minute') &&
-    time.isBefore(stringToTime('22:00'), 'minute')
+    time.isAfter(stringToTime('19:30'), 'minute')
+    // &&
+    // time.isBefore(stringToTime('23:00'), 'minute')
   ) {
     meals += 'BLD';
   } else if (
-    time.isAfter(stringToTime('21:59'), 'minute') ||
-    time.isBefore(stringToTime('01:00'), 'minute')
+    time.isAfter(stringToTime('13:30'), 'minute')
+    // &&
+    // time.isBefore(stringToTime('17:00'), 'minute')
+  ) {
+    meals += 'BL';
+  }
+  if (
+    time.isAfter(stringToTime('09:30'), 'minute')
+    // &&
+    // time.isBefore(stringToTime('11:30'), 'minute')
+  ) {
+    meals += 'B';
+  } else if (
+    time.isAfter(stringToTime('01:00'), 'minute') &&
+    time.isBefore(stringToTime('08:00'), 'minute')
   ) {
     meals += 'BLDS';
   }
@@ -77,7 +81,7 @@ const calcMealsDomBeforeInt = (
   dutyStart,
   domesticDept,
   internationalDept,
-  segmentLength
+  segmentLength,
 ) => {
   // console.log(
   //   `dutyStart: ${dutyStart}, domesticDept: ${domesticDept}, intDept: ${internationalDept}, segmentLength: ${segmentLength}`

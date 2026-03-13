@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
-// import DomExpensesTable from '../expensesTable/DomExpensesTable';
 import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import ExpensesTable from '../expensesTable/ExpensesTable';
 

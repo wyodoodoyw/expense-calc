@@ -2,8 +2,6 @@ import getMealsFromSequence from '../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../modules/calcDisplayTotal';
 
-let numberOfTests = 0;
-
 const calcNumLayovers = (s) => {
   let layoverCount = 0;
   for (let i = 0; i < s.length; i++) {
@@ -127,25 +125,11 @@ function asNumber(v) {
 }
 
 /* Main runner */
+let numberOfTests = 0;
 export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   console.info('checkAllPairings: starting...');
   const pairings = await fetchAllPairings();
-  const prefix = max[0];
-  const num = max.slice(-4);
-  const newMax = `${prefix}${(Number(num) + 1).toString()}`;
-  let minIdx = -1;
-  let maxIdx = -1;
-  for (let i = 0; i < pairings.length; i++) {
-    const p = pairings[i];
-    if (p.pairingIdentifier === min) {
-      minIdx = i;
-    }
-    if (p.pairingIdentifier === newMax) {
-      maxIdx = i;
-    }
-  }
-  const slicedPairings = pairings.slice(minIdx, maxIdx);
-  numberOfTests = slicedPairings.length;
+
   if (!pairings || pairings.length === 0) {
     console.info('No pairings found in PairingsDB.');
     return;
@@ -158,6 +142,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   let mismatchCount = 0;
 
   for (const p of pairings) {
+    numberOfTests++;
     if (p.pairingIdentifier >= min && p.pairingIdentifier <= max) {
       try {
         if (p.pairingNumber >= 5000 && p.pairingNumber < 7000) {
@@ -266,10 +251,10 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
       }
     }
   }
-
   console.info(
     `checkAllPairings: done. Pairings processed: ${numberOfTests}, mismatches: ${mismatchCount}`,
   );
+
   return { total: pairings.length, mismatches: mismatchCount };
 }
 export default runCheckAllPairings;

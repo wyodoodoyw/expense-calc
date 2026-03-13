@@ -34,7 +34,7 @@ function Flight(props) {
         departureTime: value.format('HHmm'),
       }));
       dispatch(
-        updateFlightDeparture({ index: index, value: value.format('HHmm') })
+        updateFlightDeparture({ index: index, value: value.format('HHmm') }),
       );
     }
     if (name === 'end') {
@@ -43,7 +43,7 @@ function Flight(props) {
         arrivalTime: value.format('HHmm'),
       }));
       dispatch(
-        updateFlightArrival({ index: index, value: value.format('HHmm') })
+        updateFlightArrival({ index: index, value: value.format('HHmm') }),
       );
     }
   };
@@ -90,8 +90,8 @@ function Flight(props) {
         {f.mealsOnboard && (
           <div className="col-1">Meals Onboard: {f.mealsOnboard}</div>
         )}
-        {f.mealExpenses && (
-          <div className="col-1">Meals Allowance: {f.mealExpenses}</div>
+        {f.mealAllowance && (
+          <div className="col-1">Meals Allowance: {f.mealAllowance}</div>
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>

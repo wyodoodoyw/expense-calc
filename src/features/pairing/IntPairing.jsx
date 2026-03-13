@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
 
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';

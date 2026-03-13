@@ -3,7 +3,7 @@ import all_airports from '../data/all_airports';
 import other_airlines from '../data/other_airlines';
 import aircraft from '../data/aircraft';
 
-const parseAsFlight = (array, index, isLastFlight) => {
+const parseAsFlight = (array, index, isLastFlight, isLastInDuty) => {
   let newFlight = {
     index: index,
     type: 'flight',
@@ -32,14 +32,19 @@ const parseAsFlight = (array, index, isLastFlight) => {
     newFlight.arrivalAirport = array[3].substring(0, 3);
     newFlight.arrivalTime = array[3].substring(4);
     newFlight.flightTime = array[4];
-    newFlight.dutyTime = array[5];
+    newFlight.dutyTime = array[5]; // FIX
     if (array[6] && array[6].match(/[0-9]{3,4}/g)) {
       newFlight.layoverLength = array[6];
     }
 
     // onboard meals
-    if (array[7]) {
+    if (!isLastInDuty && array[7] && array[7].match(/[BLDS]{1,4}/g)) {
       newFlight.mealsOnboard = array.slice(7, array.length).join(' ');
+    } else if (isLastInDuty && array[7] && array[7].match(/[0-9]{2,4}/g)) {
+      newFlight.dutyTime = array[7];
+      if (array[8] && array[8].match(/[BLDS]{1,4}/g)) {
+        newFlight.mealsOnboard = array.slice(8, array.length).join(' ');
+      }
     }
   } else if (all_airports.includes(array[3].substring(0, 3))) {
     // isDHD
@@ -51,15 +56,39 @@ const parseAsFlight = (array, index, isLastFlight) => {
     newFlight.aircraft = array[1].substring(0, 3);
     newFlight.flightNumber = array[2];
 
+    // ['5', '737', '195', 'YYZ 2035', 'YLW 2223', '448', 'SD']
+    // ['5', '737', '190', 'YLW 2325', 'YYZ 0644', '419', '1124']
+    // ['6', '737', '187', 'YYZ 2250', 'YVR 0055', '505', '620', '2015']
+
     // Flight information
     newFlight.departureAirport = array[3].substring(0, 3);
     newFlight.departureTime = array[3].substring(4);
     newFlight.arrivalAirport = array[4].substring(0, 3);
     newFlight.arrivalTime = array[4].substring(4);
     newFlight.flightTime = array[5];
-    newFlight.dutyTime = array[6];
-    if (array[7] && array[7].match(/[0-9]{3,4}/g)) {
+    if (array.length === 7) {
+      if (array[6] && array[6].match(/[0-9]{3,4}/g)) {
+        newFlight.dutyTime = array[6];
+        if (array[7] && array[7].match(/[BLDS]/g)) {
+          newFlight.mealAllowance = array[7];
+        }
+      } else if (array[6] && array[6].match(/[BLDS]/g)) {
+        newFlight.mealAllowance = array[6];
+      }
+    } else if (array.length === 8) {
+      newFlight.dutyTime = array[6];
       newFlight.layoverLength = array[7];
+    } else if (array.length > 8) {
+      const mealsOnboard = array.slice(8, array.length - 1);
+      if (
+        mealsOnboard.includes('HB') ||
+        mealsOnboard.includes('HL') ||
+        mealsOnboard.includes('HD') ||
+        mealsOnboard.includes('MS') ||
+        mealsOnboard.includes('SS')
+      ) {
+        newFlight.mealsOnboard = mealsOnboard.join(', ');
+      }
     }
 
     // onboard meals
@@ -86,7 +115,9 @@ const parseAsFlight = (array, index, isLastFlight) => {
     newFlight.arrivalAirport = array[5].substring(0, 3);
     newFlight.arrivalTime = array[5].substring(4);
     newFlight.flightTime = array[6];
-    newFlight.dutyTime = array[7];
+    if (isLastInDuty) {
+      newFlight.dutyTime = array[7];
+    }
     if (array[8] && array[8].match(/[0-9]{3,4}/g)) {
       newFlight.layoverLength = array[8];
     }

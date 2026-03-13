@@ -26,21 +26,20 @@ export const flightSlice = createSlice({
       flightNumber: action.payload.flightNumber,
       flightTime: action.payload.flightTime,
       isDeadhead: action.payload.isDeadhead,
+      mealAllowance: action.payload.mealAllowance,
     }),
 
     updateFlightDeparture: (state, action) => {
       const { index, value } = action.payload;
       let flightToUpdate = state.find((flight) => flight.index === index);
-      // const flightToUpdate = state.pairing.sequence[index];
       console.log(current(state));
       flightToUpdate.departureTime = value;
     },
 
     updateFlightArrival: (state, action) => {
-      // const { index, value } = action.payload;
-      // const flightToUpdate = state.find((flight) => flight.index === index);
-      // console.log(flightToUpdate);
-      // flightToUpdate.arrivalTime = value;
+      const { index, value } = action.payload;
+      const flightToUpdate = state.find((flight) => flight.index === index);
+      flightToUpdate.arrivalTime = value;
     },
   },
 });

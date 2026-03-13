@@ -168,7 +168,6 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
 
   //--- STEP 3: Calculate meals for the first day
   const firstDay = getDeptMeals(seq[0].dutyStart, seq[0].departureTime);
-  // console.log(`firstDay: ${firstDay}`);
   firstDay && pushMeal(firstDay, 'YYZ');
 
   //--- STEP 3: Calculate meals for the final day

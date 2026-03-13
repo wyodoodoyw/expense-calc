@@ -1,9 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-// import dayjs from 'dayjs';
 import american_airport_codes from '../../data/american_airport_codes';
-// import stringToTime from '../../modules/stringToTime';
-// import timeDifference from '../../modules/calculateTimeDifference';
-// import calculateTimeDifference from '../../modules/calculateTimeDifference';
 import adjustLayoverLength from '../../modules/adjustLayoverLength';
 
 const numLayovers = (s) => {
@@ -45,7 +41,6 @@ export const pairingSlice = createSlice({
       totalDuty: action.payload.totalDuty,
       sequence: action.payload.sequence || [],
       layoverCount: 0,
-      calculatedMeals: '',
       version: 0,
     }),
 
@@ -90,11 +85,6 @@ export const pairingSlice = createSlice({
       l.layoverStart = value;
     },
 
-    // updateDutyDayEnd: (state, action) => {
-    //   const { index, value } = action.payload;
-    //   state.dutyDays[index].dutyDayEnd = value;
-    // },
-
     isTransborder: (state) => {
       const s = state.sequence;
       for (let i = 0; i < s.length; i++) {
@@ -114,7 +104,6 @@ export const pairingSlice = createSlice({
 export const {
   initializePairing,
   processSequence,
-  // updateDutyDayEnd,
   updateFlightDeparture,
   updateFlightArrival,
   isTransborder,

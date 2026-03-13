@@ -31,5 +31,6 @@ export default [
   'SFO',
   'SLC',
   'SMF',
+  'SNA',
   'TPA',
 ];

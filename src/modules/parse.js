@@ -11,10 +11,15 @@ import aircraft from '../data/aircraft';
 const parse = (pairing, i) => {
   let errorPairingNumber = null;
 
-  // try {
   if (!pairing) {
     throw new Error(`Pairing is empty: ${i}.`);
   }
+
+  if (i === 18) {
+    // console.log(JSON.stringify(pairing));
+    console.log(pairing);
+  }
+
   let newPairing = {};
   let array = pairing[0];
 
@@ -23,23 +28,21 @@ const parse = (pairing, i) => {
     newPairing.pairingIdentifier = array[0].match(/(C|M|T|V)[0-9]{4}/)[0];
     newPairing.ifsBase = newPairing.pairingIdentifier[0];
     newPairing.pairingNumber = Number(newPairing.pairingIdentifier.slice(1));
-    errorPairingNumber = array[0].match(/(C|M|T|V)[0-9]{4}/)[0];
+    errorPairingNumber = newPairing.pairingIdentifier;
   } else {
     throw new Error(`Error parsing pairing number: ${errorPairingNumber}`);
   }
 
   // Dates on which pairing operates
-  const startDate = array[2];
-  if (startDate) {
-    newPairing.pairingOperatesStart = startDate;
+  if (array[2].length === 5 && array[2].match(/[0-3][0-9][A-Z]{3}/)) {
+    newPairing.pairingOperatesStart = array[2];
   } else {
-    throw new Error('Error parsing date on which pairing operates');
+    throw new Error(`Error parsing start date: ${errorPairingNumber}`);
   }
-  const endDate = array[4];
-  if (endDate) {
-    newPairing.pairingOperatesEnd = endDate;
+  if (array[4].length === 5 && array[4].match(/[0-3][0-9][A-Z]{3}/)) {
+    newPairing.pairingOperatesEnd = array[4];
   } else {
-    throw new Error('Error parsing date on which pairing operates');
+    throw new Error(`Error parsing end date: ${errorPairingNumber}`);
   }
 
   array = pairing[1];
@@ -89,14 +92,18 @@ const parse = (pairing, i) => {
       blockIdx = i;
       newPairing.blockCredit = array[1];
 
+      // ['BLOCK/H-VOL', '907', '1124', 'TOTAL', 'ALLOWANCE', '-$', '50.79']
+
       if (array[2].includes('DPG')) {
         newPairing.pairingDPG = array[3];
+        newPairing.pairingTHG = undefined;
         newPairing.totalDuty = array[4];
         newPairing.cicoAmount = array[5]
           .replace('(INC-$', '')
           .replace('CICO)', '');
         newPairing.totalAllowance = array[array.length - 1];
       } else if (array[2].includes('THG')) {
+        newPairing.pairingDPG = undefined;
         newPairing.pairingTHG = array[3];
         newPairing.totalDuty = array[4];
         newPairing.cicoAmount = array[5]
@@ -105,20 +112,41 @@ const parse = (pairing, i) => {
         newPairing.totalAllowance = array[array.length - 1];
       } else {
         newPairing.pairingDPG = undefined;
+        newPairing.pairingTHG = undefined;
         newPairing.totalDuty = array[2];
-        newPairing.cicoAmount = array[3]
-          .replace('(INC-$', '')
-          .replace('CICO)', '');
-        newPairing.totalAllowance = array[array.length - 1];
+        if (array[3] && array[3].includes('CICO')) {
+          newPairing.cicoAmount = array[3]
+            .replace('(INC-$', '')
+            .replace('CICO)', '');
+        } else {
+          newPairing.cicoAmount = undefined;
+        }
+        if (array[array.length - 1].match(/[0-9]{1,3}.[0-9]{2}/g)) {
+          newPairing.totalAllowance = array[array.length - 1];
+        } else {
+          console.warn(`Error parsing totalAllowance: ${errorPairingNumber}`);
+        }
       }
     }
 
-    //TAFB Line
+    // Find TAFB Index
     if (array[0].includes('TAFB')) {
       tafbIdx = i;
-      newPairing.tafb = array[1];
-      newPairing.totalCredit = array[3];
     }
+  }
+
+  //TAFB Line
+  // ['TAFB/PTEB', '1124', 'TOTAL -', '907']
+  if (pairing[tafbIdx][1].match(/[0-9]{3,5}/g)) {
+    newPairing.tafb = array[1];
+  } else {
+    console.warn(`Error parsing TAFB: ${errorPairingNumber}`);
+  }
+
+  if (pairing[tafbIdx][3].match(/[0-9]{3,5}/g)) {
+    newPairing.totalCredit = array[3];
+  } else {
+    console.warn(`Error parsing totalCredit: ${errorPairingNumber}`);
   }
 
   // calendar of dates
@@ -127,22 +155,19 @@ const parse = (pairing, i) => {
   newPairing.calendar = pairing[tafbIdx + 1];
 
   // DPG Line, if exists
+  // ['315 -DPG']
   for (let i = 3; i < pairing.length; i++) {
     const array = pairing[i];
+    const next = pairing[i + 1];
 
     if (
-      pairing[i + 1] &&
-      pairing[i + 1].length >= 1 &&
-      pairing[i + 1][0].includes('BLOCK') &&
+      next &&
+      next.length >= 1 &&
+      next[0].includes('BLOCK') &&
       array[0].includes('DPG')
     ) {
-      blockIdx -= 1;
+      blockIdx--;
     }
-  }
-
-  if (i === 1690) {
-    // console.log(JSON.stringify(pairing));
-    console.log(pairing);
   }
 
   // combine multiple days of week into one string
@@ -189,15 +214,46 @@ const parse = (pairing, i) => {
       array[4].match(/[A-Z]{3}/g) &&
       all_airports.includes(array[4].substring(0, 3))
     ) {
+      const nextSeq = pairing[i + 1];
+      let isLastInDuty = false;
+
+      if (i === blockIdx - 1) {
+        isLastInDuty = true;
+      } else if (nextSeq[0].includes('DPG')) {
+        isLastInDuty = true;
+      } else if (
+        nextSeq.length > 3 &&
+        !all_airports.includes(nextSeq[3].substring(0, 3))
+      ) {
+        isLastInDuty = true;
+      } else {
+        isLastInDuty = false;
+      }
+
       const flight = parseAsFlight(
         array,
         pairingSequence.length,
-        i === blockIdx - 1, // last flight in sequence, true or false
+        i === blockIdx - 1, // last flight ==> true or false
+        isLastInDuty,
       );
       pairingSequence.push(flight);
     } else {
       const layover = parseAsLayover(pairingSequence.length, array);
       pairingSequence.push(layover);
+    }
+
+    // Detect airport codes not included here
+    if (
+      array.length > 5 &&
+      array[3].match(/[A-Z]{3}/g) &&
+      array[4].match(/[A-Z]{3}/g)
+    ) {
+      if (
+        !all_airports.includes(array[3].substring(0, 3)) ||
+        !all_airports.includes(array[4].substring(0, 3))
+      ) {
+        console.warn(`Error parsing airport code: ${errorPairingNumber}`);
+      }
     }
   }
 
