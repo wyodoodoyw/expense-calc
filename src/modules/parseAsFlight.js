@@ -36,11 +36,11 @@ const parseAsFlight = (array, index, isLastFlight) => {
     if (array[1] && aircraft.includes(array[1].substring(0, 3))) {
       newFlight.aircraft = array[1].substring(0, 3);
     } else {
-      console.warn(`Error parsing aircraft type: ${array}`);
+      console.warn(`Error parsing aircraft type: ${JSON.stringify(array)}`);
     }
 
-    if (array[2] && array[2].substring(6).match(/[0-9]{1,4}/g)) {
-      newFlight.flightNumber = array[2].substring(6);
+    if (array[2] && array[2].match(/[0-9]{1,4}/g)) {
+      newFlight.flightNumber = array[2];
     } else {
       console.warn(`Error parsing flight number: ${array}`);
     }
@@ -60,13 +60,13 @@ const parseAsFlight = (array, index, isLastFlight) => {
 
     // Arrival Information
     if (array[4] && all_airports.includes(array[4].substring(0, 3))) {
-      newFlight.departureAirport = array[4].substring(0, 3);
+      newFlight.arrivalAirport = array[4].substring(0, 3);
     } else {
       console.warn(`Error parsing arrival airport: ${array}`);
     }
 
     if (array[4] && array[4].substring(4).match(/[0-9]{4}/g)) {
-      newFlight.departureTime = array[4].substring(4);
+      newFlight.arrivalTime = array[4].substring(4);
     } else {
       console.warn(`Error parsing arrival time: ${array}`);
     }
@@ -81,124 +81,43 @@ const parseAsFlight = (array, index, isLastFlight) => {
     // array[6]: dutytime OR meal Allowance
     if (array[6] && array[6].match(/[0-9]{3,4}/g)) {
       newFlight.dutyTime = array[6];
-    } else if (array[6] && array[6].match(/[BLDS]/g)) {
+    } else if (array[6] && array[6].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
+      newFlight.mealsOnboard = array.slice(6, array.length - 1);
+    } else if (
+      array[6] &&
+      array[6].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
+    ) {
       newFlight.mealAllowance = array[6];
-    } else {
+    } else if (array[6]) {
       console.warn(`Error parsing array[6]: ${array}`);
     }
 
     // array[7]: layover length OR meal allowance
     if (array[7] && array[7].match(/[0-9]{3,4}/g)) {
       newFlight.layoverLength = array[7];
-    } else if (array[7] && array[7].match(/[BLDS]/g)) {
+    } else if (array[7] && array[7].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
+      newFlight.mealsOnboard = array.slice(7, array.length - 1);
+    } else if (
+      array[7] &&
+      array[7].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
+    ) {
       newFlight.mealAllowance = array[7];
-    } else {
+    } else if (array[7]) {
       console.warn(`Error parsing array[7]: ${array}`);
     }
 
     // array[8]: meal allowance OR meals onboard
-    if (array[8] && array[8].match(/(HB|CB|HL|HD|FB|SS)/g)) {
+    if (array[8] && array[8].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
       newFlight.mealsOnboard = array.slice(8, array.length - 1);
     } else if (
       array[8] &&
       array[8].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
     ) {
       newFlight.mealAllowance = array[8];
-    } else {
+    } else if (array[8]) {
       console.warn(`Error parsing array[8]: ${array}`);
     }
   }
-
-  // onboard meals
-  // if (!isLastInDuty && array[7] && array[7].match(/[BLDS]{1,4}/g)) {
-  //   newFlight.mealsOnboard = array.slice(7, array.length).join(' ');
-  // } else if (isLastInDuty && array[7] && array[7].match(/[0-9]{2,4}/g)) {
-  //   newFlight.dutyTime = array[7];
-  //   if (array[8] && array[8].match(/[BLDS]{1,4}/g)) {
-  //     newFlight.mealsOnboard = array.slice(8, array.length).join(' ');
-  //   }
-  // }
-  // } else if (all_airports.includes(array[3].substring(0, 3))) {
-  //   // isDHD
-  //   if (array[1].includes('DHD')) {
-  //     newFlight.isDeadhead = true;
-  //   } else {
-  //     newFlight.isDeadhead = false;
-  //   }
-  //   newFlight.aircraft = array[1].substring(0, 3);
-  //   newFlight.flightNumber = array[2];
-
-  //   // ['5', '737', '195', 'YYZ 2035', 'YLW 2223', '448', 'SD']
-  //   // ['5', '737', '190', 'YLW 2325', 'YYZ 0644', '419', '1124']
-  //   // ['6', '737', '187', 'YYZ 2250', 'YVR 0055', '505', '620', '2015']
-
-  //   // Flight information
-  //   newFlight.departureAirport = array[3].substring(0, 3);
-  //   newFlight.departureTime = array[3].substring(4);
-  //   newFlight.arrivalAirport = array[4].substring(0, 3);
-  //   newFlight.arrivalTime = array[4].substring(4);
-  //   newFlight.flightTime = array[5];
-  //   if (array.length === 7) {
-  //     if (array[6] && array[6].match(/[0-9]{3,4}/g)) {
-  //       newFlight.dutyTime = array[6];
-  //       if (array[7] && array[7].match(/[BLDS]/g)) {
-  //         newFlight.mealAllowance = array[7];
-  //       }
-  //     } else if (array[6] && array[6].match(/[BLDS]/g)) {
-  //       newFlight.mealAllowance = array[6];
-  //     }
-  //   } else if (array.length === 8) {
-  //     newFlight.dutyTime = array[6];
-  //     newFlight.layoverLength = array[7];
-  //   } else if (array.length > 8) {
-  //     const mealsOnboard = array.slice(8, array.length - 1);
-  //     if (
-  //       mealsOnboard.includes('HB') ||
-  //       mealsOnboard.includes('HL') ||
-  //       mealsOnboard.includes('HD') ||
-  //       mealsOnboard.includes('MS') ||
-  //       mealsOnboard.includes('SS')
-  //     ) {
-  //       newFlight.mealsOnboard = mealsOnboard.join(', ');
-  //     }
-  //   }
-
-  //   // onboard meals
-  //   if (array[8]) {
-  //     newFlight.mealsOnboard = array.slice(8, array.length).join(' ');
-  //   }
-  // } else if (all_airports.includes(array[4].substring(0, 3))) {
-  //   for (let i = 0; i < array[1].length; i++) {
-  //     const day = array[1][i];
-  //     newFlight.daysOfWeek.push(day);
-  //   }
-
-  //   if (array[2].includes('DHD')) {
-  //     newFlight.isDeadhead = true;
-  //   } else {
-  //     newFlight.isDeadhead = false;
-  //   }
-  //   newFlight.aircraft = array[2].substring(0, 3);
-  //   newFlight.flightNumber = array[3];
-
-  //   // Flight information
-  //   newFlight.departureAirport = array[4].substring(0, 3);
-  //   newFlight.departureTime = array[4].substring(4);
-  //   newFlight.arrivalAirport = array[5].substring(0, 3);
-  //   newFlight.arrivalTime = array[5].substring(4);
-  //   newFlight.flightTime = array[6];
-  //   if (isLastInDuty) {
-  //     newFlight.dutyTime = array[7];
-  //   }
-  //   if (array[8] && array[8].match(/[0-9]{3,4}/g)) {
-  //     newFlight.layoverLength = array[8];
-  //   }
-
-  //   // onboard meals
-  //   if (array[9]) {
-  //     newFlight.mealsOnboard = array.slice(9, array.length).join(' ');
-  //   }
-  // }
 
   // calculate duty start for first flight of pairing
   if (index === 0 && !newFlight.isDeadhead) {
@@ -258,9 +177,6 @@ const parseAsFlight = (array, index, isLastFlight) => {
   // calculate duty end for last flight of pairing
   if (isLastFlight && !newFlight.isDeadhead) {
     const time = stringToTime(newFlight.arrivalTime);
-    // console.log(
-    //   `arrival time: ${newFlight.arrivalTime} ${newFlight.pairingIdentifier}`,
-    // );
     newFlight.dutyEnd = time.add(15, 'minute').format('HHmm');
   } else if (isLastFlight && newFlight.isDeadhead) {
     const time = stringToTime(newFlight.arrivalTime);

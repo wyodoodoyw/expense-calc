@@ -15,10 +15,10 @@ const parse = (pairing, i) => {
     throw new Error(`Pairing is empty: ${i}.`);
   }
 
-  if (i === 18) {
-    // console.log(JSON.stringify(pairing));
-    console.log(pairing);
-  }
+  // if (i === 255) {
+  //   // console.log(JSON.stringify(pairing));
+  //   console.log(pairing);
+  // }
 
   let newPairing = {};
   let array = pairing[0];
@@ -93,6 +93,7 @@ const parse = (pairing, i) => {
       newPairing.blockCredit = array[1];
 
       // ['BLOCK/H-VOL', '907', '1124', 'TOTAL', 'ALLOWANCE', '-$', '50.79']
+      // ['BLOCK/H-VOL', '1011', 'DPG -', '310', '1547', '(INC-$10.10', 'CICO)', 'TOTAL', 'ALLOWANCE', '-$', '188.24']
 
       if (array[2].includes('DPG')) {
         newPairing.pairingDPG = array[3];
@@ -137,14 +138,15 @@ const parse = (pairing, i) => {
 
   //TAFB Line
   // ['TAFB/PTEB', '1124', 'TOTAL -', '907']
+  // ['TAFB/PTEB', '4410', 'TOTAL -', '1321']
   if (pairing[tafbIdx][1].match(/[0-9]{3,5}/g)) {
-    newPairing.tafb = array[1];
+    newPairing.tafb = pairing[tafbIdx][1];
   } else {
     console.warn(`Error parsing TAFB: ${errorPairingNumber}`);
   }
 
   if (pairing[tafbIdx][3].match(/[0-9]{3,5}/g)) {
-    newPairing.totalCredit = array[3];
+    newPairing.totalCredit = pairing[tafbIdx][3];
   } else {
     console.warn(`Error parsing totalCredit: ${errorPairingNumber}`);
   }
@@ -181,6 +183,23 @@ const parse = (pairing, i) => {
     ) {
       array[0] = `${array[0]}${array[1]}`;
       array.splice(1, 1);
+      pairing[i] = array;
+    }
+    // ["1","7","QKKDHD 8155","YVR 1345","YYJ 1419","17","949","1506"]
+    // ["1","7","QKKDHD 8110","YWG 1150","YOW 1517","114","717","1258","L"]
+    else if (
+      array[2] &&
+      array[2].length > 10 &&
+      !aircraft.includes(array[1].substring(0, 3)) &&
+      aircraft.includes(array[2].substring(0, 3)) &&
+      all_airports.includes(array[3].substring(0, 3)) &&
+      all_airports.includes(array[4].substring(0, 3))
+    ) {
+      // console.log(array);
+      array[0] = `${array[0]}${array[1]}`;
+      array[1] = array[2].slice(0, -5);
+      array[2] = array[2].slice(-4);
+      // console.log(array);
       pairing[i] = array;
     } else if (array[3] && aircraft.includes(array[3].substring(0, 3))) {
       array[0] = `${array[0]}${array[1]}${array[2]}`;
