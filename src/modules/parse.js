@@ -214,27 +214,26 @@ const parse = (pairing, i) => {
       array[4].match(/[A-Z]{3}/g) &&
       all_airports.includes(array[4].substring(0, 3))
     ) {
-      const nextSeq = pairing[i + 1];
-      let isLastInDuty = false;
+      // const nextSeq = pairing[i + 1];
+      // let isLastInDuty = false;
 
-      if (i === blockIdx - 1) {
-        isLastInDuty = true;
-      } else if (nextSeq[0].includes('DPG')) {
-        isLastInDuty = true;
-      } else if (
-        nextSeq.length > 3 &&
-        !all_airports.includes(nextSeq[3].substring(0, 3))
-      ) {
-        isLastInDuty = true;
-      } else {
-        isLastInDuty = false;
-      }
+      // if (i === blockIdx - 1) {
+      //   isLastInDuty = true;
+      // } else if (nextSeq[0].includes('DPG')) {
+      //   isLastInDuty = true;
+      // } else if (
+      //   nextSeq.length > 3 &&
+      //   !all_airports.includes(nextSeq[3].substring(0, 3))
+      // ) {
+      //   isLastInDuty = true;
+      // } else {
+      //   isLastInDuty = false;
+      // }
 
       const flight = parseAsFlight(
         array,
         pairingSequence.length,
         i === blockIdx - 1, // last flight ==> true or false
-        isLastInDuty,
       );
       pairingSequence.push(flight);
     } else {
@@ -271,9 +270,22 @@ const parse = (pairing, i) => {
       if (
         international_airport_codes.includes(pairingSequence[i].layoverStation)
       ) {
+        newPairing.isInt = true;
+        newPairing.isUsa = false;
         pairingSequence[i].isInt = true;
-      } else {
+        pairingSequence.isUsa = false;
+      } else if (
+        american_airport_codes.includes(pairingSequence[i].layoverStation)
+      ) {
+        newPairing.isInt = false;
+        newPairing.isUsa = true;
         pairingSequence[i].isInt = false;
+        pairingSequence[i].isUsa = true;
+      } else {
+        pairing.isInt = false;
+        pairing.isUsa = false;
+        pairingSequence[i].isInt = false;
+        pairingSequence[i].isUsa = false;
       }
     }
   } catch (err) {
