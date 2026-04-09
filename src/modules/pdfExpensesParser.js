@@ -44,14 +44,13 @@ async function extractExpensesFromPDF(file) {
         }
       }
 
-      pageText = pageText.splice(firstExpenseIdx, pageText.length);
+      pageText = pageText.splice(firstExpenseIdx, pageText.length + 1);
 
       // break up pageText Array into array of destinations
       let extracted = [];
       let destination = [];
       for (let i = 0; i < pageText.length; i++) {
         const item = pageText[i];
-
         if (i === 0) {
           destination.push(item.str);
         } else if (
@@ -70,7 +69,14 @@ async function extractExpensesFromPDF(file) {
           destination.push(item.str);
         }
       }
+      extracted.push(
+        destination.slice(
+          0,
+          destination.indexOf('AIR CANADA FLIGHT ATTENDANT - IFS'),
+        ),
+      );
       if (extracted) {
+        console.log(extracted);
         return extracted;
       }
     }

@@ -1,6 +1,6 @@
 import stringToTime from './stringToTime';
 
-const getShortDutyMeals = (dutyStart, dutyEnd) => {
+const getShortDutyMealsBeforeInt = (dutyStart, dutyEnd) => {
   const start = stringToTime(dutyStart);
   const end = stringToTime(dutyEnd);
   let meals = '';
@@ -27,9 +27,10 @@ const getShortDutyMeals = (dutyStart, dutyEnd) => {
   }
 
   if (
-    start.isBefore(stringToTime('23:00'), 'minutes') &&
-    end.isAfter(stringToTime('01:00'), 'minutes') &&
-    !end.isAfter(stringToTime('09:00'), 'minute')
+    (start.isBefore(stringToTime('23:00'), 'minutes') &&
+      end.isBefore(stringToTime('00:00'), 'minute')) ||
+    (start.isBefore(stringToTime('23:00'), 'minutes') &&
+      end.isBefore(stringToTime('04:00'), 'minte'))
   ) {
     meals += 'S';
   }
@@ -41,4 +42,4 @@ const getShortDutyMeals = (dutyStart, dutyEnd) => {
   };
 };
 
-export default getShortDutyMeals;
+export default getShortDutyMealsBeforeInt;

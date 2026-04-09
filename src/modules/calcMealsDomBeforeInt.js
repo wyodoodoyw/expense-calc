@@ -10,7 +10,6 @@ const getBeginMeals = (dutyStart, departure) => {
   const duty = stringToTime(dutyStart);
   const dept = stringToTime(departure);
 
-  // console.log(`duty: ${duty.format('HH:mm')}, dept: ${dept.format('HH:mm')}`);
   let meals = '';
 
   if (
@@ -45,35 +44,56 @@ const getBeginMeals = (dutyStart, departure) => {
 
 const getEndMeals = (internationalDept) => {
   const time = stringToTime(internationalDept);
-  // console.log(`internationalDept time: ${time.format('HH:mm')}`);
 
   let meals = '';
   if (
-    time.isAfter(stringToTime('19:30'), 'minute')
-    // &&
-    // time.isBefore(stringToTime('23:00'), 'minute')
+    time.isBetween(
+      stringToTime('22:00'),
+      stringToTime('23:59'),
+      null,
+      'minute',
+      '[]',
+    ) ||
+    time.isBetween(
+      stringToTime('00:00'),
+      stringToTime('04:00'),
+      null,
+      'minute',
+      '[]',
+    )
+  ) {
+    meals += 'BLDS';
+  } else if (
+    time.isBetween(
+      stringToTime('13:30'),
+      stringToTime('23:00'),
+      null,
+      'minute',
+      '[)',
+    )
   ) {
     meals += 'BLD';
   } else if (
-    time.isAfter(stringToTime('13:30'), 'minute')
-    // &&
-    // time.isBefore(stringToTime('17:00'), 'minute')
+    time.isBetween(
+      stringToTime('09:30'),
+      stringToTime('18:00'),
+      null,
+      'minute',
+      '[)',
+    )
   ) {
     meals += 'BL';
-  }
-  if (
-    time.isAfter(stringToTime('09:30'), 'minute')
-    // &&
-    // time.isBefore(stringToTime('11:30'), 'minute')
+  } else if (
+    time.isBetween(
+      stringToTime('04:00'),
+      stringToTime('12:30'),
+      null,
+      'minute',
+      '[)',
+    )
   ) {
     meals += 'B';
-  } else if (
-    time.isAfter(stringToTime('01:00'), 'minute') &&
-    time.isBefore(stringToTime('08:00'), 'minute')
-  ) {
-    meals += 'BLDS';
   }
-  // console.log(`meals2: ${meals}`);
   return meals;
 };
 
@@ -83,15 +103,11 @@ const calcMealsDomBeforeInt = (
   internationalDept,
   segmentLength,
 ) => {
-  // console.log(
-  //   `dutyStart: ${dutyStart}, domesticDept: ${domesticDept}, intDept: ${internationalDept}, segmentLength: ${segmentLength}`
-  // );
   let collector = [];
 
   //First Meal
   if (dutyStart && domesticDept) {
     const result = getBeginMeals(dutyStart, domesticDept);
-    // console.log(`first meal result: ${result}`);
     if (result) {
       collector.push({
         index: collector.length,
@@ -103,7 +119,6 @@ const calcMealsDomBeforeInt = (
 
   // Adjust for full days on layover
   const days = calcLayoverDays(domesticDept, internationalDept, segmentLength);
-  // console.log(`days: ${days}`);
   for (let i = 1; i <= days; i++) {
     collector.push({
       index: collector.length,

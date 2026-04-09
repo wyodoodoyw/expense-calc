@@ -7,7 +7,8 @@ import addDutyDuration from './addDutyDuration';
 import calcMealsDomBeforeInt from './calcMealsDomBeforeInt';
 import calcMealsDomAfterInt from './calcMealsDomAfterInt';
 import calcMealsIntLayover from './calcMealsIntLayover';
-import getShortDutyMeals from './getShortDutyMeals';
+import getShortDutyMealsBeforeInt from './getShortDutyMealsBeforeInt';
+import getShortDutyMealsAfterInt from './getShortDutyMealsAfterInt';
 
 export default function getMealsFromSequence(seq = []) {
   // Always return an object so callers can destructure safely
@@ -110,7 +111,6 @@ export default function getMealsFromSequence(seq = []) {
         segmentLength = addDutyDuration(segmentLength, item.flightTime);
         if (item.isDeadhead) {
           segmentLength = addDutyDuration(segmentLength, item.flightTime);
-          // console.log(`segmentLength for DH: ${segmentLength}`);
         }
       }
 
@@ -125,11 +125,11 @@ export default function getMealsFromSequence(seq = []) {
       seq[intOutboundIndex] && seq[intOutboundIndex].departureTime;
 
     if (Number(segmentLength.slice(0, -2)) < 17) {
-      // console.log(
-      //   `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
-      // );
       if (dutyStart && outboundDept) {
-        const domMealsAfterInt = getShortDutyMeals(dutyStart, outboundDept);
+        const domMealsAfterInt = getShortDutyMealsBeforeInt(
+          dutyStart,
+          outboundDept,
+        );
         domMealsAfterInt && pushMeals([domMealsAfterInt]);
         // console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
       }
@@ -186,11 +186,12 @@ export default function getMealsFromSequence(seq = []) {
     let domMealsAfterInt;
 
     if (Number(segmentLength.slice(0, -2)) < 17) {
-      // console.log(
-      //   `short segment length: ${Number(segmentLength.slice(0, -2))} hours`
-      // );
+      // console.log(`short segment length: ${Number(segmentLength)}`);
       if (arrivalTime && finalDutyEnd) {
-        const domMealsAfterInt = getShortDutyMeals(arrivalTime, finalDutyEnd);
+        const domMealsAfterInt = getShortDutyMealsAfterInt(
+          arrivalTime,
+          finalDutyEnd,
+        );
         domMealsAfterInt && pushMeals([domMealsAfterInt]);
         // console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
       }

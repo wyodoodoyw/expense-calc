@@ -20,6 +20,7 @@ function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
   const [pairingNumber, setPairingNumber] = useState('T8001');
+  const [isInt, setIsInt] = useState(false);
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
@@ -39,17 +40,29 @@ function SearchPairings(props) {
     dispatch(
       initializePairing({
         id: 0,
-        pairingNumber: '',
-        pairingOperates: '',
-        pairingPurser: '',
+        blockCredit: '',
+        calendar: [],
+        cicoAmount: '',
+        ifsBase: '',
+        isInt: '',
+        isUsa: '',
+        pairingDates: '',
+        pairingDPG: '',
+
         pairingFA: '',
         pairingBL: '',
         pairingGP: '',
+        pairingGJ: '',
         pairingGY: '',
-        pairingDates: '',
+
+        pairingIdentifier: '',
         pairingLanguages: '',
-        blockCredit: '',
-        cicoAmount: '',
+        pairingNumber: '',
+        pairingOperatesEnd: '',
+        pairingOperatesStart: '',
+        pairingTHG: '',
+        sequence: null,
+        pairingPurser: '',
         tafb: '',
         totalAllowance: '',
         totalCredit: '',
@@ -68,25 +81,34 @@ function SearchPairings(props) {
 
       request.onsuccess = () => {
         setPairingSearchResult(true);
+        request.result.isInt ? setIsInt(true) : setIsInt(false);
         if (request.result) {
           dispatch(
             initializePairing({
               id: request.result.id,
-              pairingIdentifier: request.result.pairingIdentifier,
-              pairingNumber: request.result.pairingNumber,
+              blockCredit: request.result.blockCredit,
+              calendar: request.result.calendar,
+              cicoAmount: request.result.cicoAmount,
               ifsBase: request.result.ifsBase,
-              pairingOperatesStart: request.result.pairingOperatesStart,
-              pairingOperatesEnd: request.result.pairingOperatesEnd,
-              pairingPurser: request.result.pairingPurser,
+              isInt: request.result.isInt,
+              isUsa: request.result.isUsa,
+              pairingDates: request.result.pairingDates,
+              pairingDPG: request.result.pairingDPG,
+
               pairingFA: request.result.pairingFA,
               pairingBL: request.result.pairingBL,
               pairingGP: request.result.pairingGP,
               pairingGJ: request.result.pairingGJ,
               pairingGY: request.result.pairingGY,
-              pairingDates: request.result.pairingDates,
+
+              pairingIdentifier: request.result.pairingIdentifier,
               pairingLanguages: request.result.pairingLanguages,
-              blockCredit: request.result.blockCredit,
-              cicoAmount: request.result.cicoAmount,
+              pairingNumber: request.result.pairingNumber,
+              pairingOperatesEnd: request.result.pairingOperatesEnd,
+              pairingOperatesStart: request.result.pairingOperatesStart,
+              pairingTHG: request.result.pairingTHG,
+              sequence: null,
+              pairingPurser: request.result.pairingPurser,
               tafb: request.result.tafb,
               totalAllowance: request.result.totalAllowance,
               totalCredit: request.result.totalCredit,
@@ -151,12 +173,8 @@ function SearchPairings(props) {
           </div>
         </div>
       </form>
-      {pairingSearchResult && pairingNumber.search(`/(C|M|T|V)5[0-9]{3}/`) && (
-        <IntPairing />
-      )}
-
-      {pairingSearchResult &&
-        !pairingNumber.search(`/(C|M|T|V)[6789][0-9]{3}/`) && <DomPairing />}
+      {pairingSearchResult && isInt ? <IntPairing /> : <DomPairing />}
+      {/* {pairingSearchResult && !isInt && <DomPairing />} */}
     </div>
   );
 }

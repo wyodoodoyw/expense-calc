@@ -5,14 +5,8 @@ import {
   updateFlightDeparture,
   updateFlightArrival,
 } from '../pairing/pairingSlice';
-import dayjs from 'dayjs';
 import stringToTime from '../../modules/stringToTime';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
 import { useState } from 'react';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 function Flight(props) {
   const { index } = props;

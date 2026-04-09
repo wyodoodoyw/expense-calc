@@ -145,7 +145,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
     numberOfTests++;
     if (p.pairingIdentifier >= min && p.pairingIdentifier <= max) {
       try {
-        if (p.pairingNumber >= 5000 && p.pairingNumber < 7000) {
+        if (p.isInt) {
           const seq = p.sequence || [];
           const numLayovers = calcNumLayovers(seq) || 0;
           const parsedAllowance = asNumber(p.totalAllowance);
