@@ -153,7 +153,7 @@ function SearchPairings(props) {
         <div
           className={
             'mb-3 accordion-collapse ' +
-            (pairingsUploaded ? 'show' : 'collapse')
+            (pairingsUploaded && expensesUploaded ? 'show' : 'collapse')
           }
         >
           <div className="input-group mb-3" id="airport_code">
@@ -174,7 +174,6 @@ function SearchPairings(props) {
         </div>
       </form>
       {pairingSearchResult && isInt ? <IntPairing /> : <DomPairing />}
-      {/* {pairingSearchResult && !isInt && <DomPairing />} */}
     </div>
   );
 }

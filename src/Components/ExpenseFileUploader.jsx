@@ -65,6 +65,7 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
       } else {
         // capture (XXX), (XXX)
         airport_codes = line.match(/\([A-Z]{3} {0,1}\)/g);
+        // console.log(airport_codes);
       }
       if (airport_codes) {
         for (let i = 0; i < airport_codes.length || 0; i++) {
@@ -74,6 +75,7 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
             .replace(' ', '');
         }
       }
+      // console.log(airport_codes);
       return airport_codes;
     } catch (err) {
       console.log(`!Error in parseAirportCodes: ${err}`);
@@ -119,6 +121,7 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
       newExpense.airport_codes = parseAirportCodes(line[0]);
 
       addExpensetoDB(newExpense);
+      newExpense = {};
     } catch (err) {
       console.log(`!Error in parseLine: ${err}`);
     }

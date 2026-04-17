@@ -126,12 +126,13 @@ export default function getMealsFromSequence(seq = []) {
 
     if (Number(segmentLength.slice(0, -2)) < 17) {
       if (dutyStart && outboundDept) {
-        const domMealsAfterInt = getShortDutyMealsBeforeInt(
+        const domMealsBeforeInt = getShortDutyMealsBeforeInt(
           dutyStart,
+          firstDept,
           outboundDept,
         );
-        domMealsAfterInt && pushMeals([domMealsAfterInt]);
-        // console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
+        domMealsBeforeInt && pushMeals([domMealsBeforeInt]);
+        // console.log(`domMealsBeforeInt1: ${JSON.stringify(domMealsBeforeInt)}`);
       }
     } else {
       if (dutyStart && outboundDept) {
@@ -193,13 +194,8 @@ export default function getMealsFromSequence(seq = []) {
           finalDutyEnd,
         );
         domMealsAfterInt && pushMeals([domMealsAfterInt]);
-        // console.log(`domMealsAfterInt1: ${JSON.stringify(domMealsAfterInt)}`);
       }
     } else {
-      // console.log(
-      //   `arrivalTime: ${arrivalTime}, finalArrival: ${finalArrival}, finalDuty: ${finalDutyEnd}, segmentLength: ${segmentLength}`
-      // );
-
       if (arrivalTime && finalArrival && finalDutyEnd) {
         domMealsAfterInt = calcMealsDomAfterInt(
           arrivalTime,
@@ -207,9 +203,6 @@ export default function getMealsFromSequence(seq = []) {
           finalDutyEnd,
           segmentLength,
         );
-
-        // console.log(`domMealsAfterInt: ${JSON.stringify(domMealsAfterInt)}`);
-
         domMealsAfterInt && pushMeals(domMealsAfterInt);
       }
     }

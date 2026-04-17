@@ -76,7 +76,7 @@ async function extractExpensesFromPDF(file) {
         ),
       );
       if (extracted) {
-        console.log(extracted);
+        // console.log(extracted);
         return extracted;
       }
     }

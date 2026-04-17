@@ -1,7 +1,7 @@
 import stringToTime from './stringToTime';
 import calcLayoverDays from './calcLayoverDays';
 
-const priorToLayover = (start) => {
+const layoverStart = (start) => {
   const time = stringToTime(start);
 
   if (time.isBefore(stringToTime('12:31'), 'minute')) {
@@ -16,7 +16,7 @@ const priorToLayover = (start) => {
   }
 };
 
-const followingLayover = (end) => {
+const layoverEnd = (end) => {
   const time = stringToTime(end);
 
   if (
@@ -45,11 +45,11 @@ const followingLayover = (end) => {
 const calcMealsIntLayover = (start, end, length) => {
   const collector = [];
 
-  const startMeals = priorToLayover(start);
+  const startMeals = layoverStart(start);
   if (startMeals) {
     collector.push({
       index: collector.length,
-      meals: priorToLayover(start),
+      meals: layoverStart(start),
       station: 'int',
     });
   }
@@ -62,14 +62,17 @@ const calcMealsIntLayover = (start, end, length) => {
       station: 'int',
     });
   }
-  const endMeals = followingLayover(end);
+  const endMeals = layoverEnd(end);
   if (endMeals) {
     collector.push({
       index: collector.length,
-      meals: followingLayover(end),
+      meals: layoverEnd(end),
       station: 'int',
     });
   }
+  // console.log(
+  //   `layover: ${start} to ${end} l: ${length} days: ${calcLayoverDays(start, end, length)}`,
+  // );
   return collector;
 };
 

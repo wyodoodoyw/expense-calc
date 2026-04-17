@@ -82,10 +82,10 @@ function Flight(props) {
         <div className="col-1">Flight Time: {f.flightTime}</div>
         <div className="col-1">{f.dutyTime && `Duty Time: ${f.dutyTime}`}</div>
         {f.mealsOnboard && (
-          <div className="col-1">Meals Onboard: {f.mealsOnboard}</div>
+          <div className="col-2">Meals Onboard: {f.mealsOnboard}</div>
         )}
         {f.mealAllowance && (
-          <div className="col-1">Meals Allowance: {f.mealAllowance}</div>
+          <div className="col-2">Meals Allowance: {f.mealAllowance}</div>
         )}
         {!f.mealsOnboard && !f.mealAllowance && <div className="col-1"></div>}
       </div>

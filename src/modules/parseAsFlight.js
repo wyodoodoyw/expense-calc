@@ -1,5 +1,7 @@
 import stringToTime from './stringToTime';
 import all_airports from '../data/all_airports';
+import american_airport_codes from '../data/american_airport_codes';
+import international_airport_codes from '../data/international_airport_codes';
 import aircraft from '../data/aircraft';
 
 const parseAsFlight = (array, index, isLastFlight) => {
@@ -58,6 +60,14 @@ const parseAsFlight = (array, index, isLastFlight) => {
       console.warn(`Error parsing departure time: ${array}`);
     }
 
+    // isInt or isUsa
+    newFlight.isUsa =
+      american_airport_codes.includes(newFlight.departureAirport) ||
+      american_airport_codes.includes(newFlight.arrivalAirport);
+    newFlight.isInt =
+      international_airport_codes.includes(newFlight.departureAirport) ||
+      international_airport_codes.includes(newFlight.arrivalAirport);
+
     // Arrival Information
     if (array[4] && all_airports.includes(array[4].substring(0, 3))) {
       newFlight.arrivalAirport = array[4].substring(0, 3);
@@ -81,11 +91,11 @@ const parseAsFlight = (array, index, isLastFlight) => {
     // array[6]: dutytime OR meal Allowance
     if (array[6] && array[6].match(/[0-9]{3,4}/g)) {
       newFlight.dutyTime = array[6];
-    } else if (array[6] && array[6].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
-      newFlight.mealsOnboard = array.slice(6, array.length - 1);
+    } else if (array[6] && array[6].match(/(HB|CB|HL|HD|FB|SD|SS|PP|MS)/g)) {
+      newFlight.mealsOnboard = array.slice(6, array.length);
     } else if (
       array[6] &&
-      array[6].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
+      array[6].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SD)(?!SS)[BLDS]+/g)
     ) {
       newFlight.mealAllowance = array[6];
     } else if (array[6]) {
@@ -95,11 +105,11 @@ const parseAsFlight = (array, index, isLastFlight) => {
     // array[7]: layover length OR meal allowance
     if (array[7] && array[7].match(/[0-9]{3,4}/g)) {
       newFlight.layoverLength = array[7];
-    } else if (array[7] && array[7].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
-      newFlight.mealsOnboard = array.slice(7, array.length - 1);
+    } else if (array[7] && array[7].match(/(HB|CB|HL|HD|FB|SD|SS|PP|MS)/g)) {
+      newFlight.mealsOnboard = array.slice(7, array.length);
     } else if (
       array[7] &&
-      array[7].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
+      array[7].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SD)(?!SS)[BLDS]+/g)
     ) {
       newFlight.mealAllowance = array[7];
     } else if (array[7]) {
@@ -107,11 +117,11 @@ const parseAsFlight = (array, index, isLastFlight) => {
     }
 
     // array[8]: meal allowance OR meals onboard
-    if (array[8] && array[8].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
-      newFlight.mealsOnboard = array.slice(8, array.length - 1);
+    if (array[8] && array[8].match(/(HB|CB|HL|HD|FB|SD|SS|PP|MS)/g)) {
+      newFlight.mealsOnboard = array.slice(8, array.length);
     } else if (
       array[8] &&
-      array[8].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
+      array[8].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SD)(?!SS)[BLDS]+/g)
     ) {
       newFlight.mealAllowance = array[8];
     } else if (array[8]) {

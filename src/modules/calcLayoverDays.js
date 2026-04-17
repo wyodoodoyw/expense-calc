@@ -9,7 +9,12 @@ const calcLayoverDays = (start, end, length) => {
   const lengthMinutes = Number(length.slice(-2));
 
   let numberDays = lengthHours + startHours - endHours - 24;
-  numberDays += Math.floor((lengthMinutes + startMinutes - endMinutes) / 60);
+  numberDays += Math.abs(
+    Math.floor((lengthMinutes + startMinutes - endMinutes) / 60),
+  );
+  // console.log(
+  //   `mins: ${Math.floor((lengthMinutes + startMinutes - endMinutes) / 60)}`,
+  // );
   numberDays = Math.floor(numberDays / 24);
   return numberDays;
 };

@@ -48,7 +48,7 @@ const getEndMeals = (internationalDept) => {
   let meals = '';
   if (
     time.isBetween(
-      stringToTime('22:00'),
+      stringToTime('23:00'),
       stringToTime('23:59'),
       null,
       'minute',
