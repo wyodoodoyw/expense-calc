@@ -1,11 +1,17 @@
 import calcPairingDays from './calcPairingDays';
+import dayjs from 'dayjs';
+import isBetween from 'dayjs';
 import stringToTime from './stringToTime';
+import american_airport_codes from '../data/american_airport_codes';
+
+dayjs.extend(isBetween);
 
 export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   // Always return an object so callers can destructure safely
   if (!Array.isArray(seq) || seq.length === 0 || !pairingLength) {
     return { meals: [], station: null };
   }
+
   const meals = [];
   const station = 'YYZ';
 
@@ -128,11 +134,223 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   //   }
   // };
 
+  const getMealLocations = (seq) => {
+    if (!seq) return;
+
+    // const mealSeq = [];
+    // let lengthElapsed = 0;
+
+    for (let i = 0; i < seq.length; i++) {
+      const curr = seq[i];
+      const next = seq[i + 1] || null;
+
+      console.log(`index: ${JSON.stringify(curr.index)} - ${curr.type}`);
+
+      // BREAKFAST
+
+      // if (
+      //   curr &&
+      //   curr.type === 'flight' &&
+      //   stringToTime('08:00').isBetween(
+      //     stringToTime(curr.departureTime),
+      //     stringToTime(curr.arrivalTime),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // breakfast - curr.departureAirport
+      // } else if (
+      //   curr &&
+      //   curr.type === 'flight' &&
+      //   next &&
+      //   next.type === 'flight' &&
+      //   stringToTime('08:00').isBetween(
+      //     stringToTime(curr.arrivalTime),
+      //     stringToTime(next.departureTime),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // breakfast - next.departureAirport
+      // } else if (
+      //   curr.type === 'layover' &&
+      //   stringToTime('08:00').isBetween(
+      //     stringToTime(curr.layoverStart),
+      //     stringToTime(curr.layoverEnd),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // breakfast - curr.station
+      // } else {
+      //   // pass
+      // }
+
+      // LUNCH
+
+      // if (
+      //   curr &&
+      //   curr.type === 'flight' &&
+      //   stringToTime('12:00').isBetween(
+      //     stringToTime(curr.departureTime),
+      //     stringToTime(curr.arrivalTime),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // lunch - curr.departureAirport
+      // } else if (
+      //   curr &&
+      //   curr.type === 'flight' &&
+      //   next &&
+      //   next.type === 'flight' &&
+      //   stringToTime('12:00').isBetween(
+      //     stringToTime(curr.arrivalTime),
+      //     stringToTime(next.departureTime),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // lunch - next.departureAirport
+      // } else if (
+      //   curr &&
+      //   curr.type === 'layover' &&
+      //   stringToTime('12:00').isBetween(
+      //     stringToTime(curr.layoverStart),
+      //     stringToTime(curr.layoverEnd),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // lunch - curr.station
+      // } else {
+      //   // pass
+      // }
+
+      // DINNER
+
+      if (
+        curr &&
+        curr.type === 'flight' &&
+        stringToTime('17:30').isBetween(
+          stringToTime(curr.departureTime),
+          stringToTime(curr.arrivalTime),
+          null,
+          '[]',
+        )
+      ) {
+        // dinner - curr.departureAirport
+        console.log(`Dinner at ${curr.departureAirport}`);
+      } else if (
+        curr &&
+        curr.type === 'flight' &&
+        next &&
+        next.type === 'flight' &&
+        stringToTime('17:30').isBetween(
+          stringToTime(curr.arrivalTime),
+          stringToTime(next.departureTime),
+          null,
+          '[]',
+        )
+      ) {
+        // dinner - next.departureAirport
+        console.log(`Dinner at ${next.departureAirport}`);
+      } else if (
+        (curr &&
+          curr.type === 'layover' &&
+          !stringToTime(curr.layoverStart).isSame(
+            stringToTime(curr.layoverStart)
+              .add(curr.layoverLength.slice(0, -2), 'hours')
+              .add(curr.layoverLength.slice(-2), 'minutes'),
+            'day',
+          ) &&
+          stringToTime('17:30').isBetween(
+            stringToTime(curr.layoverStart),
+            stringToTime('23:59'),
+            null,
+            '[]',
+          )) ||
+        stringToTime('17:30').isBetween(
+          stringToTime('00:00'),
+          stringToTime(curr.layoverEnd),
+          null,
+          '[]',
+        )
+      ) {
+        // dinner - curr.layoverStation
+        console.log(`Dinner at ${curr.layoverStation}`);
+      } else if (
+        curr &&
+        curr.type === 'layover' &&
+        stringToTime(curr.layoverStart).isSame(
+          stringToTime(curr.layoverStart)
+            .add(curr.layoverLength.slice(0, -2), 'hours')
+            .add(curr.layoverLength.slice(-2), 'minutes'),
+          'day',
+        ) &&
+        stringToTime('17:30').isBetween(
+          stringToTime(curr.layoverStart),
+          stringToTime(curr.layoverEnd),
+          null,
+          '[]',
+        )
+      ) {
+        // dinner - curr.station
+        console.log(`Dinner at ${curr.layoverStation}`);
+      } else {
+        // pass
+        console.log(`No dinner`);
+      }
+
+      // SNACK
+
+      // if (
+      //   curr &&
+      //   curr.type === 'flight' &&
+      //   stringToTime('22:30').isBetween(
+      //     stringToTime(curr.departureTime),
+      //     stringToTime(curr.arrivalTime),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // snack - curr.departureAirport
+      // } else if (
+      //   curr &&
+      //   curr.type === 'flight' &&
+      //   next &&
+      //   next.type === 'flight' &&
+      //   stringToTime('22:30').isBetween(
+      //     stringToTime(curr.arrivalTime),
+      //     stringToTime(next.departureTime),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // snack - next.departureAirport
+      // } else if (
+      //   curr &&
+      //   curr.type === 'layover' &&
+      //   stringToTime('22:30').isBetween(
+      //     stringToTime(curr.layoverStart),
+      //     stringToTime(curr.layoverEnd),
+      //     null,
+      //     '[]',
+      //   )
+      // ) {
+      //   // snack - curr.station
+      // } else {
+      //   // pass
+      // }
+    }
+  };
+
+  getMealLocations(seq, pairingLength);
   //--- STEP 1: Handle Night Flights
   if (
     pairingLength &&
     Number(pairingLength) <= 1400 &&
-    seq.lenght == 2 &&
+    seq.length == 2 &&
     stringToTime(seq[1].arrivalTime).isAfter(stringToTime('04:00')) &&
     stringToTime(seq[1].arrivalTime).isBefore(stringToTime('08:00'))
   ) {

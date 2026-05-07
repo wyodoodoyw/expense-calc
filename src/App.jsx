@@ -8,7 +8,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import runCheckAllPairings from './tests/test';
 
 function App() {
-  const isProduction = false; // Set to true to skip disclaimer and DB upload during development
+  const isProduction = true; // Set to true to skip disclaimer and DB upload during development
   const [clicked, setClicked] = useState(isProduction);
   const [pairingsUploaded, setPairingsUploaded] = useState(isProduction);
   const [expensesUploaded, setExpensesUploaded] = useState(isProduction);
@@ -16,7 +16,7 @@ function App() {
   useEffect(() => {
     console.clear();
     checkDBExists();
-    // runCheckAllPairings('T6000', 'T7000');
+    runCheckAllPairings('T8000', 'T8001');
   }, []);
 
   const checkDBExists = () => {

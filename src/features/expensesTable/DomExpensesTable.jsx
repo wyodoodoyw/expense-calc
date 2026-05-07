@@ -77,7 +77,8 @@ const DomExpensesTable = () => {
               item.meals && (
                 <tr key={item.index}>
                   <td>🇨🇦</td>
-                  <td>{item.meals.includes('B') && caExpenses.breakfast}</td>
+                  {/* <td>{item.meals.includes('B') && caExpenses.breakfast}</td> */}
+                  <td>{item.meals.includes('C') && caExpenses.breakfast}</td>
                   <td>{item.meals.includes('L') && caExpenses.lunch}</td>
                   <td>{item.meals.includes('D') && caExpenses.dinner}</td>
                   <td>{item.meals.includes('S') && caExpenses.snack}</td>

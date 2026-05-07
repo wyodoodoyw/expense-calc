@@ -32,7 +32,6 @@ export const flightSlice = createSlice({
     updateFlightDeparture: (state, action) => {
       const { index, value } = action.payload;
       let flightToUpdate = state.find((flight) => flight.index === index);
-      console.log(current(state));
       flightToUpdate.departureTime = value;
     },
 
