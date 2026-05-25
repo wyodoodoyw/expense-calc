@@ -1,14 +1,25 @@
-// import calcPairingDays from './calcPairingDays';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs';
 import stringToTime from './stringToTime';
-import canadian_airport_codes from '../data/canadian_airport_codes';
-import american_airport_codes from '../data/american_airport_codes';
+import UTC from 'dayjs/plugin/utc';
+import Timezone from 'dayjs/plugin/timezone';
+import AdvancedFormat from 'dayjs/plugin/advancedFormat';
+
+import breakfast from './breakfast';
+import lunch from './lunch';
+import dinner from './dinner';
+import snack from './snack';
+
+import crossesMidnight from './crossesMidnight';
+import calcPairingDays from './calcPairingDays';
 
 dayjs.extend(isBetween);
+dayjs.extend(UTC);
+dayjs.extend(Timezone);
+dayjs.tz.setDefault('America/New_York');
+dayjs.extend(AdvancedFormat);
 
 export default function getMealsFromSequenceDom(seq = [], pairingLength) {
-  // Always return an object so callers can destructure safely
   if (!Array.isArray(seq) || seq.length === 0 || !pairingLength) {
     return { meals: [], station: null };
   }
@@ -16,7 +27,6 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   const meals = [];
   const station = 'YYZ';
 
-  // push meals to meal array
   const pushMeal = (mealStr) => {
     if (!mealStr) return;
     meals.push({
@@ -26,474 +36,387 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     });
   };
 
-  const breakfast = (curr, next) => {
-    if (curr && curr.type === 'flight') {
-      // during current flight
-      if (
-        stringToTime('08:00').isBetween(
-          stringToTime(curr.departureTime),
-          stringToTime(curr.arrivalTime),
-          'minute',
-          '[]',
-        )
-      ) {
-        // breakfast - curr.departureAirport
-        if (canadian_airport_codes.includes(curr.departureAirport)) {
-          return 'B';
-        }
-        if (american_airport_codes.includes(curr.departureAirport)) {
-          return 'C';
-        }
-      } else if (
-        next &&
-        next.type === 'flight' &&
-        stringToTime('08:00').isBetween(
-          stringToTime(curr.arrivalTime),
-          stringToTime(next.departureTime),
-          null,
-          '[]',
-        )
-      ) {
-        // between current arrival and next departure
-        // breakfast - next.departureAirport
-        if (canadian_airport_codes.includes(next.departureAirport)) {
-          return 'B';
-        }
-        if (american_airport_codes.includes(next.departureAirport)) {
-          return 'C';
-        }
-      }
-    } else if (curr && curr.type === 'layover') {
-      if (
-        !stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        // layover crossing midnight
-        if (
-          stringToTime('08:00').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime('23:59'),
-            null,
-            '[]',
-          ) ||
-          stringToTime('08:00').isBetween(
-            stringToTime('00:00'),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // breakfast - curr.layoverStation
-          if (canadian_airport_codes.includes(curr.layoverStation)) {
-            return 'B';
-          }
-          if (american_airport_codes.includes(curr.layoverStation)) {
-            return 'C';
-          }
-        }
-      } else if (
-        stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        // layover not crossing midnight
-        if (
-          stringToTime('08:00').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // breakfast - curr.layoverStation
-          if (canadian_airport_codes.includes(curr.layoverStation)) {
-            return 'B';
-          }
-          if (american_airport_codes.includes(curr.layoverStation)) {
-            return 'C';
-          }
-        }
-      }
-    }
-  };
-
-  const lunch = (curr, next) => {
-    if (curr && curr.type === 'flight') {
-      if (
-        stringToTime('12:00').isBetween(
-          stringToTime(curr.departureTime),
-          stringToTime(curr.arrivalTime),
-          'minute',
-          '[]',
-        )
-      ) {
-        if (stringToTime(curr.departureTime).isBefore(stringToTime('12:00'))) {
-          // lunch - curr.arrivalAirport
-          if (canadian_airport_codes.includes(next.departureAirport)) {
-            return 'L';
-          }
-          if (american_airport_codes.includes(next.departureAirport)) {
-            return 'M';
-          }
-        } else if (
-          stringToTime(curr.departureTime).isAfter(stringToTime('11:59'))
-        ) {
-          // lunch - curr.departureAirport
-          if (canadian_airport_codes.includes(next.departureAirport)) {
-            return 'L';
-          }
-          if (american_airport_codes.includes(next.departureAirport)) {
-            return 'M';
-          }
-        }
-      } else if (
-        next &&
-        next.type === 'flight' &&
-        stringToTime('12:00').isBetween(
-          stringToTime(curr.arrivalTime),
-          stringToTime(next.departureTime),
-          null,
-          '[]',
-        )
-      ) {
-        // lunch - next.departureAirport
-        if (canadian_airport_codes.includes(next.departureAirport)) {
-          return 'L';
-        }
-        if (american_airport_codes.includes(next.departureAirport)) {
-          return 'M';
-        }
-      }
-    } else if (curr && curr.type === 'layover') {
-      if (
-        !stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        if (
-          stringToTime('12:00').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime('23:59'),
-            null,
-            '[]',
-          ) ||
-          stringToTime('12:00').isBetween(
-            stringToTime('00:00'),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // lunch - curr.layoverStation
-          if (canadian_airport_codes.includes(next.departureAirport)) {
-            return 'L';
-          }
-          if (american_airport_codes.includes(next.departureAirport)) {
-            return 'M';
-          }
-        }
-      } else if (
-        stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        if (
-          stringToTime('12:00').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // lunch - curr.station
-          if (canadian_airport_codes.includes(next.departureAirport)) {
-            return 'L';
-          }
-          if (american_airport_codes.includes(next.departureAirport)) {
-            return 'M';
-          }
-        }
-      }
-    }
-  };
-
-  const dinner = (curr, next) => {
-    if (curr && curr.type === 'flight') {
-      if (
-        stringToTime('17:30').isBetween(
-          stringToTime(curr.departureTime),
-          stringToTime(curr.arrivalTime),
-          'minute',
-          '[]',
-        )
-      ) {
-        if (stringToTime(curr.departureTime).isBefore(stringToTime('17:30'))) {
-          // dinner - curr.arrivalAirport
-          console.log(`D: ${curr.arrivalAirport}`);
-        } else if (
-          stringToTime(curr.departureTime).isAfter(stringToTime('17:29'))
-        ) {
-          // dinner - curr.departureAirport
-          console.log(`D: ${curr.departureAirport}`);
-        }
-      } else if (
-        next &&
-        next.type === 'flight' &&
-        stringToTime('17:30').isBetween(
-          stringToTime(curr.arrivalTime),
-          stringToTime(next.departureTime),
-          null,
-          '[]',
-        )
-      ) {
-        // dinner - next.departureAirport
-        console.log(`D: ${next.departureAirport}`);
-      }
-    } else if (curr && curr.type === 'layover') {
-      if (
-        !stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        if (
-          stringToTime('17:30').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime('23:59'),
-            null,
-            '[]',
-          ) ||
-          stringToTime('17:30').isBetween(
-            stringToTime('00:00'),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // dinner - curr.layoverStation
-          console.log(`D: ${curr.layoverStation}`);
-        }
-      } else if (
-        stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        if (
-          stringToTime('17:30').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // dinner - curr.station
-          console.log(`D: ${curr.layoverStation}`);
-        }
-      }
-    }
-  };
-
-  const snack = (curr, next) => {
-    if (curr && curr.type === 'flight') {
-      if (
-        stringToTime('22:30').isBetween(
-          stringToTime(curr.departureTime),
-          stringToTime(curr.arrivalTime),
-          'minute',
-          '[]',
-        )
-      ) {
-        if (stringToTime(curr.departureTime).isBefore(stringToTime('22:30'))) {
-          // snack - curr.arrivalAirport
-          console.log(`S: ${curr.arrivalAirport}`);
-        } else if (
-          stringToTime(curr.departureTime).isBetween(
-            stringToTime('22:29'),
-            stringToTime('25:59'),
-            null,
-            '[]',
-          )
-        ) {
-          // snack - curr.departureAirport
-          console.log(`S: ${curr.departureAirport}`);
-        } else if (
-          stringToTime(curr.departureTime).isBetween(
-            stringToTime('00:00'),
-            stringToTime('00:59'),
-            null,
-            '[]',
-          )
-        ) {
-          console.log(`S: ${curr.departureAirport}`);
-        }
-      } else if (
-        next &&
-        next.type === 'flight' &&
-        stringToTime('22:30').isBetween(
-          stringToTime(curr.arrivalTime),
-          stringToTime(next.departureTime),
-          null,
-          '[]',
-        )
-      ) {
-        // snack - next.departureAirport
-        console.log(`S: ${next.departureAirport}`);
-      }
-    } else if (curr && curr.type === 'layover') {
-      if (
-        !stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        if (
-          stringToTime('22:30').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime('23:59'),
-            null,
-            '[]',
-          ) ||
-          stringToTime('22:30').isBetween(
-            stringToTime('00:00'),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // snack - curr.layoverStation
-          console.log(`S: ${curr.layoverStation}`);
-        }
-      } else if (
-        stringToTime(curr.layoverStart).isSame(
-          stringToTime(curr.layoverStart)
-            .add(curr.layoverLength.slice(0, -2), 'hours')
-            .add(curr.layoverLength.slice(-2), 'minutes'),
-          'day',
-        )
-      ) {
-        if (
-          stringToTime('22:30').isBetween(
-            stringToTime(curr.layoverStart),
-            stringToTime(curr.layoverEnd),
-            null,
-            '[]',
-          )
-        ) {
-          // snack - curr.station
-          console.log(`S: Snack at ${curr.layoverStation}`);
-        }
-      }
-    }
-  };
-
   const getMealsAndLocations = (seq) => {
     if (!seq) return;
 
     let mealStr = '';
+    let prevChar;
+
+    let first = true;
 
     seq.forEach((curr, i, arr) => {
-      const first = i === 0;
+      console.log(`\nIndex: ${i}, Type: ${curr.type}`);
+      console.log(`prev: ${prevChar}`);
+
+      let start;
+      let end;
+
+      const cross = crossesMidnight(curr);
+      console.log(`crosses: ${cross}`);
+
+      let days = 0;
+      if (cross && curr.type === 'flight') {
+        days = calcPairingDays(
+          curr.departureTime,
+          curr.endTime,
+          curr.flightLength,
+        );
+      } else if (cross && curr.type === 'layover') {
+        days =
+          2 +
+          calcPairingDays(
+            curr.layoverStart,
+            curr.layoverEnd,
+            curr.layoverLength,
+          );
+      }
+
+      cross && console.log(`days: ${days}`);
+
+      if (curr.type === 'flight') {
+        start = dayjs()
+          .tz()
+          .set('hour', curr.departureTime.slice(0, -2))
+          .set('minute', curr.departureTime.slice(-2))
+          .startOf('minute');
+        end = dayjs()
+          .tz()
+          .set('hour', curr.arrivalTime.slice(0, -2))
+          .set('minute', curr.arrivalTime.slice(-2))
+          .startOf('minute');
+      } else if (curr.type === 'layover') {
+        start = dayjs()
+          .tz()
+          .set('hour', curr.layoverStart.slice(0, -2))
+          .set('minute', curr.layoverStart.slice(-2))
+          .startOf('minute');
+        end = dayjs()
+          .tz()
+          .set('hour', curr.layoverEnd.slice(0, -2))
+          .set('minute', curr.layoverEnd.slice(-2))
+          .startOf('minute');
+      }
+
+      console.log(
+        `start: ${start.format('HH:mm')} to end: ${end.format('HH:mm')}`,
+      );
+
       const next = arr[i + 1];
       const last = i === arr.length - 1;
 
-      // console.log(
-      //   `curr is first: ${first}, curr duty start: ${curr.dutyStart}`,
-      // );
-
       if (first && curr.dutyStart && curr.type === 'flight') {
-        if (stringToTime(curr.dutyStart).isBefore(stringToTime('08:00'))) {
-          // breakfast
-          // console.log('hello');
-          mealStr += breakfast(curr, next);
-          // console.log(`m: ${mealStr}`);
-        } else if (
-          stringToTime(curr.dutyStart).isBefore(stringToTime('12:30'))
+        if (
+          stringToTime(curr.dutyStart).isBetween(
+            stringToTime('03:00'),
+            stringToTime('08:00'),
+            null,
+            '[)',
+          ) &&
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('03:00'),
+            stringToTime('08:00'),
+            null,
+            '[)',
+          )
+          // &&
+          // dayjs
+          //   .duration()
+          //   .add(curr.length.slice(0, -2), 'hours')
+          //   .add(curr.length.slice(-2), 'minutes')
+          //   .asMinutes() >= 90
         ) {
-          // lunch
+          mealStr += breakfast(curr, next);
+          first = false;
+        } else if (
+          stringToTime(curr.dutyStart).isBetween(
+            stringToTime('08:00'),
+            stringToTime('12:30'),
+            null,
+            '[)',
+          ) &&
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('08:00'),
+            stringToTime('12:30'),
+            null,
+            '[)',
+          )
+        ) {
           mealStr += lunch(curr, next);
         } else if (
-          stringToTime(curr.dutyStart).isBefore(stringToTime('18:00'))
+          stringToTime(curr.dutyStart).isBetween(
+            stringToTime('12:30'),
+            stringToTime('18:00'),
+            null,
+            '[)',
+          ) &&
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('12:30'),
+            stringToTime('18:00'),
+            null,
+            '[)',
+          )
         ) {
-          // dinner
           mealStr += dinner(curr, next);
         } else if (
-          stringToTime(curr.dutyStart).isBefore(stringToTime('23:00'))
+          stringToTime(curr.dutyStart).isBetween(
+            stringToTime('18:00'),
+            stringToTime('23:00'),
+            null,
+            '[)',
+          ) &&
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('18:00'),
+            stringToTime('23:00'),
+            null,
+            '[)',
+          )
         ) {
-          // snack
           mealStr += snack(curr, next);
+          mealStr && pushMeal(mealStr);
+          mealStr = '';
         }
+        first = false;
+      } else if (first && !curr.dutyStart && curr.type === 'flight') {
+        if (
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('03:00'),
+            stringToTime('08:00'),
+            null,
+            '[)',
+          )
+          // &&
+          // dayjs
+          //   .duration()
+          //   .add(curr.length.slice(0, -2), 'hours')
+          //   .add(curr.length.slice(-2), 'minutes')
+          //   .asMinutes() >= 90
+        ) {
+          mealStr += breakfast(curr, next);
+        } else if (
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('08:00'),
+            stringToTime('12:30'),
+            null,
+            '[)',
+          )
+        ) {
+          mealStr += lunch(curr, next);
+        } else if (
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('12:30'),
+            stringToTime('18:00'),
+            null,
+            '[)',
+          )
+        ) {
+          mealStr += dinner(curr, next);
+        } else if (
+          stringToTime(curr.departureTime).isBetween(
+            stringToTime('18:00'),
+            stringToTime('23:00'),
+            null,
+            '[)',
+          )
+        ) {
+          mealStr += snack(curr, next);
+          mealStr && pushMeal(mealStr);
+          mealStr = '';
+        }
+        first = false;
+      } else if (first && curr.type === 'layover') {
+        if (
+          stringToTime(curr.layoverStart).isBetween(
+            stringToTime('03:00'),
+            stringToTime('08:00'),
+            null,
+            '[)',
+          )
+          // &&
+          // dayjs
+          //   .duration()
+          //   .add(curr.length.slice(0, -2), 'hours')
+          //   .add(curr.length.slice(-2), 'minutes')
+          //   .asMinutes() >= 90
+        ) {
+          mealStr += breakfast(curr, next);
+          first = false;
+        } else if (
+          stringToTime(curr.layoverStart).isBetween(
+            stringToTime('08:00'),
+            stringToTime('12:30'),
+            null,
+            '[)',
+          )
+        ) {
+          mealStr += lunch(curr, next);
+        } else if (
+          stringToTime(curr.layoverStart).isBetween(
+            stringToTime('12:30'),
+            stringToTime('18:00'),
+            null,
+            '[)',
+          )
+        ) {
+          mealStr += dinner(curr, next);
+        } else if (
+          stringToTime(curr.layoverStart).isBetween(
+            stringToTime('18:00'),
+            stringToTime('23:00'),
+            null,
+            '[)',
+          )
+        ) {
+          mealStr += snack(curr, next);
+          mealStr && pushMeal(mealStr);
+          mealStr = '';
+        }
+        first = false;
+      } else if (first) {
+        console.error(
+          `Error determining first meal. type: ${curr.type}, dutyStart: ${curr.dutyStart}, departureTime: ${curr.departureTime}`,
+        );
       }
 
       if (last && curr.dutyEnd && curr.type === 'flight') {
         if (
+          stringToTime(curr.arrivalTime).isBetween(
+            stringToTime('09:30'),
+            stringToTime('13:30'),
+            null,
+            '(]',
+          ) &&
           stringToTime(curr.dutyEnd).isBetween(
             stringToTime('09:30'),
             stringToTime('13:30'),
             null,
-            '[]',
+            '(]',
           )
         ) {
-          // breakfast
+          mealStr += breakfast(curr, null);
           mealStr && pushMeal(mealStr);
+          return;
         } else if (
+          stringToTime(curr.arrivalTime).isBetween(
+            stringToTime('13:30'),
+            stringToTime('18:30'),
+            null,
+            '(]',
+          ) &&
           stringToTime(curr.dutyEnd).isBetween(
             stringToTime('13:30'),
             stringToTime('18:30'),
             null,
-            '[]',
+            '(]',
           )
         ) {
-          // lunch
+          mealStr += lunch(curr, null);
           mealStr && pushMeal(mealStr);
+          return;
         } else if (
+          stringToTime(curr.arrivalTime).isBetween(
+            stringToTime('18:30'),
+            stringToTime('23:59'),
+            null,
+            '(]',
+          ) &&
           stringToTime(curr.dutyEnd).isBetween(
             stringToTime('18:30'),
-            stringToTime('01:00'),
+            stringToTime('23:59'),
             null,
-            '[]',
+            '(]',
           )
         ) {
-          // dinner
+          mealStr += dinner(curr, null);
           mealStr && pushMeal(mealStr);
+          return;
         } else if (
+          stringToTime(curr.arrivalTime).isBetween(
+            stringToTime('01:00'),
+            stringToTime('09:30'),
+            null,
+            '(]',
+          ) &&
           stringToTime(curr.dutyEnd).isBetween(
             stringToTime('01:00'),
             stringToTime('09:30'),
             null,
-            '[]',
+            '(]',
           )
         ) {
-          // snack
+          mealStr += snack(curr, null);
           mealStr && pushMeal(mealStr);
+          return;
         }
+      } else if (last) {
+        console.error(
+          `Error determining last meal. type: ${curr.type}, arrivalTime: ${curr.arrivalTime}, dutyEnd: ${curr.dutyEnd}`,
+        );
       }
 
-      if (!first && !last) {
-        //
+      // if (!first && !last) {
+      mealStr && console.log(`!mealStr: ${mealStr} prevChar: ${prevChar}`);
+
+      mealStr && (prevChar = mealStr.slice(-1));
+
+      if (!prevChar) {
+        if (breakfast(curr, next)) {
+          mealStr += breakfast(curr, next);
+          prevChar = 'B';
+        } else if (lunch(curr, next)) {
+          mealStr += lunch(curr, next);
+          prevChar = 'L';
+        } else if (dinner(curr, next)) {
+          mealStr += dinner(curr, next);
+          prevChar = 'D';
+        } else if (snack(curr, next)) {
+          mealStr += snack(curr, next);
+          mealStr && pushMeal(mealStr);
+          mealStr = '';
+          prevChar = 'S';
+        } else {
+          //
+        }
+        console.log(`! first char: ${mealStr}`);
+      }
+
+      //--- NEXT MEALSTR CHAR
+
+      for (let i = 0; i <= days; i++) {
+        if (prevChar === 'B' || prevChar === 'C') {
+          if (lunch(curr, next)) {
+            mealStr += lunch(curr, next);
+            prevChar = 'L';
+            console.log(`a mealStr: ${mealStr}`);
+          }
+        }
+
+        if (prevChar === 'L' || prevChar === 'M') {
+          if (dinner(curr, next)) {
+            mealStr += dinner(curr, next);
+            prevChar = 'D';
+            console.log(`a mealStr: ${mealStr}`);
+          }
+        }
+
+        if (prevChar === 'D' || prevChar === 'E') {
+          if (snack(curr, next)) {
+            mealStr += snack(curr, next);
+            console.log(`d mealStr: ${mealStr}`);
+            mealStr && pushMeal(mealStr);
+            mealStr = '';
+            prevChar = 'S';
+          }
+        }
+
+        if (prevChar === 'S' || prevChar === 'T') {
+          mealStr = '';
+          if (breakfast(curr, next)) {
+            mealStr += breakfast(curr, next);
+            console.log(`e mealStr: ${mealStr}`);
+          }
+        }
       }
     });
-    // console.log(`mealStr: ${mealStr}`);
-    mealStr && pushMeal(mealStr);
   };
 
   getMealsAndLocations(seq, pairingLength);
@@ -536,7 +459,7 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   // }
 
   if (meals) {
-    // console.log(`{meals, station}: ${JSON.stringify(meals, station)}`);
+    console.log(`{meals}: ${JSON.stringify(meals, station)}`);
     return { meals, station };
   } else {
     return { meals: [], station: null };
