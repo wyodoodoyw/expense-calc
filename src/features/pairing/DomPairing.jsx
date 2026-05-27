@@ -7,7 +7,8 @@ import Layover from '../layover/Layover';
 import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import ExpensesTable from '../expensesTable/ExpensesTable';
 
-function DomPairing() {
+function DomPairing(props) {
+  const { display } = props;
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
 
@@ -16,6 +17,7 @@ function DomPairing() {
 
   useEffect(() => {
     const { meals: derivedMeals, station: station } = getMealsFromSequenceDom(
+      p.pairingIdentifier,
       seq || [],
     );
     setMeals(derivedMeals);
@@ -40,7 +42,8 @@ function DomPairing() {
           {p.pairingGY && `GY${p.pairingGY}`}
         </div>
         <div className="col-6 text-end pe-5">
-          Languages: {p.pairingBL && `BL${p.pairingBL}  `}
+          {p.pairingBL || (p.pairingLanguages && `Languages: `)}
+          {p.pairingBL && `BL${p.pairingBL}  `}
           {p.pairingLanguages &&
             p.pairingLanguages.map((lang) => {
               return `${lang}`;

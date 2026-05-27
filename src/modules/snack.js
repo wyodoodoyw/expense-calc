@@ -1,9 +1,8 @@
 import stringToTime from './stringToTime';
 import canadian_airport_codes from '../data/canadian_airport_codes';
 import american_airport_codes from '../data/american_airport_codes';
-import crossesMidnight from './crossesMidnight';
 
-const snack = (curr, next) => {
+const snack = (curr, next = null) => {
   //--- FLIGHTS
   if (curr && curr.type === 'flight') {
     if (
@@ -61,44 +60,7 @@ const snack = (curr, next) => {
     }
     //--- LAYOVER
   } else if (curr && curr.type === 'layover') {
-    if (
-      !crossesMidnight(
-        curr.layoverStart,
-        curr.layoverEnd,
-        curr.layoverLength,
-      ) &&
-      stringToTime('22:30').isBetween(
-        stringToTime(curr.layoverStart),
-        stringToTime(curr.layoverEnd),
-        null,
-        '[]',
-      )
-    ) {
-      if (canadian_airport_codes.includes(curr.layoverStation)) {
-        return 'S';
-      }
-      if (american_airport_codes.includes(curr.layoverStation)) {
-        return 'T';
-      }
-    } else if (
-      (crossesMidnight(
-        curr.layoverStart,
-        curr.layoverEnd,
-        curr.layoverLength,
-      ) &&
-        stringToTime('22:30').isBetween(
-          stringToTime(curr.layoverStart),
-          stringToTime('23:59'),
-          null,
-          '[]',
-        )) ||
-      stringToTime('22:30').isBetween(
-        stringToTime('00:00'),
-        stringToTime(curr.layoverEnd),
-        null,
-        '[]',
-      )
-    ) {
+    if (stringToTime(curr.layoverStart).isBefore(stringToTime('23:00'))) {
       if (canadian_airport_codes.includes(curr.layoverStation)) {
         return 'S';
       }
@@ -106,7 +68,7 @@ const snack = (curr, next) => {
         return 'T';
       }
     } else {
-      return null;
+      return '?';
     }
   }
 };

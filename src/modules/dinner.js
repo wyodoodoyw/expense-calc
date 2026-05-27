@@ -44,62 +44,23 @@ const dinner = (curr, next) => {
       }
     }
   } else if (curr && curr.type === 'layover') {
-    // if (
-    //   !stringToTime(curr.layoverStart).isSame(
-    //     stringToTime(curr.layoverStart)
-    //       .add(curr.layoverLength.slice(0, -2), 'hours')
-    //       .add(curr.layoverLength.slice(-2), 'minutes'),
-    //     'day',
-    //   )
-    // ) {
-    //   if (
-    //     stringToTime('17:30').isBetween(
-    //       stringToTime(curr.layoverStart),
-    //       stringToTime('23:59'),
-    //       null,
-    //       '[]',
-    //     ) ||
-    //     stringToTime('17:30').isBetween(
-    //       stringToTime('00:00'),
-    //       stringToTime(curr.layoverEnd),
-    //       null,
-    //       '[]',
-    //     )
-    //   ) {
-    //     if (canadian_airport_codes.includes(curr.layoverStation)) {
-    //       return 'D';
-    //     }
-    //     if (american_airport_codes.includes(curr.layoverStation)) {
-    //       return 'E';
-    //     }
-    //   }
-    // } else
     if (
-      stringToTime(curr.layoverStart).isSame(
-        stringToTime(curr.layoverEnd)
-          .add(curr.layoverLength.slice(0, -2), 'hours')
-          .add(curr.layoverLength.slice(-2), 'minutes'),
-        'day',
+      stringToTime('17:30').isBetween(
+        stringToTime(curr.layoverStart),
+        stringToTime(curr.layoverEnd),
+        null,
+        '[]',
       )
     ) {
-      if (
-        stringToTime('17:30').isBetween(
-          stringToTime(curr.layoverStart),
-          stringToTime(curr.layoverEnd),
-          null,
-          '[]',
-        )
-      ) {
-        if (canadian_airport_codes.includes(curr.layoverStation)) {
-          return 'D';
-        }
-        if (american_airport_codes.includes(curr.layoverStation)) {
-          return 'E';
-        }
+      if (canadian_airport_codes.includes(curr.layoverStation)) {
+        return 'D';
+      }
+      if (american_airport_codes.includes(curr.layoverStation)) {
+        return 'E';
       }
     }
   } else {
-    return null;
+    return 'Z';
   }
 };
 

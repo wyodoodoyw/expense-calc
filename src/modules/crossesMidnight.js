@@ -17,12 +17,14 @@ const crossesMidnight = (curr) => {
       .set('minute', 59)
       .startOf('minute')
       .diff(start, 'minute');
+
     const dur = dayjs
       .duration({
         hours: curr.flightTime.slice(0, -2),
         minutes: curr.flightTime.slice(-2),
       })
       .asMinutes();
+
     return midnight < dur;
   } else if (curr.type === 'layover') {
     const start = dayjs()
@@ -37,6 +39,7 @@ const crossesMidnight = (curr) => {
       .set('minute', 59)
       .startOf('minute')
       .diff(start, 'minute');
+
     const dur = dayjs
       .duration({
         hours: curr.layoverLength.slice(0, -2),

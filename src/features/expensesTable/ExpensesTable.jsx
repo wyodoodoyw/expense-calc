@@ -7,7 +7,6 @@ import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../../modules/calcDisplayTotal';
 
 const ExpensesTable = () => {
-  // const { meals, station } = props;
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
   const numLayovers = p.layoverCount;
@@ -19,15 +18,11 @@ const ExpensesTable = () => {
   const [intlExpenses, setIntlExpenses] = useState({});
   const [displayTotal, setDisplayTotal] = useState(0);
 
-  // console.log(`numLayovers 13: ${numLayovers}`);
-
   useEffect(() => {
     // INTERNATIONAL PAIRINGS
     if (Number(p.pairingNumber) < 7000) {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
-      // console.log(`derivedMeals: ${meals ? JSON.stringify(meals) : 'none'}`);
-      // console.log(station);
       setMeals(derivedMeals);
       setStation(intlStation);
 
@@ -44,7 +39,6 @@ const ExpensesTable = () => {
         seq || [],
         p.tafb,
       );
-      // console.log(`derivedMeals: ${meals ? JSON.stringify(meals) : 'none'}`);
       setMeals(derivedMeals || []);
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
@@ -68,8 +62,6 @@ const ExpensesTable = () => {
       return;
     }
 
-    // console.log(`numLayovers 66: ${numLayovers}`);
-
     if (
       (needsCa && !caLoaded) ||
       (needsUSA && !usLoaded) ||
@@ -81,9 +73,6 @@ const ExpensesTable = () => {
       return;
     }
 
-    // console.log(
-    //   `${JSON.stringify(meals)} ${JSON.stringify(caExpenses)} ${JSON.stringify(usExpenses)} ${JSON.stringify(intlExpenses)} ${numLayovers}`,
-    // );
     const total = calculateDisplayTotal(
       meals,
       caExpenses,
@@ -91,7 +80,7 @@ const ExpensesTable = () => {
       intlExpenses,
       numLayovers,
     );
-    // console.log(`total (ExpTable): ${total}`);
+
     setDisplayTotal(total.toFixed(2));
   }, [meals, caExpenses, usExpenses, intlExpenses, numLayovers]);
 

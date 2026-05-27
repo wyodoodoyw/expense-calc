@@ -2,7 +2,8 @@ import stringToTime from './stringToTime';
 import canadian_airport_codes from '../data/canadian_airport_codes';
 import american_airport_codes from '../data/american_airport_codes';
 
-const lunch = (curr, next) => {
+const lunch = (curr, next = null) => {
+  if (!curr && !next) return;
   if (curr && curr.type === 'flight') {
     if (
       stringToTime('12:00').isBetween(
@@ -14,10 +15,10 @@ const lunch = (curr, next) => {
     ) {
       if (stringToTime(curr.departureTime).isBefore(stringToTime('12:00'))) {
         // lunch - curr.arrivalAirport
-        if (canadian_airport_codes.includes(next.departureAirport)) {
+        if (canadian_airport_codes.includes(curr.departureAirport)) {
           return 'L';
         }
-        if (american_airport_codes.includes(next.departureAirport)) {
+        if (american_airport_codes.includes(curr.departureAirport)) {
           return 'M';
         }
       } else if (
@@ -50,45 +51,6 @@ const lunch = (curr, next) => {
       }
     }
   } else if (curr && curr.type === 'layover') {
-    // if (
-    //   !stringToTime(curr.layoverStart).isSame(
-    //     stringToTime(curr.layoverStart)
-    //       .add(curr.layoverLength.slice(0, -2), 'hours')
-    //       .add(curr.layoverLength.slice(-2), 'minutes'),
-    //     'day',
-    //   )
-    // ) {
-    //   if (
-    //     stringToTime('12:00').isBetween(
-    //       stringToTime(curr.layoverStart),
-    //       stringToTime('23:59'),
-    //       null,
-    //       '[]',
-    //     ) ||
-    //     stringToTime('12:00').isBetween(
-    //       stringToTime('00:00'),
-    //       stringToTime(curr.layoverEnd),
-    //       null,
-    //       '[]',
-    //     )
-    //   ) {
-    //     // lunch - curr.layoverStation
-    //     if (canadian_airport_codes.includes(next.departureAirport)) {
-    //       return 'L';
-    //     }
-    //     if (american_airport_codes.includes(next.departureAirport)) {
-    //       return 'M';
-    //     }
-    //   }
-    //   }
-    // else if (
-    //   stringToTime(curr.layoverStart).isSame(
-    //     stringToTime(curr.layoverStart)
-    //       .add(curr.layoverLength.slice(0, -2), 'hours')
-    //       .add(curr.layoverLength.slice(-2), 'minutes'),
-    //     'day',
-    //   )
-    // ) {
     if (
       stringToTime('12:00').isBetween(
         stringToTime(curr.layoverStart),
@@ -98,17 +60,16 @@ const lunch = (curr, next) => {
       )
     ) {
       // lunch - curr.station
-      if (canadian_airport_codes.includes(next.departureAirport)) {
+      if (canadian_airport_codes.includes(curr.layoverStation)) {
         return 'L';
       }
-      if (american_airport_codes.includes(next.departureAirport)) {
+      if (american_airport_codes.includes(curr.layoverStation)) {
         return 'M';
       }
     } else {
-      return null;
+      return 'Y';
     }
   }
-  // }
 };
 
 export default lunch;

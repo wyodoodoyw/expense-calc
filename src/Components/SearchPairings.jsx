@@ -10,7 +10,7 @@ import IntPairing from '../features/pairing/IntPairing';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import getAllPairingNumbers from '../modules/getAllPairingNumbers';
+// import getAllPairingNumbers from '../modules/getAllPairingNumbers';
 
 dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
@@ -24,8 +24,6 @@ function SearchPairings(props) {
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
-  // const allPairingNos = getAllPairingNumbers();
-  // console.log(allPairingNos);
 
   const handlePairingNumberChange = (e) => {
     const value = e.target.value;
@@ -173,7 +171,11 @@ function SearchPairings(props) {
           </div>
         </div>
       </form>
-      {pairingSearchResult && isInt ? <IntPairing /> : <DomPairing />}
+      {pairingSearchResult && isInt ? (
+        <IntPairing display={pairingSearchResult} />
+      ) : (
+        <DomPairing display={pairingSearchResult} />
+      )}
     </div>
   );
 }

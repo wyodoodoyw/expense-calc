@@ -12,6 +12,8 @@ import snack from './snack';
 
 import crossesMidnight from './crossesMidnight';
 import calcPairingDays from './calcPairingDays';
+import canadian_airport_codes from '../data/canadian_airport_codes';
+import american_airport_codes from '../data/american_airport_codes';
 
 dayjs.extend(isBetween);
 dayjs.extend(UTC);
@@ -19,11 +21,12 @@ dayjs.extend(Timezone);
 dayjs.tz.setDefault('America/New_York');
 dayjs.extend(AdvancedFormat);
 
-export default function getMealsFromSequenceDom(seq = [], pairingLength) {
-  if (!Array.isArray(seq) || seq.length === 0 || !pairingLength) {
+export default function getMealsFromSequenceDom(pIdentifier, seq = []) {
+  if (!Array.isArray(seq) || seq.length === 0) {
     return { meals: [], station: null };
   }
 
+  console.log(`${pIdentifier}`);
   const meals = [];
   const station = 'YYZ';
 
@@ -45,14 +48,11 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
     let first = true;
 
     seq.forEach((curr, i, arr) => {
-      console.log(`\nIndex: ${i}, Type: ${curr.type}`);
-      console.log(`prev: ${prevChar}`);
-
-      let start;
-      let end;
+      // let start;
+      // let end;
 
       const cross = crossesMidnight(curr);
-      console.log(`crosses: ${cross}`);
+      console.log(`${i} crosses? ${cross}`);
 
       let days = 0;
       if (cross && curr.type === 'flight') {
@@ -71,35 +71,30 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
           );
       }
 
-      cross && console.log(`days: ${days}`);
-
-      if (curr.type === 'flight') {
-        start = dayjs()
-          .tz()
-          .set('hour', curr.departureTime.slice(0, -2))
-          .set('minute', curr.departureTime.slice(-2))
-          .startOf('minute');
-        end = dayjs()
-          .tz()
-          .set('hour', curr.arrivalTime.slice(0, -2))
-          .set('minute', curr.arrivalTime.slice(-2))
-          .startOf('minute');
-      } else if (curr.type === 'layover') {
-        start = dayjs()
-          .tz()
-          .set('hour', curr.layoverStart.slice(0, -2))
-          .set('minute', curr.layoverStart.slice(-2))
-          .startOf('minute');
-        end = dayjs()
-          .tz()
-          .set('hour', curr.layoverEnd.slice(0, -2))
-          .set('minute', curr.layoverEnd.slice(-2))
-          .startOf('minute');
-      }
-
-      console.log(
-        `start: ${start.format('HH:mm')} to end: ${end.format('HH:mm')}`,
-      );
+      // if (curr.type === 'flight') {
+      //   start = dayjs()
+      //     .tz()
+      //     .set('hour', curr.departureTime.slice(0, -2))
+      //     .set('minute', curr.departureTime.slice(-2))
+      //     .startOf('minute');
+      //   end = dayjs()
+      //     .tz()
+      //     .set('hour', curr.arrivalTime.slice(0, -2))
+      //     .set('minute', curr.arrivalTime.slice(-2))
+      //     .startOf('minute');
+      // }
+      // else if (curr.type === 'layover') {
+      //   start = dayjs()
+      //     .tz()
+      //     .set('hour', curr.layoverStart.slice(0, -2))
+      //     .set('minute', curr.layoverStart.slice(-2))
+      //     .startOf('minute');
+      //   end = dayjs()
+      //     .tz()
+      //     .set('hour', curr.layoverEnd.slice(0, -2))
+      //     .set('minute', curr.layoverEnd.slice(-2))
+      //     .startOf('minute');
+      // }
 
       const next = arr[i + 1];
       const last = i === arr.length - 1;
@@ -354,7 +349,7 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
       }
 
       // if (!first && !last) {
-      mealStr && console.log(`!mealStr: ${mealStr} prevChar: ${prevChar}`);
+      // mealStr && console.log(`!mealStr: ${mealStr} prevChar: ${prevChar}`);
 
       mealStr && (prevChar = mealStr.slice(-1));
 
@@ -376,50 +371,99 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
         } else {
           //
         }
-        console.log(`! first char: ${mealStr}`);
       }
 
       //--- NEXT MEALSTR CHAR
 
       for (let i = 0; i <= days; i++) {
-        if (prevChar === 'B' || prevChar === 'C') {
-          if (lunch(curr, next)) {
-            mealStr += lunch(curr, next);
-            prevChar = 'L';
-            console.log(`a mealStr: ${mealStr}`);
+        if (i === 0) {
+          if (prevChar === 'B' || prevChar === 'C') {
+            if (lunch(curr, next)) {
+              mealStr += lunch(curr, next);
+              prevChar = 'L';
+              console.log(`${i} mealStr: ${lunch(curr, next)}`);
+            }
           }
-        }
 
-        if (prevChar === 'L' || prevChar === 'M') {
-          if (dinner(curr, next)) {
-            mealStr += dinner(curr, next);
-            prevChar = 'D';
-            console.log(`a mealStr: ${mealStr}`);
+          if (prevChar === 'L' || prevChar === 'M') {
+            if (dinner(curr, next)) {
+              mealStr += dinner(curr, next);
+              prevChar = 'D';
+              console.log(`${i} mealStr: ${dinner(curr, next)}`);
+            }
           }
-        }
 
-        if (prevChar === 'D' || prevChar === 'E') {
-          if (snack(curr, next)) {
-            mealStr += snack(curr, next);
-            console.log(`d mealStr: ${mealStr}`);
-            mealStr && pushMeal(mealStr);
+          if (prevChar === 'D' || prevChar === 'E') {
+            if (snack(curr, next)) {
+              mealStr += snack(curr, next, cross);
+              console.log(`${i} mealStr: ${snack(curr, next)}`);
+              mealStr && pushMeal(mealStr);
+              mealStr = '';
+              prevChar = 'S';
+            }
+          }
+
+          if (prevChar === 'S' || prevChar === 'T') {
             mealStr = '';
-            prevChar = 'S';
+            if (breakfast(curr, next)) {
+              mealStr += breakfast(curr, next);
+              console.log(`${i} mealStr: ${breakfast(curr, next)}`);
+            }
           }
-        }
+        } else if (curr.type === 'layover' && i === days) {
+          const c = {
+            type: 'layover',
+            layoverStart: '00:00',
+            layoverEnd: curr.layoverEnd,
+            layoverStation: curr.layoverStation,
+          };
 
-        if (prevChar === 'S' || prevChar === 'T') {
-          mealStr = '';
-          if (breakfast(curr, next)) {
-            mealStr += breakfast(curr, next);
-            console.log(`e mealStr: ${mealStr}`);
+          if (prevChar === 'S' || prevChar === 'T') {
+            mealStr = '';
+            if (breakfast(c, null, cross)) {
+              mealStr += breakfast(curr, next);
+              prevChar = 'B';
+              // console.log(`e mealStr: ${mealStr}`);
+            }
+          }
+
+          if (prevChar === 'B' || prevChar === 'C') {
+            if (lunch(c, null)) {
+              mealStr += lunch(c, null);
+              prevChar = 'L';
+              // console.log(`a mealStr: ${mealStr}`);
+            }
+          }
+
+          if (prevChar === 'L' || prevChar === 'M') {
+            if (dinner(c, null, cross)) {
+              mealStr += dinner(curr, next);
+              prevChar = 'D';
+              // console.log(`a mealStr: ${mealStr}`);
+            }
+          }
+
+          if (prevChar === 'D' || prevChar === 'E') {
+            if (snack(c, null, cross)) {
+              mealStr += snack(curr, next, cross);
+              // console.log(`d mealStr: ${mealStr}`);
+              mealStr && pushMeal(mealStr);
+              mealStr = '';
+              prevChar = 'S';
+            }
+          }
+        } else if (i !== 0 && i !== days && curr.type === 'layover') {
+          if (canadian_airport_codes.includes(curr.layoverStation)) {
+            pushMeal('BLDS');
+          } else if (american_airport_codes.includes(curr.layoverStation)) {
+            pushMeal('CMET');
           }
         }
       }
     });
   };
 
-  getMealsAndLocations(seq, pairingLength);
+  getMealsAndLocations(seq);
   // //--- STEP 1: Handle Night Flights
   // if (
   //   pairingLength &&
@@ -432,30 +476,6 @@ export default function getMealsFromSequenceDom(seq = [], pairingLength) {
   //     meals: [{ index: 0, meals: 'DS', station: 'YYZ' }],
   //     station: 'YYZ',
   //   };
-  // }
-
-  // //--- STEP 2: Handle short duty days
-
-  // if (pairingLength && Number(pairingLength) <= 1700) {
-  //   const dutyStart = seq[0].dutyStart;
-  //   const deptTime = seq[0].departureTime;
-  //   const arrTime = seq[seq.length - 1].arrivalTime;
-  //   const dutyEnd = seq[seq.length - 1].dutyEnd;
-
-  //   const shortDutyMeals = getShortDutyMeals(
-  //     dutyStart,
-  //     deptTime,
-  //     arrTime,
-  //     dutyEnd,
-  //   );
-
-  //   shortDutyMeals && pushMeal(shortDutyMeals, 'YYZ');
-
-  //   if (shortDutyMeals) {
-  //     return { meals, station };
-  //   } else {
-  //     return { meals: [], station: null };
-  //   }
   // }
 
   if (meals) {

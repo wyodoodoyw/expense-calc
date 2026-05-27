@@ -4,7 +4,6 @@ export default [
   'YCD',
   'YDF',
   'YEG',
-  'YEG',
   'YFC',
   'YHZ',
   'YLW',
