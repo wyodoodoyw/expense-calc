@@ -198,9 +198,9 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
           const numLayovers = calcNumLayovers(seq) || 0;
           const parsedAllowance = asNumber(p.totalAllowance);
 
-          const { meals, station: usStation } = getMealsFromSequenceDom(
+          const { meals, station: usStation } = await getMealsFromSequenceDom(
+            p.pairingIdentifier,
             seq || [],
-            p.tafb,
           );
 
           const calc = calculateDisplayTotal(

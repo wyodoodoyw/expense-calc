@@ -16,12 +16,16 @@ function DomPairing(props) {
   const [station, setStation] = useState('');
 
   useEffect(() => {
-    const { meals: derivedMeals, station: station } = getMealsFromSequenceDom(
-      p.pairingIdentifier,
-      seq || [],
-    );
-    setMeals(derivedMeals);
-    setStation(station);
+    const loadMeals = async () => {
+      const { meals: derivedMeals, station: station } = await getMealsFromSequenceDom(
+        p.pairingIdentifier,
+        seq || [],
+      );
+      setMeals(derivedMeals);
+      setStation(station);
+    };
+
+    loadMeals();
   }, [seq]);
 
   return (

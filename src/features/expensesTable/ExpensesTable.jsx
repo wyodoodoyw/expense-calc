@@ -20,7 +20,8 @@ const ExpensesTable = () => {
 
   useEffect(() => {
     // INTERNATIONAL PAIRINGS
-    if (Number(p.pairingNumber) < 7000) {
+    // if (Number(p.pairingNumber) < 7000) {
+    if (p.isInt) {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
       setMeals(derivedMeals);
@@ -28,24 +29,28 @@ const ExpensesTable = () => {
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
       getExpenseseFromDB('YYZ', setCaExpenses);
-      if (station) {
-        getExpenseseFromDB(station, setIntlExpenses);
+      if (intlStation) {
+        getExpenseseFromDB(intlStation, setIntlExpenses);
       } else {
         setIntlExpenses({});
       }
       // DOMESTIC AND TB PAIRINGS
     } else {
-      const { meals: derivedMeals } = getMealsFromSequenceDom(
-        seq || [],
-        p.tafb,
-      );
-      setMeals(derivedMeals || []);
+      const getDomMeals = async () => {
+        const { meals: derivedMeals } = await getMealsFromSequenceDom(
+          p.pairingIdentifier,
+          seq || [],
+        );
+        setMeals(derivedMeals || []);
+      };
+
+      getDomMeals();
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
       getExpenseseFromDB('YYZ', setCaExpenses);
       getExpenseseFromDB('MCO', setUsExpenses);
     }
-  }, [p, seq, station]);
+  }, [p, seq]);
 
   useEffect(() => {
     const hasMeals = Array.isArray(meals) && meals.length > 0;
@@ -113,11 +118,11 @@ const ExpensesTable = () => {
                     </td>
                     <td>
                       {(item.meals.includes('D') && caExpenses.dinner) ||
-                        (item.meals.includes('E') && usExpenses.dinner)}
+                        (item.meals.includes('E') && usExpenses.dinner + '*')}
                     </td>
                     <td>
                       {(item.meals.includes('S') && caExpenses.snack) ||
-                        (item.meals.includes('T') && usExpenses.snack)}
+                        (item.meals.includes('T') && usExpenses.snack + '*')}
                     </td>
                   </tr>
                 )
