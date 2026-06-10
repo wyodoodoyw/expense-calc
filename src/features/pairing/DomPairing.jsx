@@ -1,32 +1,16 @@
 /* eslint-disable react/prop-types */
 import { useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
-import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
+// import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import ExpensesTable from '../expensesTable/ExpensesTable';
 
 function DomPairing(props) {
-  const { display } = props;
+  // const { display } = props;
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
-
-  const [meals, setMeals] = useState([]);
-  const [station, setStation] = useState('');
-
-  useEffect(() => {
-    const loadMeals = async () => {
-      const { meals: derivedMeals, station: station } = await getMealsFromSequenceDom(
-        p.pairingIdentifier,
-        seq || [],
-      );
-      setMeals(derivedMeals);
-      setStation(station);
-    };
-
-    loadMeals();
-  }, [seq]);
 
   return (
     <div className="text-start font-monospace">
@@ -82,7 +66,8 @@ function DomPairing(props) {
         <div className="col-3">TAFB/PTEB {p.tafb}</div>
         <div className="col-3">TOTAL - {p.totalCredit}</div>
       </div>
-      <ExpensesTable meals={meals} station={station} />
+      {/* <ExpensesTable meals={meals} station={station} /> */}
+      <ExpensesTable />
     </div>
   );
 }

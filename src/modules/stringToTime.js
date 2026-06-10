@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 
 const stringToTime = (timeString) => {
+  if (typeof timeString !== 'string') return null;
+
   if (timeString) {
     timeString = timeString.replace(':', '');
     return dayjs()

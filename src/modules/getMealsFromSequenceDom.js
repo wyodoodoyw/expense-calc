@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import isBetween from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
 import duration from 'dayjs/plugin/duration';
 import stringToTime from './stringToTime';
 import canadian_airport_codes from '../data/canadian_airport_codes';
@@ -27,8 +27,15 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
     });
   };
 
-  const getMealChar = (meal, start, end, startLoc, endLoc) => {
+  const includesMeal = (meal, start, end, dutyEnd) => {
+    if (!meal || !start || !end) return;
+
+    console.log(
+      `includesMeal - ${meal.canChar} test: ${meal.test} from: ${start} to: ${end}, dutyEnd: ${dutyEnd}`,
+    );
+
     if (
+      !dutyEnd &&
       stringToTime(meal.test).isBetween(
         stringToTime(start),
         stringToTime(end),
@@ -36,38 +43,71 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
         '[]',
       )
     ) {
-      if (canadian_airport_codes.includes(station)) {
-        if (meal === b) {
-          return 'B';
-        }
-        if (meal === l) {
-          return 'L';
-        }
-        if (meal === d) {
-          return 'D';
-        }
-        if (meal === s) {
-          return 'S';
-        }
+      return true;
+    } else if (
+      dutyEnd &&
+      stringToTime(meal.end).isBefore(stringToTime(dutyEnd)) &&
+      stringToTime(meal.test).isBetween(
+        stringToTime(start),
+        stringToTime(end),
+        'minute',
+        '[]',
+      )
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const canOrUsFlight = (deptTime, meal, startLoc, endLoc) => {
+    if (!deptTime || !meal || !startLoc || !endLoc) return;
+
+    const time = stringToTime(deptTime);
+    const test = stringToTime(meal.test);
+
+    if (meal === b) {
+      if (canadian_airport_codes.includes(startLoc)) {
+        return 'B';
+      } else if (american_airport_codes.includes(startLoc)) {
+        return 'C';
       }
-      if (american_airport_codes.includes(station)) {
-        if (meal === b) {
-          return 'C';
-        }
-        if (meal === l) {
-          return 'M';
-        }
-        if (meal === d) {
-          return 'E';
-        }
-        if (meal === s) {
-          return 'T';
-        }
+    } else {
+      if (
+        time.isBefore(test, 'minutes') &&
+        canadian_airport_codes.includes(endLoc)
+      ) {
+        return meal.canChar;
+      } else if (
+        time.isBefore(test, 'minutes') &&
+        american_airport_codes.includes(endLoc)
+      ) {
+        return meal.usChar;
+      } else if (
+        time.isAfter(test, 'minutes') &&
+        canadian_airport_codes.includes(startLoc)
+      ) {
+        return meal.canChar;
+      } else if (
+        time.isAfter(test) &&
+        american_airport_codes.includes(startLoc)
+      ) {
+        return meal.usChar;
       }
     }
   };
 
-  const getLayoverDays = (s, e, len) => {
+  const canOrUsLayoverOrSit = (meal, station) => {
+    if (!meal || !station) return;
+
+    if (canadian_airport_codes.includes(station)) {
+      return meal.canChar;
+    } else if (american_airport_codes.includes(station)) {
+      return meal.usChar;
+    }
+  };
+
+  const getLayoverDays = (s, e, len, dhBefore, dhAfter) => {
     if (!s || !e || !len) return;
 
     const startHH = Number(s.slice(0, -2));
@@ -77,33 +117,37 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
     const durHH = Number(len.slice(0, -2));
     const durMM = Number(len.slice(-2));
 
-    const layoverLength = dayjs.duration({ hours: durHH, minutes: durMM });
-    const newLen = dayjs
+    // const layoverLength = dayjs.duration({ hours: durHH, minutes: durMM });
+    let newLen = dayjs
       .duration({
         hours: durHH,
         minutes: durMM,
       })
       .add({ hours: 1, minutes: 15 });
 
-    console.log(
-      `length: ${layoverLength.asMinutes()} new: ${JSON.stringify(newLen.asMinutes())}`,
-    );
+    if (dhBefore) {
+      newLen = newLen.subtract({ minutes: 15 });
+    }
+    if (dhAfter) {
+      newLen = newLen.subtract({ minutes: 30 });
+    }
 
-    // const lengthDay = dayjs.duration({ hours: 24 }).asMinutes();
     const lengthDayOne = dayjs
       .duration({ hours: 24 })
       .subtract({ hours: startHH, minutes: startMM });
     const lengthLastDay = dayjs.duration({ hours: endHH, minutes: endMM });
 
+    console.log(
+      `getLayoverDays - start: ${s} end: ${e} newLen: ${newLen.format('HH:mm')} before? ${dhBefore} after? ${dhAfter}`,
+    );
+
     if (lengthDayOne > newLen) {
-      console.log(`same day`);
       return 0;
     } else {
       if (newLen.subtract(lengthDayOne).subtract(lengthLastDay) <= 0) {
-        console.log(`spans two days`);
         return 1;
       } else {
-        console.log(`spans three days`);
+        // add logic for full days BLDS or CMET
         return 2;
       }
     }
@@ -115,135 +159,149 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
     let mealStr = '';
 
     seq.forEach((curr, i, arr) => {
-      const first = i === 0;
-      const next = arr[i + 1];
+      const prev = arr[i - 1] || null;
+      const next = arr[i + 1] || null;
       const last = i === arr.length - 1;
 
-      if (curr.type === 'flight' && next && next.type === 'flight') {
-        const start = curr.departureTime;
-        const end = next.departureTime;
-        const startLoc = curr.departureAirport;
-        const endLoc = curr.arrivalAirport;
+      const start = curr.departureTime;
+      const end = curr.arrivalTime;
+      const startLoc = curr.departureAirport;
+      const endLoc = curr.arrivalAirport;
+      let dutyEnd;
+      if (curr.dutyEnd) {
+        dutyEnd = curr.dutyEnd;
+        console.log(`dutyEnd: ${dutyEnd}`);
+      } else if (next && next.dutyEnd) {
+        dutyEnd = next.dutyEnd;
+        console.log(`dutyEnd from next: ${dutyEnd}`);
+      }
 
-        console.log(`${i}: ${getMealChar(b, start, end, startLoc, endLoc)}`);
-        console.log(`${i}: ${getMealChar(l, start, end, startLoc, endLoc)}`);
-        console.log(`${i}: ${getMealChar(d, start, end, startLoc, endLoc)}`);
-        console.log(`${i}: ${getMealChar(s, start, end, startLoc, endLoc)}`);
-        mealStr += getMealChar(b, start, end, startLoc, endLoc) || '';
-        mealStr += getMealChar(l, start, end, startLoc, endLoc) || '';
-        mealStr += getMealChar(d, start, end, startLoc, endLoc) || '';
-        if (getMealChar(s, start, end, startLoc, endLoc)) {
-          mealStr += getMealChar(s, start, end, startLoc, endLoc) || '';
+      //--- FLIGHT
+      if (curr.type === 'flight') {
+        // if (!dutyEnd) {
+        if (includesMeal(b, start, end, dutyEnd)) {
+          mealStr += canOrUsFlight(start, b, startLoc, endLoc) || '';
+        }
+        if (includesMeal(l, start, end, dutyEnd)) {
+          mealStr += canOrUsFlight(start, l, startLoc, endLoc) || '';
+        }
+        if (includesMeal(d, start, end, dutyEnd)) {
+          mealStr += canOrUsFlight(start, d, startLoc, endLoc) || '';
+        }
+        if (includesMeal(s, start, end, dutyEnd)) {
+          mealStr += canOrUsFlight(start, s, startLoc, endLoc) || '';
           mealStr && pushMeal(mealStr);
           mealStr = '';
         }
-      } else if (curr.type === 'flight') {
-        const start = curr.departureTime;
-        const end = curr.arrivalTime;
-        const startLoc = curr.departureAirport;
-        const endLoc = curr.arrivalAirport;
 
-        console.log(`${i}: ${getMealChar(b, start, end, startLoc, endLoc)}`);
-        console.log(`${i}: ${getMealChar(l, start, end, startLoc, endLoc)}`);
-        console.log(`${i}: ${getMealChar(d, start, end, startLoc, endLoc)}`);
-        console.log(`${i}: ${getMealChar(s, start, end, startLoc, endLoc)}`);
-        mealStr += getMealChar(b, start, end, startLoc, endLoc) || '';
-        mealStr += getMealChar(l, start, end, startLoc, endLoc) || '';
-        mealStr += getMealChar(d, start, end, startLoc, endLoc) || '';
-        if (getMealChar(s, start, end, startLoc, endLoc)) {
-          mealStr += getMealChar(s, start, end, startLoc, endLoc) || '';
-          mealStr && pushMeal(mealStr);
-          mealStr = '';
+        if (next && next.type === 'flight') {
+          //checks time between flights (airport sit)
+
+          const sitStart = curr.arrivalTime;
+          const sitEnd = next.departureTime;
+          const sitStation = curr.arrivalAirport;
+          console.log(`sit ${sitStart} - ${sitEnd} at ${sitStation}`);
+
+          if (!dutyEnd) {
+            if (includesMeal(b, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(b, sitStation) || '';
+            }
+            if (includesMeal(l, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(l, sitStation) || '';
+            }
+            if (includesMeal(d, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(d, sitStation) || '';
+            }
+            if (includesMeal(s, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(s, sitStation) || '';
+              mealStr && pushMeal(mealStr);
+              mealStr = '';
+            }
+          } else if (
+            dutyEnd &&
+            stringToTime(b.end).isBefore(stringToTime(dutyEnd))
+          ) {
+            if (includesMeal(b, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(b, sitStation) || '';
+            }
+          } else if (
+            dutyEnd &&
+            stringToTime(l.end).isBefore(stringToTime(dutyEnd))
+          ) {
+            if (includesMeal(l, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(l, sitStation) || '';
+            }
+          } else if (
+            dutyEnd &&
+            stringToTime(d.end).isBefore(stringToTime(dutyEnd))
+          ) {
+            if (includesMeal(d, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(d, sitStation) || '';
+            }
+          } else if (
+            dutyEnd &&
+            stringToTime(s.end).isBefore(stringToTime(dutyEnd))
+          ) {
+            if (includesMeal(s, sitStart, sitEnd, undefined)) {
+              mealStr += canOrUsLayoverOrSit(s, sitStation) || '';
+              mealStr && pushMeal(mealStr);
+              mealStr = '';
+            }
+          }
+          console.log(`after sit mealStr: ${mealStr}`);
         }
       } else if (curr.type === 'layover') {
-        const start = curr.layoverStart;
-        const end = curr.layoverEnd;
+        let start;
+        let end;
         const len = curr.layoverLength;
-        const startLoc = curr.layoverStation;
-        const endLoc = curr.layoverStation;
-        const days = getLayoverDays(start, end, len);
+        const station = curr.layoverStation;
+        const dhBefore = prev && prev.isDeadhead;
+        const dhAfter = next && next.isDeadhead;
+        const days = getLayoverDays(
+          curr.layoverStart,
+          curr.layoverEnd,
+          len,
+          dhBefore,
+          dhAfter,
+        );
 
         for (let j = 0; j <= days; j++) {
           console.log(`j: ${j}`);
+          // set start and end
           if (j === 0 && days === 0) {
-            console.log(`j === 0 && days === 0)`);
-            console.log(
-              `${i}: ${getMealChar(b, start, end, startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(l, start, end, startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(d, start, end, startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(s, start, end, startLoc, endLoc)}`,
-            );
-            mealStr += getMealChar(b, start, end, startLoc, endLoc) || '';
-            mealStr += getMealChar(l, start, end, startLoc, endLoc) || '';
-            mealStr += getMealChar(d, start, end, startLoc, endLoc) || '';
-            if (getMealChar(s, start, end, startLoc, endLoc)) {
-              mealStr += getMealChar(s, start, end, startLoc, endLoc) || '';
-              mealStr && pushMeal(mealStr);
-              mealStr = '';
-            }
+            start = curr.layoverStart;
+            end = curr.layoverEnd;
+            console.log(`opt 1 start: ${start} - end: ${end}`);
           } else if (j === 0 && j !== days) {
-            console.log(`j === 0 && j !== days`);
-            console.log(
-              `${i}: ${getMealChar(b, start, '23:59', startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(l, start, '23:59', startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(d, start, '23:59', startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(s, start, '23:59', startLoc, endLoc)}`,
-            );
-            mealStr += getMealChar(b, start, '23:59', startLoc, endLoc) || '';
-            mealStr += getMealChar(l, start, '23:59', startLoc, endLoc) || '';
-            mealStr += getMealChar(d, start, '23:59', startLoc, endLoc) || '';
-            if (getMealChar(s, start, '23:59', startLoc, endLoc)) {
-              mealStr += getMealChar(s, start, '23:59', startLoc, endLoc) || '';
-              mealStr && pushMeal(mealStr);
-              mealStr = '';
-            }
+            start = curr.layoverStart;
+            end = '23:59';
+            console.log(`opt 2start: ${start} - end: ${end}`);
           } else if (j !== 0 && j === days) {
-            console.log(`j !== 0 && j === days`);
-            console.log(
-              `${i}: ${getMealChar(b, '00:00', end, startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(l, '00:00', end, startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(d, '00:00', end, startLoc, endLoc)}`,
-            );
-            console.log(
-              `${i}: ${getMealChar(s, '00:00', end, startLoc, endLoc)}`,
-            );
-            mealStr += getMealChar(b, '00:00', end, startLoc, endLoc) || '';
-            mealStr += getMealChar(l, '00:00', end, startLoc, endLoc) || '';
-            mealStr += getMealChar(d, '00:00', end, startLoc, endLoc) || '';
-            if (getMealChar(s, '00:00', end, startLoc, endLoc)) {
-              mealStr += getMealChar(s, '00:00', end, startLoc, endLoc) || '';
-              mealStr && pushMeal(mealStr);
-              mealStr = '';
-            }
-          } else {
-            console.log(`j !== 0 && j !== days`);
-            if (canadian_airport_codes.includes(curr.layoverStation)) {
-              console.log(`${i}: BLDS`);
-            } else if (american_airport_codes.includes(curr.layoverStation)) {
-              console.log(`${i}: CMET`);
-            }
+            start = '00:00';
+            end = curr.layoverEnd;
+            console.log(`opt 3start: ${start} - end: ${end}`);
+          }
+          // add mealsChars if meal included on layover
+          if (includesMeal(b, start, end, undefined)) {
+            mealStr += canOrUsLayoverOrSit(b, station) || '';
+          }
+          if (includesMeal(l, start, end, undefined)) {
+            mealStr += canOrUsLayoverOrSit(l, station) || '';
+          }
+          if (includesMeal(d, start, end, undefined)) {
+            mealStr += canOrUsLayoverOrSit(d, station) || '';
+          }
+          if (includesMeal(s, start, end, undefined)) {
+            mealStr += canOrUsLayoverOrSit(s, station) || '';
+            mealStr && pushMeal(mealStr);
+            mealStr = '';
           }
         }
       }
       if (last) {
         mealStr && pushMeal(mealStr);
       }
+      console.log(`i: ${i} - mealStr: ${mealStr}`);
     });
   };
 
