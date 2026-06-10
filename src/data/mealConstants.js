@@ -18,7 +18,7 @@ const l = {
 
 const d = {
   start: '18:00',
-  end: '19:30',
+  end: '18:30',
   deptStart: '18:00',
   deptEnd: '19:30',
   arrStart: '17:00',

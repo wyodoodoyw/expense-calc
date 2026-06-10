@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 // import getAllPairingNumbers from '../modules/getAllPairingNumbers';
+import LoadingIndicator from './LoadingIndicator';
 
 dayjs.extend(isBetween);
 dayjs.extend(customParseFormat);
@@ -19,6 +20,7 @@ dayjs.extend(customParseFormat);
 function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
+  const [loading, setLoading] = useState(false);
   const [pairingNumber, setPairingNumber] = useState('T8001');
   const [isInt, setIsInt] = useState(false);
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
@@ -35,96 +37,101 @@ function SearchPairings(props) {
   };
 
   const handleSearchClick = () => {
-    dispatch(
-      initializePairing({
-        id: 0,
-        blockCredit: '',
-        calendar: [],
-        cicoAmount: '',
-        ifsBase: '',
-        isInt: '',
-        isUsa: '',
-        pairingDates: '',
-        pairingDPG: '',
+    setLoading(true);
+    try {
+      dispatch(
+        initializePairing({
+          id: 0,
+          blockCredit: '',
+          calendar: [],
+          cicoAmount: '',
+          ifsBase: '',
+          isInt: '',
+          isUsa: '',
+          pairingDates: '',
+          pairingDPG: '',
 
-        pairingFA: '',
-        pairingBL: '',
-        pairingGP: '',
-        pairingGJ: '',
-        pairingGY: '',
+          pairingFA: '',
+          pairingBL: '',
+          pairingGP: '',
+          pairingGJ: '',
+          pairingGY: '',
 
-        pairingIdentifier: '',
-        pairingLanguages: '',
-        pairingNumber: '',
-        pairingOperatesEnd: '',
-        pairingOperatesStart: '',
-        pairingTHG: '',
-        sequence: null,
-        pairingPurser: '',
-        tafb: '',
-        totalAllowance: '',
-        totalCredit: '',
-        totalDuty: '',
-      }),
-    );
+          pairingIdentifier: '',
+          pairingLanguages: '',
+          pairingNumber: '',
+          pairingOperatesEnd: '',
+          pairingOperatesStart: '',
+          pairingTHG: '',
+          sequence: null,
+          pairingPurser: '',
+          tafb: '',
+          totalAllowance: '',
+          totalCredit: '',
+          totalDuty: '',
+        }),
+      );
 
-    const request = window.indexedDB.open('PairingsDB', 1);
+      const request = window.indexedDB.open('PairingsDB', 1);
 
-    request.onsuccess = (event) => {
-      const db = event.target.result;
-      const tx = db.transaction(['pairings'], 'readonly');
-      const pairingsStore = tx.objectStore('pairings');
-      const pairingNumberIndex = pairingsStore.index('pairingIdentifier');
-      const request = pairingNumberIndex.get(pairingNumber);
+      request.onsuccess = (event) => {
+        const db = event.target.result;
+        const tx = db.transaction(['pairings'], 'readonly');
+        const pairingsStore = tx.objectStore('pairings');
+        const pairingNumberIndex = pairingsStore.index('pairingIdentifier');
+        const request = pairingNumberIndex.get(pairingNumber);
 
-      request.onsuccess = () => {
-        setPairingSearchResult(true);
-        request.result.isInt ? setIsInt(true) : setIsInt(false);
-        if (request.result) {
-          dispatch(
-            initializePairing({
-              id: request.result.id,
-              blockCredit: request.result.blockCredit,
-              calendar: request.result.calendar,
-              cicoAmount: request.result.cicoAmount,
-              ifsBase: request.result.ifsBase,
-              isInt: request.result.isInt,
-              isUsa: request.result.isUsa,
-              pairingDates: request.result.pairingDates,
-              pairingDPG: request.result.pairingDPG,
+        request.onsuccess = () => {
+          setPairingSearchResult(true);
+          request.result.isInt ? setIsInt(true) : setIsInt(false);
+          if (request.result) {
+            dispatch(
+              initializePairing({
+                id: request.result.id,
+                blockCredit: request.result.blockCredit,
+                calendar: request.result.calendar,
+                cicoAmount: request.result.cicoAmount,
+                ifsBase: request.result.ifsBase,
+                isInt: request.result.isInt,
+                isUsa: request.result.isUsa,
+                pairingDates: request.result.pairingDates,
+                pairingDPG: request.result.pairingDPG,
 
-              pairingFA: request.result.pairingFA,
-              pairingBL: request.result.pairingBL,
-              pairingGP: request.result.pairingGP,
-              pairingGJ: request.result.pairingGJ,
-              pairingGY: request.result.pairingGY,
+                pairingFA: request.result.pairingFA,
+                pairingBL: request.result.pairingBL,
+                pairingGP: request.result.pairingGP,
+                pairingGJ: request.result.pairingGJ,
+                pairingGY: request.result.pairingGY,
 
-              pairingIdentifier: request.result.pairingIdentifier,
-              pairingLanguages: request.result.pairingLanguages,
-              pairingNumber: request.result.pairingNumber,
-              pairingOperatesEnd: request.result.pairingOperatesEnd,
-              pairingOperatesStart: request.result.pairingOperatesStart,
-              pairingTHG: request.result.pairingTHG,
-              sequence: null,
-              pairingPurser: request.result.pairingPurser,
-              tafb: request.result.tafb,
-              totalAllowance: request.result.totalAllowance,
-              totalCredit: request.result.totalCredit,
-              totalDuty: request.result.totalDuty,
-            }),
-          );
-          dispatch(processSequence(request.result.sequence));
-        }
+                pairingIdentifier: request.result.pairingIdentifier,
+                pairingLanguages: request.result.pairingLanguages,
+                pairingNumber: request.result.pairingNumber,
+                pairingOperatesEnd: request.result.pairingOperatesEnd,
+                pairingOperatesStart: request.result.pairingOperatesStart,
+                pairingTHG: request.result.pairingTHG,
+                sequence: null,
+                pairingPurser: request.result.pairingPurser,
+                tafb: request.result.tafb,
+                totalAllowance: request.result.totalAllowance,
+                totalCredit: request.result.totalCredit,
+                totalDuty: request.result.totalDuty,
+              }),
+            );
+            dispatch(processSequence(request.result.sequence));
+          }
+        };
+
+        request.onerror = (event) => {
+          console.log(`!DB Error: ${event.target.error}`);
+        };
+
+        tx.oncomplete = () => {
+          db.close();
+        };
       };
-
-      request.onerror = (event) => {
-        console.log(`!DB Error: ${event.target.error}`);
-      };
-
-      tx.oncomplete = () => {
-        db.close();
-      };
-    };
+    } finally {
+      setLoading(false);
+    }
   };
 
   const submitHandler = (e) => {
@@ -133,50 +140,63 @@ function SearchPairings(props) {
   };
 
   return (
-    <div className="accordion-item">
-      <h2 className="accordion-header">
-        <button
-          className="accordion-button collapsed"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#collapseTwo"
-          aria-expanded="false"
-          aria-controls="collapseTwo"
-        >
-          <h2 className="">Step 3:</h2>
-          <strong className="ms-3">Search for an existing pairing.</strong>
-        </button>
-      </h2>
-      <form onSubmit={submitHandler} className="mx-3">
-        <div
-          className={
-            'mb-3 accordion-collapse ' +
-            (pairingsUploaded && expensesUploaded ? 'show' : 'collapse')
-          }
-        >
-          <div className="input-group mb-3" id="airport_code">
-            <span className="input-group-text">Pairing Number: </span>
-            <input
-              list="pairings"
-              id="pairing"
-              name="pairing"
-              className="col-11 form-control flex"
-              placeholder=""
-              value={pairingNumber}
-              onChange={(e) => handlePairingNumberChange(e)}
-            />
-            <div className="btn btn-primary" onClick={handleSearchClick}>
-              Search
+    <>
+      <LoadingIndicator
+        loading={loading}
+        message="Processing pairing file..."
+      />
+      <div className="accordion-item">
+        <h2 className="accordion-header">
+          <button
+            className="accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapseTwo"
+            aria-expanded="false"
+            aria-controls="collapseTwo"
+          >
+            <h2 className="">Step 3:</h2>
+            <strong className="ms-3">Search for an existing pairing.</strong>
+          </button>
+        </h2>
+        <form onSubmit={submitHandler} className="mx-3">
+          <div
+            className={
+              'mb-3 accordion-collapse ' +
+              (pairingsUploaded && expensesUploaded ? 'show' : 'collapse')
+            }
+          >
+            <div className="input-group mb-3" id="airport_code">
+              <span className="input-group-text">Pairing Number: </span>
+              <input
+                list="pairings"
+                id="pairing"
+                name="pairing"
+                className="col-11 form-control flex"
+                placeholder=""
+                value={pairingNumber}
+                onChange={(e) => handlePairingNumberChange(e)}
+              />
+              <button
+                onClick={handleSearchClick}
+                className="submit"
+                disabled={loading}
+              >
+                {loading ? 'Searching...' : 'Search'}
+              </button>
+              {/* <div className="btn btn-primary" onClick={handleSearchClick}>
+                Search
+              </div> */}
             </div>
           </div>
-        </div>
-      </form>
-      {pairingSearchResult && isInt ? (
-        <IntPairing display={pairingSearchResult} />
-      ) : (
-        <DomPairing display={pairingSearchResult} />
-      )}
-    </div>
+        </form>
+        {pairingSearchResult && isInt ? (
+          <IntPairing display={pairingSearchResult} />
+        ) : (
+          <DomPairing display={pairingSearchResult} />
+        )}
+      </div>
+    </>
   );
 }
 

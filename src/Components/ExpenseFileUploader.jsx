@@ -2,9 +2,11 @@ import { useState } from 'react';
 import extractExpensesFromPDF from '../modules/pdfExpensesParser';
 import american_airport_codes from '../data/american_airport_codes';
 import canadian_airport_codes from '../data/canadian_airport_codes';
+import LoadingIndicator from './LoadingIndicator';
 
 const ExpenseFileUploader = ({ setExpensesUploaded }) => {
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     if (e.target.files) {
@@ -128,50 +130,64 @@ const ExpenseFileUploader = ({ setExpensesUploaded }) => {
   };
 
   const handleUpload = async () => {
-    // delete existing DB
-    const request = window.indexedDB.deleteDatabase('ExpensesDB');
-    request.onsuccess = () => {
-      console.log('Database deleted successfully');
-    };
-    request.onerror = () => {
-      console.log('Error deleting database');
-    };
-    request.onblocked = () => {
-      console.log('Database deletion blocked');
-    };
+    setLoading(true);
+    try {
+      // delete existing DB
+      const request = window.indexedDB.deleteDatabase('ExpensesDB');
+      request.onsuccess = () => {
+        console.log('Database deleted successfully');
+      };
+      request.onerror = () => {
+        console.log('Error deleting database');
+      };
+      request.onblocked = () => {
+        console.log('Database deletion blocked');
+      };
 
-    if (file) {
-      try {
-        // Read pdf file
-        let array = await extractExpensesFromPDF(file, 'custom');
-        array && setExpensesUploaded(true);
-        // console.log(array);
+      if (file) {
+        try {
+          // Read pdf file
+          let array = await extractExpensesFromPDF(file, 'custom');
+          array && setExpensesUploaded(true);
+          // console.log(array);
 
-        // Parse each destination depending on expenses or bracelet
-        for (let i = 0; i < array.length; i++) {
-          const destination = array[i];
+          // Parse each destination depending on expenses or bracelet
+          for (let i = 0; i < array.length; i++) {
+            const destination = array[i];
 
-          if (destination.length === 3) {
-            parseLineAsBracelet(destination);
-          } else {
-            parseLine(destination);
+            if (destination.length === 3) {
+              parseLineAsBracelet(destination);
+            } else {
+              parseLine(destination);
+            }
           }
+        } catch (err) {
+          console.error(`!Error: ${err}`);
         }
-      } catch (err) {
-        console.error(`!Error: ${err}`);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
+      <LoadingIndicator
+        loading={loading}
+        message="Processing expenses file..."
+      />
       <div className="input-group">
-        <input id="file" type="file" onChange={handleFileChange} />
+        <input
+          id="file"
+          type="file"
+          onChange={handleFileChange}
+          disabled={loading}
+        />
       </div>
 
       {file && (
-        <button onClick={handleUpload} className="submit">
-          Upload Expense File
+        <button onClick={handleUpload} className="submit" disabled={loading}>
+          {loading ? 'Uploading...' : 'Upload Expense File'}
         </button>
       )}
     </>
