@@ -1,7 +1,7 @@
 const b = {
   start: '08:00',
   end: '09:30',
-  test: '07:30',
+  test: '07:47',
   testBefore: '07:30',
   testAfter: '07:29',
   canChar: 'B',

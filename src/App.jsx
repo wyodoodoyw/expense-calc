@@ -4,7 +4,7 @@ import Accordion from './Components/Accordion';
 import { useState, useEffect } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-// import test from './tests';
+// import TestComponent from './Components/Test';
 import runCheckAllPairings from './tests/test';
 
 function App() {
@@ -16,7 +16,7 @@ function App() {
   useEffect(() => {
     console.clear();
     checkDBExists();
-    runCheckAllPairings('T8068', 'T8301');
+    runCheckAllPairings('T8200', 'T8300');
   }, []);
 
   const checkDBExists = () => {
@@ -43,6 +43,7 @@ function App() {
           <h1 className="heading mt-3 mb-3">Expense Calculator</h1>
 
           <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/* <TestComponent min={'T8000'} max={'T8301'} /> */}
             {!clicked && (
               <Disclaimer clicked={clicked} setClicked={setClicked} />
             )}

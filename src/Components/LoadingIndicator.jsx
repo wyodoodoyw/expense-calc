@@ -1,4 +1,4 @@
-import { ClipLoader } from 'react-spinners';
+import { BeatLoader } from 'react-spinners';
 import './LoadingIndicator.css';
 
 const LoadingIndicator = ({ loading, message = 'Loading...' }) => {
@@ -7,7 +7,7 @@ const LoadingIndicator = ({ loading, message = 'Loading...' }) => {
   return (
     <div className="loading-overlay">
       <div className="loading-container">
-        <ClipLoader
+        <BeatLoader
           color="#0d6efd"
           loading={loading}
           size={50}
