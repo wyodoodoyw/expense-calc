@@ -4,7 +4,7 @@ import american_airport_codes from '../data/american_airport_codes';
 import international_airport_codes from '../data/international_airport_codes';
 import aircraft from '../data/aircraft';
 
-const parseAsFlight = (array, index, isLastFlight) => {
+const parseAsFlight = (pairingSequence, array, index, isLastFlight) => {
   let newFlight = {
     index: index,
     type: 'flight',
@@ -15,7 +15,9 @@ const parseAsFlight = (array, index, isLastFlight) => {
   let daysOfWeek = [];
   for (let i = 0; i < array[0].length; i++) {
     const day = array[0][i];
-    daysOfWeek.push(day);
+    if (day !== ' ') {
+      daysOfWeek.push(day);
+    }
   }
   newFlight.daysOfWeek = daysOfWeek;
 

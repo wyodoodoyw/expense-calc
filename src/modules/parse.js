@@ -1,12 +1,14 @@
 import all_airports from '../data/all_airports';
-import other_airlines from '../data/other_airlines';
-import canadian_airport_codes from '../data/canadian_airport_codes';
 import american_airport_codes from '../data/american_airport_codes';
 import international_airport_codes from '../data/international_airport_codes';
 import parseAsFlight from '../modules/parseAsFlight';
 import parseAsLayover from '../modules/parseAsLayover';
 import addPairingToDB from '../modules/addPairingToDB';
 import aircraft from '../data/aircraft';
+import dayjs from 'dayjs';
+import Duration from 'dayjs/plugin/duration';
+
+dayjs.extend(Duration);
 
 const parse = (pairing, i) => {
   let errorPairingNumber = null;
@@ -14,11 +16,6 @@ const parse = (pairing, i) => {
   if (!pairing) {
     throw new Error(`Pairing is empty: ${i}.`);
   }
-
-  // if (i === 255) {
-  //   // console.log(JSON.stringify(pairing));
-  //   console.log(pairing);
-  // }
 
   let newPairing = {};
   let array = pairing[0];
@@ -233,23 +230,9 @@ const parse = (pairing, i) => {
       array[4].match(/[A-Z]{3}/g) &&
       all_airports.includes(array[4].substring(0, 3))
     ) {
-      // const nextSeq = pairing[i + 1];
-      // let isLastInDuty = false;
-
-      // if (i === blockIdx - 1) {
-      //   isLastInDuty = true;
-      // } else if (nextSeq[0].includes('DPG')) {
-      //   isLastInDuty = true;
-      // } else if (
-      //   nextSeq.length > 3 &&
-      //   !all_airports.includes(nextSeq[3].substring(0, 3))
-      // ) {
-      //   isLastInDuty = true;
-      // } else {
-      //   isLastInDuty = false;
-      // }
-
+      //-------------------------
       const flight = parseAsFlight(
+        pairingSequence || undefined,
         array,
         pairingSequence.length,
         i === blockIdx - 1, // last flight ==> true or false
@@ -314,6 +297,45 @@ const parse = (pairing, i) => {
       i,
       err,
     );
+  }
+
+  // determine day in pairing
+  try {
+    console.log(`${newPairing.pairingIdentifier}`);
+    let timeElapsed = dayjs.duration({
+      hours: pairingSequence[0].dutyStart.slice(0, -2),
+      minutes: pairingSequence[0].dutyStart.slice(-2),
+    });
+    console.log(`1 timeElapsed: ${timeElapsed.format('HH:mm')}`);
+    for (let i = 0; i < pairingSequence.length; i++) {
+      if (pairingSequence[i].type === 'flight') {
+        pairingSequence[i].dutyDay = Math.floor(timeElapsed.asDays() + 1);
+        if (pairingSequence[i].dutyTime) {
+          timeElapsed = timeElapsed.add(
+            dayjs.duration({
+              hours: pairingSequence[i].dutyTime.slice(0, -2),
+              minutes: pairingSequence[i].dutyTime.slice(-2),
+            }),
+          );
+          console.log(
+            `add dutyTime: ${pairingSequence[i].dutyTime} -> timeElapsed: ${timeElapsed.format('HH:mm')}`,
+          );
+        }
+        if (pairingSequence[i].layoverLength) {
+          ((timeElapsed = timeElapsed.add(
+            dayjs.duration({
+              hours: pairingSequence[i].layoverLength.slice(0, -2),
+              minutes: pairingSequence[i].layoverLength.slice(-2),
+            }),
+          )),
+            console.log(
+              `add dutyTime: ${pairingSequence[i].layoverLength} -> timeElapsed: ${timeElapsed.format('HH:mm')}`,
+            ));
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`Error determining dutyDay: ${err},`);
   }
 
   newPairing.sequence = pairingSequence;

@@ -20,7 +20,8 @@ const ExpensesTable = () => {
 
   useEffect(() => {
     // INTERNATIONAL PAIRINGS
-    // if (Number(p.pairingNumber) < 7000) {
+    if (!p.pairingIdentifier || seq.length === 0) return;
+
     if (p.isInt) {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
@@ -50,7 +51,7 @@ const ExpensesTable = () => {
       getExpenseseFromDB('YYZ', setCaExpenses);
       getExpenseseFromDB('MCO', setUsExpenses);
     }
-  }, [p, seq]);
+  }, [seq]);
 
   useEffect(() => {
     const hasMeals = Array.isArray(meals) && meals.length > 0;
