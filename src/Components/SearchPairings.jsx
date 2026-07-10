@@ -46,7 +46,7 @@ function SearchPairings(props) {
           calendar: [],
           cicoAmount: '',
           ifsBase: '',
-          isInt: '',
+          isInt: false,
           isUsa: '',
           pairingDates: '',
           pairingDPG: '',

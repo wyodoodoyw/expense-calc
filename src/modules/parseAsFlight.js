@@ -195,6 +195,14 @@ const parseAsFlight = (pairingSequence, array, index, isLastFlight) => {
     newFlight.dutyEnd = time.format('HHmm');
   }
 
+  if (isLastFlight && !newFlight.isDeadhead) {
+    const time = stringToTime(newFlight.arrivalTime);
+    newFlight.dutyEnd = time.add(15, 'minute').format('HHmm');
+  } else if (isLastFlight && newFlight.isDeadhead) {
+    const time = stringToTime(newFlight.arrivalTime);
+    newFlight.dutyEnd = time.format('HHmm');
+  }
+
   return newFlight;
 };
 

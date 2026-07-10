@@ -5,6 +5,13 @@ const stringToTime = (timeString) => {
 
   if (timeString) {
     timeString = timeString.replace(':', '');
+    // console.log(`timeString: ${timeString}`);
+    // console.log(
+    //   `dayjs: ${dayjs()
+    //     .set('hour', timeString.slice(0, -2))
+    //     .set('minute', timeString.slice(-2))
+    //     .format('HH:mm')}`,
+    // );
     return dayjs()
       .set('hour', timeString.slice(0, -2))
       .set('minute', timeString.slice(-2));

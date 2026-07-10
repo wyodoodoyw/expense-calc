@@ -1,74 +1,73 @@
 /* eslint-disable react/prop-types */
 import { useSelector } from 'react-redux';
-// import { useEffect, useState } from 'react';
-
 import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
-// import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import ExpensesTable from '../expensesTable/ExpensesTable';
 
 function DomPairing(props) {
-  // const { display } = props;
+  const { display } = props;
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
 
   return (
-    <div className="text-start font-monospace">
-      <div className="row mt-4">
-        <div className="col-6 ps-5">
-          {p.pairingIdentifier} OPERATES/OPER- {p.pairingOperatesStart} -{' '}
-          {p.pairingOperatesEnd}
+    display && (
+      <div className="text-start font-monospace">
+        <div className="row mt-4">
+          <div className="col-6 ps-5">
+            {p.pairingIdentifier} OPERATES/OPER- {p.pairingOperatesStart} -{' '}
+            {p.pairingOperatesEnd}
+          </div>
+          <div className="col-6 text-end pe-5"></div>
         </div>
-        <div className="col-6 text-end pe-5"></div>
-      </div>
-      <div className="row">
-        <div className="col-6 ps-5">
-          Crew: {p.pairingPurser && `P${p.pairingPurser}  `}
-          {p.pairingFA && `FA${p.pairingFA}  `}
-          {p.pairingGJ && `GJ${p.pairingGJ}  `}
-          {p.pairingGP && `GP${p.pairingGP}  `}
-          {p.pairingGY && `GY${p.pairingGY}`}
+        <div className="row">
+          <div className="col-6 ps-5">
+            Crew: {p.pairingPurser && `P${p.pairingPurser}  `}
+            {p.pairingFA && `FA${p.pairingFA}  `}
+            {p.pairingGJ && `GJ${p.pairingGJ}  `}
+            {p.pairingGP && `GP${p.pairingGP}  `}
+            {p.pairingGY && `GY${p.pairingGY}`}
+          </div>
+          <div className="col-6 text-end pe-5">
+            {p.pairingBL || (p.pairingLanguages && `Languages: `)}
+            {p.pairingBL && `BL${p.pairingBL}  `}
+            {p.pairingLanguages &&
+              p.pairingLanguages.map((lang) => {
+                return `${lang}`;
+              })}
+          </div>
         </div>
-        <div className="col-6 text-end pe-5">
-          {p.pairingBL || (p.pairingLanguages && `Languages: `)}
-          {p.pairingBL && `BL${p.pairingBL}  `}
-          {p.pairingLanguages &&
-            p.pairingLanguages.map((lang) => {
-              return `${lang}`;
+
+        <div className="row mt-3 ms-3">
+          {seq &&
+            seq.map((current, index) => {
+              if (!current.hotelInfo) {
+                // flight
+                <p key={index}>{JSON.stringify(current)}</p>;
+                return <Flight key={index} index={index} />;
+              } else if (current.hotelInfo) {
+                // layover
+                return (
+                  <div className="row" key={index}>
+                    <Layover key={index} index={index} />
+                  </div>
+                );
+              }
             })}
         </div>
+        <div className="row ms-3">
+          <div className="col-3">BLOCK/H-VOL {p.blockCredit}</div>
+          <div className="col-3">Total Duty {p.totalDuty}</div>
+          <div className="col-3">(INC - ${p.cicoAmount} CICO)</div>
+          <div className="col-3">TOTAL ALLOWANCE - ${p.totalAllowance}</div>
+        </div>
+        <div className="row ms-3">
+          <div className="col-3">TAFB/PTEB {p.tafb}</div>
+          <div className="col-3">TOTAL - {p.totalCredit}</div>
+        </div>
+        {/* <ExpensesTable meals={meals} station={station} /> */}
+        <ExpensesTable />
       </div>
-
-      <div className="row mt-3 ms-3">
-        {seq &&
-          seq.map((current, index) => {
-            if (!current.hotelInfo) {
-              // flight
-              <p key={index}>{JSON.stringify(current)}</p>;
-              return <Flight key={index} index={index} />;
-            } else if (current.hotelInfo) {
-              // layover
-              return (
-                <div className="row" key={index}>
-                  <Layover key={index} index={index} />
-                </div>
-              );
-            }
-          })}
-      </div>
-      <div className="row ms-3">
-        <div className="col-3">BLOCK/H-VOL {p.blockCredit}</div>
-        <div className="col-3">Total Duty {p.totalDuty}</div>
-        <div className="col-3">(INC - ${p.cicoAmount} CICO)</div>
-        <div className="col-3">TOTAL ALLOWANCE - ${p.totalAllowance}</div>
-      </div>
-      <div className="row ms-3">
-        <div className="col-3">TAFB/PTEB {p.tafb}</div>
-        <div className="col-3">TOTAL - {p.totalCredit}</div>
-      </div>
-      {/* <ExpensesTable meals={meals} station={station} /> */}
-      <ExpensesTable />
-    </div>
+    )
   );
 }
 export default DomPairing;

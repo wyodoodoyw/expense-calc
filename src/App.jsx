@@ -16,7 +16,7 @@ function App() {
   useEffect(() => {
     console.clear();
     checkDBExists();
-    runCheckAllPairings('T8000', 'T8100');
+    runCheckAllPairings('T8200', 'T8300');
   }, []);
 
   const checkDBExists = () => {

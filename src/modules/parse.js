@@ -126,6 +126,14 @@ const parse = (pairing, i) => {
         }
       }
     }
+    if (
+      newPairing.totalAllowance &&
+      !newPairing.totalAllowance.match(/[0-9]{1,3}.[0-9]{2}/)
+    ) {
+      console.log(
+        `Error parsing totalAllowance. pairing: ${newPairing.pairingIdentifier}, allowance: ${newPairing.totalAllowance}`,
+      );
+    }
 
     // Find TAFB Index
     if (array[0].includes('TAFB')) {
@@ -301,15 +309,17 @@ const parse = (pairing, i) => {
 
   // determine day in pairing
   try {
-    console.log(`${newPairing.pairingIdentifier}`);
     let timeElapsed = dayjs.duration({
       hours: pairingSequence[0].dutyStart.slice(0, -2),
       minutes: pairingSequence[0].dutyStart.slice(-2),
     });
-    console.log(`1 timeElapsed: ${timeElapsed.format('HH:mm')}`);
+    let layoverCount = 0;
+    // const layoverMax = Number(pairing.cicoAmount) / 5.05;
     for (let i = 0; i < pairingSequence.length; i++) {
       if (pairingSequence[i].type === 'flight') {
+        // if (layoverCount === 0 || layoverCount === layoverMax) {
         pairingSequence[i].dutyDay = Math.floor(timeElapsed.asDays() + 1);
+        // }
         if (pairingSequence[i].dutyTime) {
           timeElapsed = timeElapsed.add(
             dayjs.duration({
@@ -317,25 +327,47 @@ const parse = (pairing, i) => {
               minutes: pairingSequence[i].dutyTime.slice(-2),
             }),
           );
-          console.log(
-            `add dutyTime: ${pairingSequence[i].dutyTime} -> timeElapsed: ${timeElapsed.format('HH:mm')}`,
-          );
         }
-        if (pairingSequence[i].layoverLength) {
-          ((timeElapsed = timeElapsed.add(
-            dayjs.duration({
-              hours: pairingSequence[i].layoverLength.slice(0, -2),
-              minutes: pairingSequence[i].layoverLength.slice(-2),
-            }),
-          )),
-            console.log(
-              `add dutyTime: ${pairingSequence[i].layoverLength} -> timeElapsed: ${timeElapsed.format('HH:mm')}`,
-            ));
-        }
+      } else if (
+        pairingSequence[i].type === 'layover' &&
+        pairingSequence[i].layoverLength
+      ) {
+        timeElapsed = timeElapsed.add(
+          dayjs.duration({
+            hours: pairingSequence[i].layoverLength.slice(0, -2),
+            minutes: pairingSequence[i].layoverLength.slice(-2),
+          }),
+        );
+        layoverCount++;
       }
+      // else if (pairingSequence[i].type === 'layover') {
+      //   layoverCount++;
+      // }
     }
   } catch (err) {
     console.warn(`Error determining dutyDay: ${err},`);
+  }
+
+  // add dutyEnd to last dutyDay flights
+  const lastDutyDay = pairingSequence[pairingSequence.length - 1].dutyDay;
+  // let layoverCount = 0;
+  // const layoverMax = pairing.cicoAmount / 5.05;
+  for (let i = 0; i < pairingSequence.length; i++) {
+    if (pairingSequence[i].type === 'flight' && !pairingSequence[i].dutyDay) {
+      console.log(
+        `Error: ${newPairing.pairingIdentifier} - flight segment does not have dutyDay.`,
+      );
+    }
+    // if (pairingSequence[i].type === 'layover') {
+    //   layoverCount++;
+    // }
+    if (pairingSequence[i].dutyDay === pairingSequence[0].dutyDay) {
+      pairingSequence[i].dutyStart = pairingSequence[0].dutyStart;
+    }
+    if (pairingSequence[i].dutyDay === lastDutyDay) {
+      pairingSequence[i].dutyEnd =
+        pairingSequence[pairingSequence.length - 1].dutyEnd;
+    }
   }
 
   newPairing.sequence = pairingSequence;
