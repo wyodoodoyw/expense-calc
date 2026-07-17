@@ -37,6 +37,7 @@ function SearchPairings(props) {
   };
 
   const handleSearchClick = () => {
+    console.clear();
     setLoading(true);
     try {
       dispatch(

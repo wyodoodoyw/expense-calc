@@ -7,6 +7,7 @@ import addPairingToDB from '../modules/addPairingToDB';
 import aircraft from '../data/aircraft';
 import dayjs from 'dayjs';
 import Duration from 'dayjs/plugin/duration';
+import stringToTime from '../modules/stringToTime';
 
 dayjs.extend(Duration);
 
@@ -313,13 +314,9 @@ const parse = (pairing, i) => {
       hours: pairingSequence[0].dutyStart.slice(0, -2),
       minutes: pairingSequence[0].dutyStart.slice(-2),
     });
-    let layoverCount = 0;
-    // const layoverMax = Number(pairing.cicoAmount) / 5.05;
     for (let i = 0; i < pairingSequence.length; i++) {
       if (pairingSequence[i].type === 'flight') {
-        // if (layoverCount === 0 || layoverCount === layoverMax) {
         pairingSequence[i].dutyDay = Math.floor(timeElapsed.asDays() + 1);
-        // }
         if (pairingSequence[i].dutyTime) {
           timeElapsed = timeElapsed.add(
             dayjs.duration({
@@ -338,11 +335,7 @@ const parse = (pairing, i) => {
             minutes: pairingSequence[i].layoverLength.slice(-2),
           }),
         );
-        layoverCount++;
       }
-      // else if (pairingSequence[i].type === 'layover') {
-      //   layoverCount++;
-      // }
     }
   } catch (err) {
     console.warn(`Error determining dutyDay: ${err},`);
@@ -350,23 +343,32 @@ const parse = (pairing, i) => {
 
   // add dutyEnd to last dutyDay flights
   const lastDutyDay = pairingSequence[pairingSequence.length - 1].dutyDay;
-  // let layoverCount = 0;
-  // const layoverMax = pairing.cicoAmount / 5.05;
   for (let i = 0; i < pairingSequence.length; i++) {
     if (pairingSequence[i].type === 'flight' && !pairingSequence[i].dutyDay) {
       console.log(
         `Error: ${newPairing.pairingIdentifier} - flight segment does not have dutyDay.`,
       );
     }
-    // if (pairingSequence[i].type === 'layover') {
-    //   layoverCount++;
-    // }
     if (pairingSequence[i].dutyDay === pairingSequence[0].dutyDay) {
       pairingSequence[i].dutyStart = pairingSequence[0].dutyStart;
     }
+
     if (pairingSequence[i].dutyDay === lastDutyDay) {
-      pairingSequence[i].dutyEnd =
-        pairingSequence[pairingSequence.length - 1].dutyEnd;
+      if (
+        stringToTime(
+          pairingSequence[pairingSequence.length - 1].arrivalTime,
+        ).isBetween(
+          stringToTime('00:00'),
+          stringToTime('07:31'),
+          'minutes',
+          '[]',
+        )
+      ) {
+        // skip
+      } else {
+        pairingSequence[i].dutyEnd =
+          pairingSequence[pairingSequence.length - 1].dutyEnd;
+      }
     }
   }
 

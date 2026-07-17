@@ -5,6 +5,8 @@
  * @param {Number} numLayovers
  * @returns {Number} total allowance rounded to 2 decimals
  */
+import sun_domestic_airport_codes from '../data/sun_domestic_airport_codes';
+
 export default function calculateDisplayTotal(
   meals,
   caExpenses,
@@ -27,7 +29,11 @@ export default function calculateDisplayTotal(
       const mealStr = m.meals || '';
       // console.log(`Calculating meal: station=${m.station}, meals=${mealStr}`);
       // console.log(JSON.stringify(intlExpenses));
-      if (m.station === 'YYZ' || m.station === 'MCO') {
+      if (
+        m.station === 'YYZ' ||
+        m.station === 'MCO' ||
+        sun_domestic_airport_codes.includes(m.station)
+      ) {
         total += mealStr.includes('B') ? toNum(caExpenses.breakfast) : 0;
         total += mealStr.includes('L') ? toNum(caExpenses.lunch) : 0;
         total += mealStr.includes('D') ? toNum(caExpenses.dinner) : 0;
@@ -37,6 +43,11 @@ export default function calculateDisplayTotal(
         total += mealStr.includes('M') ? toNum(usExpenses.lunch) : 0;
         total += mealStr.includes('E') ? toNum(usExpenses.dinner) : 0;
         total += mealStr.includes('T') ? toNum(usExpenses.snack) : 0;
+        //
+        total += mealStr.includes('A') ? toNum(intlExpenses.breakfast) : 0;
+        total += mealStr.includes('N') ? toNum(intlExpenses.lunch) : 0;
+        total += mealStr.includes('F') ? toNum(intlExpenses.dinner) : 0;
+        total += mealStr.includes('U') ? toNum(intlExpenses.snack) : 0;
       } else if (m.station === 'int') {
         total += mealStr.includes('B') ? toNum(intlExpenses.breakfast) : 0;
         total += mealStr.includes('L') ? toNum(intlExpenses.lunch) : 0;

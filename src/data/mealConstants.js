@@ -1,11 +1,12 @@
 const b = {
   start: '08:00',
   end: '09:30',
-  test: '07:30',
+  test: '08:00',
   deptTest: '08:00',
   arrTest: '09:30',
   canChar: 'B',
   usChar: 'C',
+  intChar: 'A',
 };
 
 const l = {
@@ -16,6 +17,7 @@ const l = {
   test: '12:00',
   canChar: 'L',
   usChar: 'M',
+  intChar: 'N',
 };
 
 const d = {
@@ -30,6 +32,7 @@ const d = {
   test: '17:30',
   canChar: 'D',
   usChar: 'E',
+  intChar: 'F',
 };
 
 const s = {
@@ -40,6 +43,7 @@ const s = {
   test: '22:30',
   canChar: 'S',
   usChar: 'T',
+  intChar: 'U',
 };
 
 export { b, l, d, s };

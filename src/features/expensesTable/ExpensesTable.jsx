@@ -1,10 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
-import getExpenseseFromDB from '../../modules/getExpensesFromDB';
+import getExpensesFromDB from '../../modules/getExpensesFromDB';
 import getMealsFromSequence from '../../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../../modules/calcDisplayTotal';
+import sun_domestic_airport_codes from '../../data/sun_domestic_airport_codes';
 
 const ExpensesTable = () => {
   const p = useSelector((state) => state.pairing);
@@ -29,35 +30,36 @@ const ExpensesTable = () => {
       setStation(intlStation);
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
-      getExpenseseFromDB('YYZ', setCaExpenses);
+      getExpensesFromDB('YYZ', setCaExpenses);
       if (intlStation) {
-        getExpenseseFromDB(intlStation, setIntlExpenses);
+        getExpensesFromDB(intlStation, setIntlExpenses);
       } else {
         setIntlExpenses({});
       }
       // DOMESTIC AND TB PAIRINGS
     } else {
       const getDomMeals = async () => {
-        const { meals: derivedMeals } = await getMealsFromSequenceDom(
-          p.pairingIdentifier,
-          seq || [],
-        );
+        const { meals: derivedMeals, station: station } =
+          await getMealsFromSequenceDom(p.pairingIdentifier, seq || []);
         setMeals(derivedMeals || []);
+        setStation(station);
+        sun_domestic_airport_codes.includes(station) &&
+          getExpensesFromDB(station, setIntlExpenses);
       };
 
       getDomMeals();
 
       // fetch CA expenses (base) and fetch intl expenses only if station found
-      getExpenseseFromDB('YYZ', setCaExpenses);
-      getExpenseseFromDB('MCO', setUsExpenses);
+      getExpensesFromDB('YYZ', setCaExpenses);
+      getExpensesFromDB('MCO', setUsExpenses);
     }
   }, [seq]);
 
   useEffect(() => {
     const hasMeals = Array.isArray(meals) && meals.length > 0;
-    const needsIntl = hasMeals && meals.some((m) => m.station === 'int');
-    const needsUSA = hasMeals && meals.some((m) => m.station === 'MCO');
     const needsCa = hasMeals && meals.some((m) => m.station === 'YYZ');
+    const needsUSA = hasMeals && meals.some((m) => m.station === 'MCO');
+    const needsIntl = hasMeals && meals.some((m) => m.station === 'int');
 
     const caLoaded = Object.keys(caExpenses || {}).length > 0;
     const usLoaded = Object.keys(usExpenses || {}).length > 0;
@@ -103,7 +105,11 @@ const ExpensesTable = () => {
 
         {meals &&
           meals.map((item) => {
-            if (item.station === 'YYZ') {
+            if (
+              item.station === 'YYZ' ||
+              item.station === 'MCO' ||
+              sun_domestic_airport_codes.includes(item.station)
+            ) {
               return (
                 item.meals && (
                   <tr key={item.index}>
@@ -111,19 +117,25 @@ const ExpensesTable = () => {
                     <td>
                       {(item.meals.includes('B') && caExpenses.breakfast) ||
                         (item.meals.includes('C') &&
-                          usExpenses.breakfast + '*')}
+                          usExpenses.breakfast + '*') ||
+                        (item.meals.includes('A') &&
+                          intlExpenses.breakfast + '**')}
                     </td>
                     <td>
                       {(item.meals.includes('L') && caExpenses.lunch) ||
-                        (item.meals.includes('M') && usExpenses.lunch + '*')}
+                        (item.meals.includes('M') && usExpenses.lunch + '*') ||
+                        (item.meals.includes('N') && intlExpenses.lunch + '**')}
                     </td>
                     <td>
                       {(item.meals.includes('D') && caExpenses.dinner) ||
-                        (item.meals.includes('E') && usExpenses.dinner + '*')}
+                        (item.meals.includes('E') && usExpenses.dinner + '*') ||
+                        (item.meals.includes('F') &&
+                          intlExpenses.dinner + '**')}
                     </td>
                     <td>
                       {(item.meals.includes('S') && caExpenses.snack) ||
-                        (item.meals.includes('T') && usExpenses.snack + '*')}
+                        (item.meals.includes('T') && usExpenses.snack + '*') ||
+                        (item.meals.includes('U') && intlExpenses.snack + '**')}
                     </td>
                   </tr>
                 )
@@ -156,15 +168,19 @@ const ExpensesTable = () => {
               );
             }
           })}
-        <tr className="table-secondary">
-          <td>CI/CO:</td>
-          <td colSpan={4}>{(numLayovers * 5.05).toFixed(2)}</td>
-        </tr>
+        {meals && (
+          <>
+            <tr className="table-secondary">
+              <td>CI/CO:</td>
+              <td colSpan={4}>{(numLayovers * 5.05).toFixed(2)}</td>
+            </tr>
 
-        <tr className="table-primary">
-          <td>Total:</td>
-          <td colSpan={4}>${displayTotal}</td>
-        </tr>
+            <tr className="table-primary">
+              <td>Total:</td>
+              <td colSpan={4}>${displayTotal}</td>
+            </tr>
+          </>
+        )}
       </tbody>
     </table>
   );
