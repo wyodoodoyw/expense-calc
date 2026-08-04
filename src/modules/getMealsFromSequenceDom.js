@@ -48,169 +48,179 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
   ) => {
     if (!meal || !start || !end) return;
 
-    // if (meal !== s) {
-    if (dutyStart && dutyEnd) {
-      // one-day pairing
-      console.log(
-        `checking ${meal.canChar} / day: ${day} / dutyStart: ${dutyStart} start: ${start} test: ${meal.test} end: ${end} dutyEnd: ${dutyEnd}`,
-      );
-      if (
-        stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
-        stringToTime(firstDept).isBefore(stringToTime(meal.deptTest)) &&
-        stringToTime(lastArr).isAfter(stringToTime(meal.arrTest)) &&
-        stringToTime(dutyEnd).isAfter(stringToTime(meal.arrTest)) &&
-        stringToTime(meal.test).isBetween(
-          stringToTime(start),
-          stringToTime(end),
-          'minute',
-          '[]',
-        )
-      ) {
-        return true;
+    if (meal !== s) {
+      if (dutyStart && dutyEnd) {
+        // one-day pairing
+        console.log(
+          `checking ${meal.canChar} / day: ${day} / dutyStart: ${dutyStart} start: ${start} test: ${meal.test} end: ${end} dutyEnd: ${dutyEnd}`,
+        );
+        if (
+          stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
+          stringToTime(firstDept).isBefore(stringToTime(meal.deptTest)) &&
+          (stringToTime(lastArr).isBetween(
+            stringToTime(meal.arrTest),
+            stringToTime('23:59'),
+            'minute',
+            '[]',
+          ) ||
+            (stringToTime(meal.arrTest).isBetween(
+              stringToTime('00:00'),
+              stringToTime('05:59'),
+              'minute',
+              '[]',
+            ) &&
+              stringToTime(dutyEnd).isAfter(stringToTime(meal.arrTest)) &&
+              stringToTime(meal.test).isBetween(
+                stringToTime(start),
+                stringToTime(end),
+                'minute',
+                '[]',
+              )))
+        ) {
+          return true;
+        }
+      } else if (dutyStart && !dutyEnd) {
+        // first day of multi-day pairing
+        console.log(
+          `checking ${meal.canChar} | dutyStart: ${dutyStart} start: ${start} deptTest: ${meal.deptTest} | start: ${start} test: ${meal.test} end: ${end}`,
+        );
+        if (
+          stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
+          stringToTime(firstDept).isBefore(stringToTime(meal.deptTest)) &&
+          stringToTime(meal.test).isBetween(
+            stringToTime(start),
+            stringToTime(end),
+            'minute',
+            '[]',
+          )
+        ) {
+          console.log(`includes ${meal.canChar}`);
+          return true;
+        }
+      } else if (!dutyStart && dutyEnd) {
+        console.log(
+          `checking ${meal.canChar} | test: ${meal.arrTest} end: ${end} dutyEnd: ${dutyEnd} | start: ${start} test: ${meal.test} end: ${end}`,
+        );
+        // last day of multi-day pairing
+        if (
+          stringToTime(lastArr).isAfter(stringToTime(meal.arrTest)) &&
+          stringToTime(dutyEnd).isAfter(stringToTime(meal.arrTest)) &&
+          stringToTime(meal.test).isBetween(
+            stringToTime(start),
+            stringToTime(end),
+            'minute',
+            '[]',
+          )
+        ) {
+          console.log(`includes ${meal.canChar}`);
+          return true;
+        }
+      } else {
+        // neither first nor last day of multi-day pairing
+        console.log(
+          `checking ${meal.canChar} / start: ${start} test: ${meal.arrTest} end: ${end}`,
+        );
+        if (
+          stringToTime(meal.test).isBetween(
+            stringToTime(start),
+            stringToTime(end),
+            'minute',
+            '[]',
+          )
+        ) {
+          console.log(`includes ${meal.canChar}`);
+          return true;
+        }
       }
-    } else if (dutyStart && !dutyEnd) {
-      // first day of multi-day pairing
-      console.log(
-        `checking ${meal.canChar} | dutyStart: ${dutyStart} start: ${start} deptTest: ${meal.deptTest} | start: ${start} test: ${meal.test} end: ${end}`,
-      );
-      if (
-        stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
-        stringToTime(firstDept).isBefore(stringToTime(meal.deptTest)) &&
-        stringToTime(meal.test).isBetween(
-          stringToTime(start),
-          stringToTime(end),
-          'minute',
-          '[]',
-        )
-      ) {
-        console.log(`includes ${meal.canChar}`);
-        return true;
-      }
-    } else if (!dutyStart && dutyEnd) {
-      console.log(
-        `checking ${meal.canChar} | test: ${meal.arrTest} end: ${end} dutyEnd: ${dutyEnd} | start: ${start} test: ${meal.test} end: ${end}`,
-      );
-      // last day of multi-day pairing
-      if (
-        // stringToTime(end).isAfter(stringToTime(meal.arrTest)) &&
-        stringToTime(dutyEnd).isAfter(stringToTime(meal.arrTest)) &&
-        stringToTime(lastArr).isAfter(stringToTime(meal.arrTest)) &&
-        stringToTime(meal.test).isBetween(
-          stringToTime(start),
-          stringToTime(end),
-          'minute',
-          '[]',
-        )
-      ) {
-        console.log(`includes ${meal.canChar}`);
-        return true;
-      }
-    } else {
-      // neither first nor last day of multi-day pairing
-      console.log(
-        `checking ${meal.canChar} / start: ${start} test: ${meal.arrTest} end: ${end}`,
-      );
-      if (
-        stringToTime(meal.test).isBetween(
-          stringToTime(start),
-          stringToTime(end),
-          'minute',
-          '[]',
-        )
-      ) {
-        console.log(`includes ${meal.canChar}`);
-        return true;
+    } else if (meal === s) {
+      if (dutyStart && dutyEnd) {
+        // one-day pairing
+        console.log(
+          `checking ${meal.canChar} | dutyStart: ${dutyStart} start: ${start} test: ${meal.test} end: ${end} dutyEnd: ${dutyEnd}`,
+        );
+        if (
+          stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
+          stringToTime(dutyEnd).isBetween(
+            stringToTime(meal.arrTest),
+            stringToTime('03:00'),
+            'minute',
+            '[]',
+          ) &&
+          stringToTime(meal.test).isBetween(
+            stringToTime(start),
+            stringToTime(end),
+            'minute',
+            '[]',
+          )
+        ) {
+          // console.log(`includes ${meal.canChar}`);
+          return true;
+        }
+      } else if (dutyStart && !dutyEnd) {
+        console.log(
+          `checking ${meal.canChar} | dutyStart: ${dutyStart} start: ${start} deptTest: ${meal.deptTest} | start: ${start} test: ${meal.test} end: ${end}`,
+        );
+        if (
+          stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
+          stringToTime(start).isBefore(stringToTime(meal.deptTest)) &&
+          stringToTime(meal.deptTest).isBetween(
+            stringToTime(start),
+            stringToTime(end),
+            'minute',
+            '[]',
+          )
+        ) {
+          console.log(`includes ${meal.canChar}`);
+          return true;
+        }
+      } else if (!dutyStart && dutyEnd) {
+        // last day of multi-day pairing
+        console.log(
+          `checking ${meal.canChar} | test: ${meal.arrTest} end: ${end} dutyEnd: | ${dutyEnd} start: ${start} test: ${meal.test} end: ${end}`,
+        );
+        if (
+          // stringToTime(lastArr).isBetween(
+          //   stringToTime(meal.arrTest),
+          //   stringToTime('03:00'),
+          //   'minute',
+          //   '[]',
+          // ) &&
+          stringToTime(lastArr).isAfter(stringToTime(meal.arrTest)) &&
+          stringToTime(dutyEnd).isAfter(stringToTime(meal.arrTest)) &&
+          stringToTime(dutyEnd).isBetween(
+            stringToTime(meal.arrTest),
+            stringToTime('03:00'),
+            'minute',
+            '[]',
+          ) &&
+          stringToTime(meal.arrTest).isBetween(
+            stringToTime(start),
+            stringToTime(end),
+            'minute',
+            '[]',
+          )
+        ) {
+          console.log(`includes ${meal.canChar}`);
+          return true;
+        }
+      } else {
+        // neither first nor last day of multi-day pairing
+        console.log(
+          `checking ${meal.canChar} | start: ${start} test: ${meal.test} end: ${end}`,
+        );
+        if (
+          stringToTime(meal.test).isBetween(
+            stringToTime(start),
+            stringToTime(end),
+            'minute',
+            '[]',
+          )
+        ) {
+          console.log(`includes ${meal.canChar}`);
+          return true;
+        }
       }
     }
-    // } else if (meal === s) {
-    //   if (dutyStart && dutyEnd) {
-    //     // one-day pairing
-    //     console.log(
-    //       `checking ${meal.canChar} | dutyStart: ${dutyStart} start: ${start} test: ${meal.test} end: ${end} dutyEnd: ${dutyEnd}`,
-    //     );
-    //     if (
-    //       stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
-    //       stringToTime(dutyEnd).isBetween(
-    //         stringToTime(meal.arrTest),
-    //         stringToTime('03:00'),
-    //         'minute',
-    //         '[]',
-    //       ) &&
-    //       stringToTime(meal.test).isBetween(
-    //         stringToTime(start),
-    //         stringToTime(end),
-    //         'minute',
-    //         '[]',
-    //       )
-    //     ) {
-    //       // console.log(`includes ${meal.canChar}`);
-    //       return true;
-    //     }
-    //   } else if (dutyStart && !dutyEnd) {
-    //     console.log(
-    //       `checking ${meal.canChar} | dutyStart: ${dutyStart} start: ${start} deptTest: ${meal.deptTest} | start: ${start} test: ${meal.test} end: ${end}`,
-    //     );
-    //     if (
-    //       stringToTime(dutyStart).isBefore(stringToTime(meal.deptTest)) &&
-    //       stringToTime(start).isBefore(stringToTime(meal.deptTest)) &&
-    //       stringToTime(meal.deptTest).isBetween(
-    //         stringToTime(start),
-    //         stringToTime(end),
-    //         'minute',
-    //         '[]',
-    //       )
-    //     ) {
-    //       console.log(`includes ${meal.canChar}`);
-    //       return true;
-    //     }
-    //   } else if (!dutyStart && dutyEnd) {
-    //     // last day of multi-day pairing
-    //     console.log(
-    //       `checking ${meal.canChar} | test: ${meal.arrTest} end: ${end} dutyEnd: | ${dutyEnd} start: ${start} test: ${meal.test} end: ${end}`,
-    //     );
-    //     if (
-    //       // stringToTime(lastArr).isBetween(
-    //       //   stringToTime(meal.arrTest),
-    //       //   stringToTime('03:00'),
-    //       //   'minute',
-    //       //   '[]',
-    //       // ) &&
-    //       stringToTime(lastArr).isAfter(stringToTime(meal.arrTest)) &&
-    //       stringToTime(dutyEnd).isAfter(stringToTime(meal.arrTest)) &&
-    //       stringToTime(dutyEnd).isBetween(
-    //         stringToTime(meal.arrTest),
-    //         stringToTime('03:00'),
-    //         'minute',
-    //         '[]',
-    //       ) &&
-    //       stringToTime(meal.arrTest).isBetween(
-    //         stringToTime(start),
-    //         stringToTime(end),
-    //         'minute',
-    //         '[]',
-    //       )
-    //     ) {
-    //       console.log(`includes ${meal.canChar}`);
-    //       return true;
-    //     }
-    //   } else {
-    //     // neither first nor last day of multi-day pairing
-    //     console.log(
-    //       `checking ${meal.canChar} | start: ${start} test: ${meal.test} end: ${end}`,
-    //     );
-    //     if (
-    //       stringToTime(meal.test).isBetween(
-    //         stringToTime(start),
-    //         stringToTime(end),
-    //         'minute',
-    //         '[]',
-    //       )
-    //     ) {
-    //       console.log(`includes ${meal.canChar}`);
-    //       return true;
-    //     }
-    //   }
-    // }
   };
 
   const canOrUsFlight = (deptTime, meal, startLoc, endLoc) => {
@@ -373,6 +383,18 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
 
     let mealStr = '';
 
+    // detect CDD pairings
+    if (
+      seq.length === 2 &&
+      stringToTime(seq[0].departureTime).isAfter(stringToTime('18:00')) &&
+      stringToTime(seq[1].arrivalTime).isBefore(stringToTime('06:00'))
+      // &&
+      // Number(seq[1].dutyTime) > 600
+    ) {
+      console.log('CDD');
+      return { index: 0, meals: 'D', station: seq[0].arrivalAirport };
+    }
+
     seq.forEach((curr, i, arr) => {
       if (seq[i].type === 'flight') {
         console.log(`Duty Day: ${seq[i].dutyDay}`);
@@ -398,8 +420,10 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
       const endLoc = curr.arrivalAirport;
       const firstDept = arr[0].departureTime;
       const lastArr = arr[arr.length - 1].arrivalTime;
-      const includesMS =
-        arr[i].mealsOnboard && arr[i].mealsOnboard.includes('MS');
+      const includesMSPP =
+        arr[i].mealsOnboard &&
+        (arr[i].mealsOnboard.includes('MS') ||
+          arr[i].mealsOnboard.includes('PP'));
 
       //--- FLIGHT
       if (curr.type === 'flight') {
@@ -462,7 +486,7 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
             mealStr += canOrUsFlight(start, d, startLoc, endLoc) || '';
           }
           if (
-            !includesMS &&
+            !includesMSPP &&
             includesMeal(
               s,
               day,
@@ -551,7 +575,7 @@ export default async function getMealsFromSequenceDom(pIdentifier, seq = []) {
           }
         }
       } else if (curr.type === 'layover') {
-        let dutyStart = curr.dutyStart;
+        // let dutyStart = curr.dutyStart;
         let start;
         let end;
         const len = curr.layoverLength;

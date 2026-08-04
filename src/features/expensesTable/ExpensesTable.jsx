@@ -182,6 +182,14 @@ const ExpensesTable = () => {
           </>
         )}
       </tbody>
+      <tfoot>
+        <tr>
+          <td colSpan={5}>* US meals shown in CAD</td>
+        </tr>
+        <tr>
+          <td colSpan={5}>** Sun Destination meals shown in CAD</td>
+        </tr>
+      </tfoot>
     </table>
   );
 };
