@@ -40,7 +40,7 @@ const ExpensesTable = () => {
     } else {
       const getDomMeals = async () => {
         const { meals: derivedMeals, station: station } =
-          await getMealsFromSequenceDom(p.pairingIdentifier, seq || []);
+          await getMealsFromSequenceDom(p.pairingIdentifier, seq || [], p.tafb);
         setMeals(derivedMeals || []);
         setStation(station);
         sun_domestic_airport_codes.includes(station) &&

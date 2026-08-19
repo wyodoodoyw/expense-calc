@@ -2,6 +2,7 @@ import getMealsFromSequence from '../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../modules/calcDisplayTotal';
 import ignoreList from '../data/ignoreList';
+import dayjs from 'dayjs';
 
 const calcNumLayovers = (s) => {
   let layoverCount = 0;
@@ -143,116 +144,169 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
   let mismatchCount = 0;
 
   for (const p of pairings) {
-    if (!ignoreList.includes(p.pairingIdentifier)) {
-      numberOfTests++;
-      if (p.pairingIdentifier >= min && p.pairingIdentifier <= max) {
-        try {
-          if (p.isInt) {
-            const seq = p.sequence || [];
-            const numLayovers = calcNumLayovers(seq) || 0;
-            const parsedAllowance = asNumber(p.totalAllowance);
-            const { meals, station: intlStation } = getMealsFromSequence(
-              seq || [],
+    // if (!ignoreList.includes(p.pairingIdentifier)) {
+    numberOfTests++;
+    if (p.pairingIdentifier >= min && p.pairingIdentifier <= max) {
+      try {
+        if (p.isInt) {
+          const seq = p.sequence || [];
+          const numLayovers = calcNumLayovers(seq) || 0;
+          const parsedAllowance = asNumber(p.totalAllowance);
+          const { meals, station: intlStation } = getMealsFromSequence(
+            seq || [],
+          );
+          const intlRates = await fetchExpensesForStation(intlStation);
+          const calc = calculateDisplayTotal(
+            meals || [],
+            caRates || {},
+            null, //usRates
+            intlRates || {},
+            numLayovers || undefined,
+          );
+          const calcRounded = Number(calc);
+          const diff = Math.abs(calcRounded - parsedAllowance);
+          const isMismatch =
+            diff > 0.01 && !(isNaN(calcRounded) && isNaN(parsedAllowance));
+          if (isMismatch) {
+            mismatchCount++;
+            console.warn(
+              `Mismatch: Pairing ${
+                p.pairingIdentifier || p.id || '<unknown>'
+              } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
+                2,
+              )}`,
             );
-
-            const intlRates = await fetchExpensesForStation(intlStation);
-
-            const calc = calculateDisplayTotal(
-              meals || [],
-              caRates || {},
-              null, //usRates
-              intlRates || {},
-              numLayovers || undefined,
-            );
-            const calcRounded = Number(calc);
-
-            const diff = Math.abs(calcRounded - parsedAllowance);
-            const isMismatch =
-              diff > 0.01 && !(isNaN(calcRounded) && isNaN(parsedAllowance));
-
-            if (isMismatch) {
-              mismatchCount++;
-              console.warn(
-                `Mismatch: Pairing ${
-                  p.pairingIdentifier || p.id || '<unknown>'
-                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
-                  2,
-                )}`,
-              );
-              if (logAll) {
-                console.log('  meals:', meals);
-                console.log('  intlStation:', intlStation);
-                console.log('  caRates:', caRates);
-                console.log('  intlRates:', intlRates);
-                console.log('  pairing raw:', p);
-              }
-            } else {
-              if (logAll) {
-                console.info(
-                  `OK: Pairing ${
-                    p.pairingIdentifier || p.id || '<unknown>'
-                  } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
-                );
-              }
+            if (logAll) {
+              console.log('  meals:', meals);
+              console.log('  intlStation:', intlStation);
+              console.log('  caRates:', caRates);
+              console.log('  intlRates:', intlRates);
+              console.log('  pairing raw:', p);
             }
-          } else if (p.pairingNumber >= 7000) {
-            const seq = p.sequence || [];
-            const numLayovers = calcNumLayovers(seq) || 0;
-            const parsedAllowance = asNumber(p.totalAllowance);
-
-            const { meals, station: usStation } = await getMealsFromSequenceDom(
-              p.pairingIdentifier,
-              seq || [],
-            );
-
-            const calc = calculateDisplayTotal(
-              meals || [],
-              caRates || {},
-              usRates || {},
-              null, // intlRates
-              numLayovers || undefined,
-            );
-            const calcRounded = Number(calc);
-
-            const diff = Math.abs(calcRounded - parsedAllowance);
-            const isMismatch =
-              diff > 0.01 && !(isNaN(calcRounded) && isNaN(parsedAllowance));
-
-            if (isMismatch) {
-              mismatchCount++;
-              console.warn(
-                `Mismatch: Pairing ${
+          } else {
+            if (logAll) {
+              console.info(
+                `OK: Pairing ${
                   p.pairingIdentifier || p.id || '<unknown>'
-                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
-                  2,
-                )}`,
+                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
               );
-              if (logAll) {
-                console.log('  meals:', meals);
-                console.log('  usStation:', usStation);
-                console.log('  caRates:', caRates);
-                console.log('  usRates:', usRates);
-                console.log('  pairing raw:', p);
-              }
-            } else {
-              if (logAll) {
-                console.info(
-                  `OK: Pairing ${
-                    p.pairingIdentifier || p.id || '<unknown>'
-                  } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
-                );
-              }
             }
           }
-        } catch (err) {
-          console.error(
-            'Error processing pairing',
-            p && p.pairingIdentifier,
-            err,
+        } else if (p.pairingNumber >= 7000) {
+          const seq = p.sequence || [];
+          const numLayovers = calcNumLayovers(seq) || 0;
+          const parsedAllowance = asNumber(p.totalAllowance);
+          const { meals, station: usStation } = await getMealsFromSequenceDom(
+            p.pairingIdentifier,
+            seq || [],
           );
+          const calc = calculateDisplayTotal(
+            meals || [],
+            caRates || {},
+            usRates || {},
+            null, // intlRates
+            numLayovers || undefined,
+          );
+          const calcRounded = Number(calc);
+          const diff = Math.abs(calcRounded - parsedAllowance);
+          const isMismatch =
+            diff > 0.01 && !(isNaN(calcRounded) && isNaN(parsedAllowance));
+          if (isMismatch) {
+            mismatchCount++;
+            console.warn(
+              `Mismatch: Pairing ${
+                p.pairingIdentifier || p.id || '<unknown>'
+              } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}, diff: ${diff.toFixed(
+                2,
+              )}`,
+            );
+            if (logAll) {
+              console.log('  meals:', meals);
+              console.log('  usStation:', usStation);
+              console.log('  caRates:', caRates);
+              console.log('  usRates:', usRates);
+              console.log('  pairing raw:', p);
+            }
+          } else {
+            if (logAll) {
+              console.info(
+                `OK: Pairing ${
+                  p.pairingIdentifier || p.id || '<unknown>'
+                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
+              );
+            }
+          }
         }
+      } catch (err) {
+        console.error(
+          'Error processing pairing',
+          p && p.pairingIdentifier,
+          err,
+        );
       }
+      // const startDate = dayjs(`2000-01-01`)
+      //   .set('hour', `${p.sequence[0].dutyStart.slice(0, -2)}`)
+      //   .set('minute', `${p.sequence[0].dutyStart.slice(-2)}`);
+      // console.log(`!startDate: ${startDate.format('YYYY-MM-DD HH:mm')}`);
+      // const end = startDate
+      //   .add(p.tafb.slice(0, -2), 'hours')
+      //   .add(p.tafb.slice(-2), 'minutes');
+      // console.log(`!end: ${end.format('YYYY-MM-DD HH:mm')}`);
+      // const endDate = dayjs(`2000-01-01`)
+      //   .set(
+      //     'hour',
+      //     `${p.sequence[p.sequence.length - 1].dutyEnd.slice(0, -2)}`,
+      //   )
+      //   .set('minute', `${p.sequence[p.sequence.length - 1].dutyEnd.slice(-2)}`)
+      //   .add(p.sequence[p.sequence.length - 1].dutyDay - 1, 'day');
+      // console.log(`!endDate: ${endDate.format('YYYY-MM-DD HH:mm')}`);
+      // const endDate2 = dayjs(`2000-01-01`)
+      //   .set(
+      //     'hour',
+      //     `${p.sequence[p.sequence.length - 1].arrivalTime.slice(0, -2)}`,
+      //   )
+      //   .set(
+      //     'minute',
+      //     `${p.sequence[p.sequence.length - 1].arrivalTime.slice(-2)}`,
+      //   )
+      //   .add(p.sequence[p.sequence.length - 1].dutyDay - 1, 'day')
+      //   .add(p.sequence[p.sequence.length - 1].flightTime.slice(0, -2), 'hour')
+      //   .add(p.sequence[p.sequence.length - 1].flightTime.slice(-2), 'minute')
+      //   .add(15, 'minute');
+      // p.sequence[p.sequence.length - 1].isDH &&
+      //   endDate2
+      //     .add(
+      //       p.sequence[p.sequence.length - 1].flightTime.slice(0, -2),
+      //       'hour',
+      //     )
+      //     .add(
+      //       p.sequence[p.sequence.length - 1].flightTime.slice(-2),
+      //       'minute',
+      //     );
+      // console.log(`!endDate2: ${endDate2.format('YYYY-MM-DD HH:mm')}`);
+      // if (!end.isSame(endDate)) {
+      //   console.warn(
+      //     `Pairing ${p.pairingIdentifier} has mismatched end times: end=${end.format(
+      //       'YYYY-MM-DD HH:mm',
+      //     )}, endDate=${endDate.format('YYYY-MM-DD HH:mm')}`,
+      //   );
+      // }
+      // if (!end.isSame(endDate2)) {
+      //   console.warn(
+      //     `Pairing ${p.pairingIdentifier} has mismatched end times: end=${end.format(
+      //       'YYYY-MM-DD HH:mm',
+      //     )}, endDate=${endDate2.format('YYYY-MM-DD HH:mm')}`,
+      //   );
+      // }
+      // if (!endDate.isSame(endDate2)) {
+      //   console.warn(
+      //     `Pairing ${p.pairingIdentifier} has mismatched end times: end=${endDate.format(
+      //       'YYYY-MM-DD HH:mm',
+      //     )}, endDate=${endDate2.format('YYYY-MM-DD HH:mm')}`,
+      //   );
+      // }
     }
+    // }
   }
   console.info(
     `checkAllPairings: done. Pairings processed: ${numberOfTests}, mismatches: ${mismatchCount}`,
