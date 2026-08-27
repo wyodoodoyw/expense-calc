@@ -120,15 +120,14 @@ async function fetchAllPairings() {
 function asNumber(v) {
   if (v === null || v === undefined) return 0;
   if (typeof v === 'number') return v;
-  // strip currency chars, commas
-  const cleaned = String(v).replace(/[^0-9.]/g, '');
+  const cleaned = String(v).replace(/[^0-9.]/g, ''); // strip currency chars, commas
   const n = Number(cleaned);
   return Number.isNaN(n) ? 0 : n;
 }
 
 /* Main runner */
 let numberOfTests = 0;
-export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
+export async function runCheckAllPairings(min, max) {
   console.info('checkAllPairings: starting...');
   const pairings = await fetchAllPairings();
 
@@ -176,21 +175,6 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
                 2,
               )}`,
             );
-            if (logAll) {
-              console.log('  meals:', meals);
-              console.log('  intlStation:', intlStation);
-              console.log('  caRates:', caRates);
-              console.log('  intlRates:', intlRates);
-              console.log('  pairing raw:', p);
-            }
-          } else {
-            if (logAll) {
-              console.info(
-                `OK: Pairing ${
-                  p.pairingIdentifier || p.id || '<unknown>'
-                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
-              );
-            }
           }
         } else if (p.pairingNumber >= 7000) {
           const seq = p.sequence || [];
@@ -199,6 +183,7 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
           const { meals, station: usStation } = await getMealsFromSequenceDom(
             p.pairingIdentifier,
             seq || [],
+            p.tafb,
           );
           const calc = calculateDisplayTotal(
             meals || [],
@@ -220,21 +205,6 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
                 2,
               )}`,
             );
-            if (logAll) {
-              console.log('  meals:', meals);
-              console.log('  usStation:', usStation);
-              console.log('  caRates:', caRates);
-              console.log('  usRates:', usRates);
-              console.log('  pairing raw:', p);
-            }
-          } else {
-            if (logAll) {
-              console.info(
-                `OK: Pairing ${
-                  p.pairingIdentifier || p.id || '<unknown>'
-                } -> parsed: ${parsedAllowance}, calculated: ${calcRounded}`,
-              );
-            }
           }
         }
       } catch (err) {
@@ -244,67 +214,6 @@ export async function runCheckAllPairings(min, max, { logAll = false } = {}) {
           err,
         );
       }
-      // const startDate = dayjs(`2000-01-01`)
-      //   .set('hour', `${p.sequence[0].dutyStart.slice(0, -2)}`)
-      //   .set('minute', `${p.sequence[0].dutyStart.slice(-2)}`);
-      // console.log(`!startDate: ${startDate.format('YYYY-MM-DD HH:mm')}`);
-      // const end = startDate
-      //   .add(p.tafb.slice(0, -2), 'hours')
-      //   .add(p.tafb.slice(-2), 'minutes');
-      // console.log(`!end: ${end.format('YYYY-MM-DD HH:mm')}`);
-      // const endDate = dayjs(`2000-01-01`)
-      //   .set(
-      //     'hour',
-      //     `${p.sequence[p.sequence.length - 1].dutyEnd.slice(0, -2)}`,
-      //   )
-      //   .set('minute', `${p.sequence[p.sequence.length - 1].dutyEnd.slice(-2)}`)
-      //   .add(p.sequence[p.sequence.length - 1].dutyDay - 1, 'day');
-      // console.log(`!endDate: ${endDate.format('YYYY-MM-DD HH:mm')}`);
-      // const endDate2 = dayjs(`2000-01-01`)
-      //   .set(
-      //     'hour',
-      //     `${p.sequence[p.sequence.length - 1].arrivalTime.slice(0, -2)}`,
-      //   )
-      //   .set(
-      //     'minute',
-      //     `${p.sequence[p.sequence.length - 1].arrivalTime.slice(-2)}`,
-      //   )
-      //   .add(p.sequence[p.sequence.length - 1].dutyDay - 1, 'day')
-      //   .add(p.sequence[p.sequence.length - 1].flightTime.slice(0, -2), 'hour')
-      //   .add(p.sequence[p.sequence.length - 1].flightTime.slice(-2), 'minute')
-      //   .add(15, 'minute');
-      // p.sequence[p.sequence.length - 1].isDH &&
-      //   endDate2
-      //     .add(
-      //       p.sequence[p.sequence.length - 1].flightTime.slice(0, -2),
-      //       'hour',
-      //     )
-      //     .add(
-      //       p.sequence[p.sequence.length - 1].flightTime.slice(-2),
-      //       'minute',
-      //     );
-      // console.log(`!endDate2: ${endDate2.format('YYYY-MM-DD HH:mm')}`);
-      // if (!end.isSame(endDate)) {
-      //   console.warn(
-      //     `Pairing ${p.pairingIdentifier} has mismatched end times: end=${end.format(
-      //       'YYYY-MM-DD HH:mm',
-      //     )}, endDate=${endDate.format('YYYY-MM-DD HH:mm')}`,
-      //   );
-      // }
-      // if (!end.isSame(endDate2)) {
-      //   console.warn(
-      //     `Pairing ${p.pairingIdentifier} has mismatched end times: end=${end.format(
-      //       'YYYY-MM-DD HH:mm',
-      //     )}, endDate=${endDate2.format('YYYY-MM-DD HH:mm')}`,
-      //   );
-      // }
-      // if (!endDate.isSame(endDate2)) {
-      //   console.warn(
-      //     `Pairing ${p.pairingIdentifier} has mismatched end times: end=${endDate.format(
-      //       'YYYY-MM-DD HH:mm',
-      //     )}, endDate=${endDate2.format('YYYY-MM-DD HH:mm')}`,
-      //   );
-      // }
     }
     // }
   }
