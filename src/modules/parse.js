@@ -278,26 +278,26 @@ const parse = (pairing, i) => {
         pairingSequence[i].layoverStation =
           pairingSequence[i - 1].arrivalAirport;
       }
-      if (
-        international_airport_codes.includes(pairingSequence[i].layoverStation)
-      ) {
-        newPairing.isInt = true;
-        newPairing.isUsa = false;
-        pairingSequence[i].isInt = true;
-        pairingSequence.isUsa = false;
-      } else if (
-        american_airport_codes.includes(pairingSequence[i].layoverStation)
-      ) {
-        newPairing.isInt = false;
-        newPairing.isUsa = true;
-        pairingSequence[i].isInt = false;
-        pairingSequence[i].isUsa = true;
-      } else {
-        pairing.isInt = false;
-        pairing.isUsa = false;
-        pairingSequence[i].isInt = false;
-        pairingSequence[i].isUsa = false;
-      }
+      // if (
+      //   international_airport_codes.includes(pairingSequence[i].layoverStation)
+      // ) {
+      //   newPairing.isInt = true;
+      //   newPairing.isUsa = false;
+      //   pairingSequence[i].isInt = true;
+      //   pairingSequence.isUsa = false;
+      // } else if (
+      //   american_airport_codes.includes(pairingSequence[i].layoverStation)
+      // ) {
+      //   newPairing.isInt = false;
+      //   newPairing.isUsa = true;
+      //   pairingSequence[i].isInt = false;
+      //   pairingSequence[i].isUsa = true;
+      // } else {
+      //   pairing.isInt = false;
+      //   pairing.isUsa = false;
+      //   pairingSequence[i].isInt = false;
+      //   pairingSequence[i].isUsa = false;
+      // }
     }
   } catch (err) {
     console.warn(
@@ -316,7 +316,7 @@ const parse = (pairing, i) => {
     });
     for (let i = 0; i < pairingSequence.length; i++) {
       if (pairingSequence[i].type === 'flight') {
-        pairingSequence[i].dutyDay = Math.floor(timeElapsed.asDays() + 1);
+        pairingSequence[i].dutyDay = Math.floor(timeElapsed.asDays());
         if (pairingSequence[i].dutyTime) {
           timeElapsed = timeElapsed.add(
             dayjs.duration({
@@ -342,7 +342,7 @@ const parse = (pairing, i) => {
   }
 
   // add dutyEnd to last dutyDay flights
-  const lastDutyDay = pairingSequence[pairingSequence.length - 1].dutyDay;
+  const lastDutyDay = pairingSequence[pairingSequence.length - 1].dutyDay; // what about spans midnight?
   for (let i = 0; i < pairingSequence.length; i++) {
     if (pairingSequence[i].type === 'flight' && !pairingSequence[i].dutyDay) {
       console.log(
@@ -356,7 +356,7 @@ const parse = (pairing, i) => {
     if (pairingSequence[i].dutyDay === lastDutyDay) {
       if (
         stringToTime(
-          pairingSequence[pairingSequence.length - 1].arrivalTime,
+          pairingSequence[pairingSequence.length - 1].arrivalTime, // change to isSameDay?
         ).isBetween(
           stringToTime('00:00'),
           stringToTime('07:31'),

@@ -1,6 +1,6 @@
 const b = {
-  // start: '0800',
-  // end: '0930',
+  start: '0800',
+  end: '0930',
   test: '0800',
   deptTest: '0800',
   arrTest: '0930',
@@ -10,8 +10,8 @@ const b = {
 };
 
 const l = {
-  // start: '1230',
-  // end: '1330',
+  start: '1230',
+  end: '1330',
   deptTest: '1230',
   arrTest: '1330',
   test: '1200',
@@ -21,8 +21,8 @@ const l = {
 };
 
 const d = {
-  // start: '1800',
-  // end: '1830',
+  start: '1800',
+  end: '1830',
   // deptStart: '1800',
   // deptEnd: '1930',
   // arrStart: '1700',
@@ -36,8 +36,8 @@ const d = {
 };
 
 const s = {
-  // start: '2300',
-  // end: '0100',
+  start: '2300',
+  end: '0100',
   arrTest: '0100',
   deptTest: '2300',
   test: '2230',

@@ -216,12 +216,13 @@ export default async function getMealsFromSequenceDom(
         console.log(`Duty Day: ${seq[i].dutyDay}`);
       }
 
-      let day = seq[i].dutyDay - 1;
+      let day = seq[i].dutyDay;
       const prev = arr[i - 1] || null;
       const next = arr[i + 1] || null;
       const firstDutyDay = i === 0;
       // console.log(`!${seq[i].dutyDay === seq[seq.length - 1].dutyDay}`);
-      const lastDutyDay = seq[i].dutyDay === seq[seq.length - 1].dutyDay;
+      // const lastDutyDay = seq[i].dutyDay === seq[seq.length - 1].dutyDay;
+      const lastDutyDay = arr[arr.length - 1].dutyDay;
       const last = i === arr.length - 1;
 
       let start;
@@ -250,110 +251,109 @@ export default async function getMealsFromSequenceDom(
 
       //--- FLIGHT
       if (curr.type === 'flight') {
-        for (let j = 0; j <= flDays; j++) {
-          start = stringToDate(curr.departureTime, day);
+        // for (let j = 0; j <= flDays; j++) {
+        start = stringToDate(curr.departureTime, day);
+
+        if (
+          start
+            .add(curr.flightTime.slice(0, -2), 'hour')
+            .add(curr.flightTime.slice(-2), 'minute')
+            .isSame(start, 'day')
+        ) {
           end = stringToDate(curr.arrivalTime, day);
-          console.log(
-            `flight ${start.tz('America/Toronto').format('HH:mm')} - ${end.tz('America/Toronto').format('HH:mm')} at ${curr.departureAirport}`,
-          );
-          // } else if (j === 0 && j !== flDays) {
-          //   start = curr.departureTime;
-          //   end = '23:59';
-          //   // dutyEnd = undefined;
-          // } else if (j !== 0 && j === flDays) {
-          //   // else if (!lastSpansMidnight && j !== 0 && j === flDays) {
-          //   // dutyStart = undefined;
-          //   start = '00:00';
-          //   end = curr.arrivalTime;
-          //   day += 1;
-          // }
+        } else {
+          end = stringToDate(curr.arrivalTime, day + 1);
+        }
+        console.log(
+          `flight ${start.tz('America/Toronto').format('HH:mm')} - ${end.tz('America/Toronto').format('HH:mm')} at ${curr.departureAirport}`,
+        );
 
-          if (
-            includesMeal(
-              b,
-              day,
-              dutyStart,
-              firstDept,
-              start,
-              end,
-              lastArr,
-              dutyEnd,
-              firstDutyDay,
-              lastDutyDay,
-            )
-          ) {
-            mealStr += canOrUsFlight(start, b, startLoc, endLoc) || '';
-          }
+        if (
+          includesMeal(
+            b,
+            day,
+            dutyStart,
+            firstDept,
+            start,
+            end,
+            lastArr,
+            dutyEnd,
+            firstDutyDay,
+            lastDutyDay,
+          )
+        ) {
+          mealStr += canOrUsFlight(start, b, startLoc, endLoc) || '';
+        }
 
-          if (
-            includesMeal(
+        if (
+          includesMeal(
+            l,
+            day,
+            dutyStart,
+            firstDept,
+            start,
+            end,
+            lastArr,
+            dutyEnd,
+            firstDutyDay,
+            lastDutyDay,
+          )
+        ) {
+          mealStr +=
+            canOrUsFlight(
+              start.tz('America/Toronto').format('HHmm'),
               l,
-              day,
-              dutyStart,
-              firstDept,
-              start,
-              end,
-              lastArr,
-              dutyEnd,
-              firstDutyDay,
-              lastDutyDay,
-            )
-          ) {
-            mealStr +=
-              canOrUsFlight(
-                start.tz('America/Toronto').format('HHmm'),
-                l,
-                startLoc,
-                endLoc,
-              ) || '';
-          }
-          if (
-            includesMeal(
+              startLoc,
+              endLoc,
+            ) || '';
+        }
+        if (
+          includesMeal(
+            d,
+            day,
+            dutyStart,
+            firstDept,
+            start,
+            end,
+            lastArr,
+            dutyEnd,
+            firstDutyDay,
+            lastDutyDay,
+          )
+        ) {
+          mealStr +=
+            canOrUsFlight(
+              start.tz('America/Toronto').format('HHmm'),
               d,
-              day,
-              dutyStart,
-              firstDept,
-              start,
-              end,
-              lastArr,
-              dutyEnd,
-              firstDutyDay,
-              lastDutyDay,
-            )
-          ) {
-            mealStr +=
-              canOrUsFlight(
-                start.tz('America/Toronto').format('HHmm'),
-                d,
-                startLoc,
-                endLoc,
-              ) || '';
-          }
-          if (
-            !includesMSPP &&
-            includesMeal(
+              startLoc,
+              endLoc,
+            ) || '';
+        }
+        if (
+          // !includesMSPP &&
+          includesMeal(
+            s,
+            day,
+            dutyStart,
+            firstDept,
+            start,
+            end,
+            lastArr,
+            dutyEnd,
+            firstDutyDay,
+            lastDutyDay,
+          )
+        ) {
+          mealStr +=
+            canOrUsFlight(
+              start.tz('America/Toronto').format('HHmm'),
               s,
-              day,
-              dutyStart,
-              firstDept,
-              start,
-              end,
-              lastArr,
-              dutyEnd,
-              firstDutyDay,
-              lastDutyDay,
-            )
-          ) {
-            mealStr +=
-              canOrUsFlight(
-                start.tz('America/Toronto').format('HHmm'),
-                s,
-                startLoc,
-                endLoc,
-              ) || '';
-            mealStr && pushMeal(mealStr);
-            mealStr = '';
-          }
+              startLoc,
+              endLoc,
+            ) || '';
+          mealStr && pushMeal(mealStr);
+          mealStr = '';
+          // }
           // }
         }
 
@@ -366,6 +366,8 @@ export default async function getMealsFromSequenceDom(
           console.log(
             `sit ${sitStart.tz('America/Toronto').format('HH:mm')} - ${sitEnd.tz('America/Toronto').format('HH:mm')} at ${sitStation}`,
           );
+          console.log(`curr: ${curr.dutyDay} next: ${next.dutyDay}`);
+          console.log(`day: ${day}`);
 
           if (
             includesMeal(
@@ -438,7 +440,7 @@ export default async function getMealsFromSequenceDom(
       } else if (curr.type === 'layover') {
         const dhBefore = prev && prev.isDeadhead;
         const dhAfter = next && next.isDeadhead;
-        const lDay = prev.dutyDay;
+        let lDay = prev.dutyDay;
 
         const lStart = stringToDate(curr.layoverStart, lDay);
         let lEnd = lStart
@@ -454,28 +456,39 @@ export default async function getMealsFromSequenceDom(
           lEnd = lEnd.subtract(1, 'hour');
         }
 
+        const noDays = getLayoverDays(
+          curr.layoverStart,
+          curr.layoverEnd,
+          curr.layoverLength,
+          dhBefore,
+          dhAfter,
+        );
+        console.log(`!noDays: ${noDays}`);
+
         console.log(
           `layover: s/${lStart.tz('America/Toronto').format('HH:mm')}, l/${curr.layoverLength} e/${lEnd.tz('America/Toronto').format('HH:mm')}`,
         );
         const station = curr.layoverStation;
 
-        if (includesMealLayover(b, lDay, lStart, lEnd)) {
-          mealStr += canOrUsLayoverOrSit(b, station) || '';
-        }
-        if (includesMealLayover(l, lDay, lStart, lEnd)) {
-          mealStr += canOrUsLayoverOrSit(l, station) || '';
-        }
-        if (includesMealLayover(d, lDay, lStart, lEnd)) {
-          mealStr += canOrUsLayoverOrSit(d, station) || '';
-        }
-        if (includesMealLayover(s, lDay, lStart, lEnd)) {
-          mealStr += canOrUsLayoverOrSit(s, station) || '';
-          mealStr && pushMeal(mealStr);
-          console.log(`after layover mealStr: ${mealStr}`);
-          mealStr = '';
+        for (let i = 0; i <= noDays; i++) {
+          lDay += i;
+          if (includesMealLayover(b, lDay, lStart, lEnd)) {
+            mealStr += canOrUsLayoverOrSit(b, station) || '';
+          }
+          if (includesMealLayover(l, lDay, lStart, lEnd)) {
+            mealStr += canOrUsLayoverOrSit(l, station) || '';
+          }
+          if (includesMealLayover(d, lDay, lStart, lEnd)) {
+            mealStr += canOrUsLayoverOrSit(d, station) || '';
+          }
+          if (includesMealLayover(s, lDay, lStart, lEnd)) {
+            mealStr += canOrUsLayoverOrSit(s, station) || '';
+            mealStr && pushMeal(mealStr);
+            console.log(`after layover mealStr: ${mealStr}`);
+            mealStr = '';
+          }
         }
       }
-
       if (last) {
         mealStr && pushMeal(mealStr);
       }

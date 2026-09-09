@@ -2,7 +2,7 @@ import stringToDate from './stringToDate.js';
 
 const includesMeal = (
   meal,
-  day,
+  currDay,
   dutyStart,
   firstDept,
   start,
@@ -13,21 +13,46 @@ const includesMeal = (
   lastDutyDay,
 ) => {
   if (!meal || !start || !end) return;
-  console.log(
-    `dutyStart: ${dutyStart.tz('America/Toronto').format('YYYY-MM-DD HH:mm')} --> dutyEnd: ${dutyEnd.tz('America/Toronto').format('YYYY-MM-DD HH:mm')}`,
-  );
-  console.log(
-    `checking ${meal.canChar} || day: ${day} || start: x${start.tz('America/Toronto').format('HH:mm')} || end: x${end.tz('America/Toronto').format('HH:mm')} || first: ${firstDutyDay} || last: ${lastDutyDay}`,
-  );
-  console.log(
-    `${meal.canChar} deptTest: ${stringToDate(meal.deptTest, day).tz('America/Toronto').format('YYYY-MM-DD HH:mm')} || arrTest: ${stringToDate(meal.arrTest, day).tz('America/Toronto').format('YYYY-MM-DD HH:mm')}`,
-  );
+
+  let check;
+
   if (
-    dutyStart.isBefore(stringToDate(meal.deptTest, day)) &&
-    dutyEnd.isAfter(stringToDate(meal.arrTest, day)) &&
-    stringToDate(meal.test, day).isBetween(start, end, 'minute', '[]')
+    dutyStart.isBefore(stringToDate(meal.start, currDay)) &&
+    firstDept.isBefore(stringToDate(meal.deptTest, currDay)) &&
+    lastArr.isAfter(stringToDate(meal.arrTest, currDay)) &&
+    dutyEnd.isAfter(stringToDate(meal.end, currDay)) &&
+    stringToDate(meal.test, currDay).isBetween(start, end, 'minute', '[]')
   ) {
-    return true;
+    check = true;
+  } else {
+    check = false;
+  }
+
+  console.log(
+    `checking ${meal.canChar} || start: ${start.tz('America/Toronto').format('DD HH:mm')} || test: ${stringToDate(meal.test, currDay).tz('America/Toronto').format('DD HH:mm')} ||end: ${end.tz('America/Toronto').format('DD HH:mm')} ${
+      check ? 'yes' : 'no'
+    }`,
+  );
+  if (meal.canChar === 'S') {
+    if (
+      dutyStart.isBefore(stringToDate(meal.start, currDay)) &&
+      firstDept.isBefore(stringToDate(meal.deptTest, currDay)) &&
+      lastArr.isAfter(stringToDate(meal.arrTest, currDay + 1)) &&
+      dutyEnd.isAfter(stringToDate(meal.end, currDay + 1)) &&
+      stringToDate(meal.test, currDay).isBetween(start, end, 'minute', '[]')
+    ) {
+      return true;
+    }
+  } else {
+    if (
+      dutyStart.isBefore(stringToDate(meal.start, currDay)) &&
+      firstDept.isBefore(stringToDate(meal.deptTest, currDay)) &&
+      lastArr.isAfter(stringToDate(meal.arrTest, currDay)) &&
+      dutyEnd.isAfter(stringToDate(meal.end, currDay)) &&
+      stringToDate(meal.test, currDay).isBetween(start, end, 'minute', '[]')
+    ) {
+      return true;
+    }
   }
 };
 
