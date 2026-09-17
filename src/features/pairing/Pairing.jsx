@@ -4,7 +4,7 @@ import Flight from '../flight/Flight';
 import Layover from '../layover/Layover';
 import ExpensesTable from '../expensesTable/ExpensesTable';
 
-function DomPairing(props) {
+function Pairing(props) {
   const { display } = props;
   const p = useSelector((state) => state.pairing);
   const seq = p.sequence;
@@ -64,10 +64,9 @@ function DomPairing(props) {
           <div className="col-3">TAFB/PTEB {p.tafb}</div>
           <div className="col-3">TOTAL - {p.totalCredit}</div>
         </div>
-        {/* <ExpensesTable meals={meals} station={station} /> */}
         <ExpensesTable />
       </div>
     )
   );
 }
-export default DomPairing;
+export default Pairing;

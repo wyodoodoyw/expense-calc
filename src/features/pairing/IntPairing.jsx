@@ -63,7 +63,6 @@ function IntPairing() {
         <div className="col-3">TAFB/PTEB {p.tafb}</div>
         <div className="col-3">TOTAL - {p.totalCredit}</div>
       </div>
-      {/* <ExpensesTable meals={meals} station={station} /> */}
       <ExpensesTable />
     </div>
   );

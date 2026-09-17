@@ -3,7 +3,6 @@
 import canadian_airport_codes from '../data/canadian_airport_codes';
 import international_airport_codes from '../data/international_airport_codes';
 import addDutyDuration from './addDutyDuration';
-
 import calcMealsDomBeforeInt from './calcMealsDomBeforeInt';
 import calcMealsDomAfterInt from './calcMealsDomAfterInt';
 import calcMealsIntLayover from './calcMealsIntLayover';
@@ -94,7 +93,11 @@ export default function getMealsFromSequence(seq = []) {
     }
 
     // Find international layover index
-    if (cur && cur.hotelInfo && cur.isInt) {
+    if (
+      cur &&
+      cur.hotelInfo &&
+      international_airport_codes.includes(cur.layoverStation)
+    ) {
       intLayoverIndex = i;
     }
   }
@@ -148,7 +151,8 @@ export default function getMealsFromSequence(seq = []) {
   }
 
   //--- STEP 3: Calculate meals for international layover.
-  const station = seq[intLayoverIndex].layoverStation;
+  console.log(`! ${intLayoverIndex}`);
+  const station = seq[intLayoverIndex].layoverStation || 'LHR';
 
   const layoverMeals = calcMealsIntLayover(
     seq[intLayoverIndex].layoverStart,

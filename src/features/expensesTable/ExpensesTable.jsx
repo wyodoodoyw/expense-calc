@@ -5,6 +5,9 @@ import getExpensesFromDB from '../../modules/getExpensesFromDB';
 import getMealsFromSequence from '../../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../../modules/calcDisplayTotal';
+import international_airport_codes from '../../data/international_airport_codes';
+import american_airport_codes from '../../data/american_airport_codes';
+import na_sun_airports from '../../data/na_sun_airports';
 import sun_domestic_airport_codes from '../../data/sun_domestic_airport_codes';
 
 const ExpensesTable = () => {
@@ -20,38 +23,40 @@ const ExpensesTable = () => {
   const [displayTotal, setDisplayTotal] = useState(0);
 
   useEffect(() => {
-    // INTERNATIONAL PAIRINGS
     if (!p.pairingIdentifier || seq.length === 0) return;
 
-    if (p.isInt) {
+    let arrivalStations = [];
+    seq.forEach((s) => {
+      if (s.type === 'flight') arrivalStations.push(s.arrivalAirport);
+    });
+    getExpensesFromDB('YYZ', setCaExpenses);
+
+    // INTERNATIONAL PAIRINGS
+    if (arrivalStations.some((s) => international_airport_codes.includes(s))) {
       const { meals: derivedMeals, station: intlStation } =
         getMealsFromSequence(seq || []);
       setMeals(derivedMeals);
       setStation(intlStation);
+      getExpensesFromDB(intlStation, setIntlExpenses);
 
-      // fetch CA expenses (base) and fetch intl expenses only if station found
-      getExpensesFromDB('YYZ', setCaExpenses);
-      if (intlStation) {
-        getExpensesFromDB(intlStation, setIntlExpenses);
-      } else {
-        setIntlExpenses({});
-      }
       // DOMESTIC AND TB PAIRINGS
-    } else {
+    } else if (arrivalStations.every((s) => na_sun_airports.includes(s))) {
       const getDomMeals = async () => {
         const { meals: derivedMeals, station: station } =
           await getMealsFromSequenceDom(p.pairingIdentifier, seq || [], p.tafb);
         setMeals(derivedMeals || []);
         setStation(station);
-        sun_domestic_airport_codes.includes(station) &&
+        na_sun_airports.includes(station) &&
           getExpensesFromDB(station, setIntlExpenses);
       };
 
       getDomMeals();
 
-      // fetch CA expenses (base) and fetch intl expenses only if station found
-      getExpensesFromDB('YYZ', setCaExpenses);
-      getExpensesFromDB('MCO', setUsExpenses);
+      if (arrivalStations.some((s) => american_airport_codes.includes(s))) {
+        getExpensesFromDB('MCO', setUsExpenses);
+      }
+    } else {
+      console.log('No valid arrival stations found in sequence');
     }
   }, [seq]);
 

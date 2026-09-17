@@ -13,7 +13,7 @@ import american_airport_codes from '../data/american_airport_codes';
 import sun_domestic_airport_codes from '../data/sun_domestic_airport_codes';
 import { b, l, d, s } from '../data/mealConstants';
 import timezones from '../data/timezones';
-
+import getMealsFromSequence from './getMealsFromSequence';
 // import getTimezone from './getTimezone';
 
 dayjs.extend(isBetween);
@@ -92,7 +92,11 @@ export default async function getMealsFromSequenceDom(
       return meal.canChar;
     } else if (american_airport_codes.includes(stn)) {
       return meal.usChar;
-    } else if (sun_domestic_airport_codes.includes(stn)) {
+    } else if (
+      sun_domestic_airport_codes.includes(stn) ||
+      stn === 'LHR' ||
+      stn === 'KEF'
+    ) {
       station = stn;
       return meal.intChar;
     }
@@ -210,6 +214,41 @@ export default async function getMealsFromSequenceDom(
     const dutyEnd = dutyStart
       .add(tafb.slice(0, -2), 'hours')
       .add(tafb.slice(-2), 'minutes');
+
+    // LHR PAIRINGS
+
+    if (seq[0].arrivalAirport === 'LHR' || seq[1].arrivalAirport === 'LHR') {
+      const lhrMeals = getMealsFromSequence(seq);
+      console.log(`LHR meals: ${JSON.stringify(lhrMeals)}`);
+      return { meals: lhrMeals.meals, station: lhrMeals.station };
+    }
+
+    // CONTINUOUS DUTY DAY CDD PAIRINGS
+    if (seq.length === 2) {
+      const start = stringToDate(seq[0].departureTime, seq[0].dutyDay);
+      const end = start
+        .add(tafb.slice(0, -2), 'hour')
+        .add(tafb.slice(-2), 'minute')
+        .subtract(75, 'minute');
+
+      const checkStart = dayjs(`2000-01-01T22:00:00`);
+      const checkEnd = dayjs(`2000-01-02T08:00:00`);
+      const latestStart = start.isAfter(checkStart) ? start : checkStart;
+      const earliestEnd = end.isBefore(checkEnd) ? end : checkEnd;
+      const overlap = earliestEnd.diff(latestStart, 'hours', false);
+
+      console.log(
+        `CDD || latestStart: ${latestStart.format('HH:mm')} start: ${start.format('HH:mm')} end: ${end.format('HH:mm')} | earliestEnd: ${earliestEnd.format('HH:mm')} | overlap: ${overlap}`,
+      );
+
+      if (!start.isSame(end, 'day') && Number(tafb) > 600 && overlap >= 4) {
+        console.log(`! ${pIdentifier} night flight`);
+        pushMeal('DS');
+        return { meals: meals, station: station };
+      }
+    }
+
+    // OTHER PAIRINGS
 
     seq.forEach((curr, i, arr) => {
       if (seq[i].type === 'flight') {
@@ -496,7 +535,7 @@ export default async function getMealsFromSequenceDom(
     });
   };
 
-  await getMealsAndLocations(seq, tafb);
+  getMealsAndLocations(seq, tafb);
 
   if (meals) {
     console.log(`{meals}: ${JSON.stringify(meals, station)}`);

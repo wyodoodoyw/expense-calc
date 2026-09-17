@@ -5,24 +5,14 @@ import {
   initializePairing,
   processSequence,
 } from '../features/pairing/pairingSlice';
-import DomPairing from '../features/pairing/DomPairing';
-import IntPairing from '../features/pairing/IntPairing';
-import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
-// import getAllPairingNumbers from '../modules/getAllPairingNumbers';
+import Pairing from '../features/pairing/Pairing';
 import LoadingIndicator from './LoadingIndicator';
-
-dayjs.extend(isBetween);
-dayjs.extend(customParseFormat);
-// const timeFormat = 'HH:mm';
 
 function SearchPairings(props) {
   const { expensesUploaded, pairingsUploaded } = props;
 
   const [loading, setLoading] = useState(false);
   const [pairingNumber, setPairingNumber] = useState('T8001');
-  const [isInt, setIsInt] = useState(false);
   const [pairingSearchResult, setPairingSearchResult] = useState(false);
 
   const dispatch = useDispatch();
@@ -84,7 +74,6 @@ function SearchPairings(props) {
 
         request.onsuccess = () => {
           setPairingSearchResult(true);
-          request.result.isInt ? setIsInt(true) : setIsInt(false);
           if (request.result) {
             dispatch(
               initializePairing({
@@ -185,17 +174,10 @@ function SearchPairings(props) {
               >
                 {loading ? 'Searching...' : 'Search'}
               </button>
-              {/* <div className="btn btn-primary" onClick={handleSearchClick}>
-                Search
-              </div> */}
             </div>
           </div>
         </form>
-        {pairingSearchResult && isInt ? (
-          <IntPairing display={pairingSearchResult} />
-        ) : (
-          <DomPairing display={pairingSearchResult} />
-        )}
+        <Pairing display={pairingSearchResult} />
       </div>
     </>
   );
