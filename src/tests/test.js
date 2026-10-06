@@ -1,8 +1,8 @@
 import getMealsFromSequence from '../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../modules/calcDisplayTotal';
+import international_airport_codes from '../data/international_airport_codes';
 import ignoreList from '../data/ignoreList';
-import dayjs from 'dayjs';
 
 const calcNumLayovers = (s) => {
   let layoverCount = 0;
@@ -143,11 +143,17 @@ export async function runCheckAllPairings(min, max) {
   let mismatchCount = 0;
 
   for (const p of pairings) {
+    let arrivalStations = [];
+    p.sequence.forEach((s) => {
+      if (s.type === 'flight') arrivalStations.push(s.arrivalAirport);
+    });
     // if (!ignoreList.includes(p.pairingIdentifier)) {
     numberOfTests++;
     if (p.pairingIdentifier >= min && p.pairingIdentifier <= max) {
       try {
-        if (p.isInt) {
+        if (
+          arrivalStations.some((s) => international_airport_codes.includes(s))
+        ) {
           const seq = p.sequence || [];
           const numLayovers = calcNumLayovers(seq) || 0;
           const parsedAllowance = asNumber(p.totalAllowance);

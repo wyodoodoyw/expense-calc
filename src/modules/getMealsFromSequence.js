@@ -151,7 +151,7 @@ export default function getMealsFromSequence(seq = []) {
   }
 
   //--- STEP 3: Calculate meals for international layover.
-  console.log(`! ${intLayoverIndex}`);
+  // console.log(`! ${intLayoverIndex}`);
   const station = seq[intLayoverIndex].layoverStation || 'LHR';
 
   const layoverMeals = calcMealsIntLayover(

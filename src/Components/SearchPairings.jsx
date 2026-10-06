@@ -168,7 +168,7 @@ function SearchPairings(props) {
                 onChange={(e) => handlePairingNumberChange(e)}
               />
               <button
-                onClick={handleSearchClick}
+                // onClick={handleSearchClick}
                 className="submit"
                 disabled={loading}
               >

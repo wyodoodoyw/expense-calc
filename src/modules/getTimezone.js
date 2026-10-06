@@ -3,7 +3,7 @@ async function getTimezone(airportCode) {
   //?name=${airportCode}
 
   const url = new URL(baseUrl);
-  const key = '82leBCJ5BgTlT5MkPlMYIjwbOEr4b20l3z2CqFdV';
+  const key = 'key';
   url.searchParams.set('iata', airportCode);
 
   try {

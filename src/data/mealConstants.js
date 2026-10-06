@@ -46,4 +46,4 @@ const s = {
   intChar: 'U',
 };
 
-export { b, l, d, s };
+export default [b, l, d, s];

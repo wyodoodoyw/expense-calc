@@ -46,8 +46,15 @@ const ExpensesTable = () => {
           await getMealsFromSequenceDom(p.pairingIdentifier, seq || [], p.tafb);
         setMeals(derivedMeals || []);
         setStation(station);
-        na_sun_airports.includes(station) &&
-          getExpensesFromDB(station, setIntlExpenses);
+        if (na_sun_airports.includes(station)) {
+          const intlExp = getExpensesFromDB(station, setIntlExpenses);
+          if (typeof intlExp === 'undefined') {
+            getExpensesFromDB('YYZ', setIntlExpenses);
+          }
+          // console.log(
+          //   `intlExp: ${JSON.stringify(intlExpenses)} for ${station}`,
+          // );
+        }
       };
 
       getDomMeals();
