@@ -186,8 +186,8 @@ export default function getMealsFromSequence(seq = []) {
 
     const arrivalTime =
       seq[intInboundIndex] && seq[intInboundIndex].arrivalTime;
-    const finalArrival = seq[seq.length - 1] && seq[seq.length - 1].arrivalTime;
-    const finalDutyEnd = seq[seq.length - 1] && seq[seq.length - 1].dutyEnd;
+    const finalArrival = seq.at(-1) && seq.at(-1).arrivalTime;
+    const finalDutyEnd = seq.at(-1) && seq.at(-1).dutyEnd;
     let domMealsAfterInt;
 
     if (Number(segmentLength.slice(0, -2)) < 17) {

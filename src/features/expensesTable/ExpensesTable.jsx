@@ -105,10 +105,10 @@ const ExpensesTable = () => {
   }, [meals, caExpenses, usExpenses, intlExpenses, numLayovers]);
 
   return (
-    <table className="table table-striped table-bordered mt-3 text-center ">
+    <table className="table table-striped table-bordered mt-3 mx-3 text-center w-stretch">
       <tbody>
         <tr>
-          <th>Station</th>
+          <th></th>
           <th>Breakfast</th>
           <th>Lunch</th>
           <th>Dinner</th>
@@ -125,29 +125,36 @@ const ExpensesTable = () => {
               return (
                 item.meals && (
                   <tr key={item.index}>
-                    <td>🇨🇦</td>
+                    <td></td>
                     <td>
-                      {(item.meals.includes('B') && caExpenses.breakfast) ||
+                      {(item.meals.includes('B') &&
+                        '🇨🇦 ' + caExpenses.breakfast) ||
                         (item.meals.includes('C') &&
-                          usExpenses.breakfast + '*') ||
+                          '🇺🇸 ' + usExpenses.breakfast) ||
                         (item.meals.includes('A') &&
-                          intlExpenses.breakfast + '**')}
+                          '🇺🇳 ' + intlExpenses.breakfast)}
                     </td>
                     <td>
-                      {(item.meals.includes('L') && caExpenses.lunch) ||
-                        (item.meals.includes('M') && usExpenses.lunch + '*') ||
-                        (item.meals.includes('N') && intlExpenses.lunch + '**')}
+                      {(item.meals.includes('L') && '🇨🇦 ' + caExpenses.lunch) ||
+                        (item.meals.includes('M') &&
+                          '🇺🇸 ' + usExpenses.lunch) ||
+                        (item.meals.includes('N') &&
+                          '🇺🇳 ' + intlExpenses.lunch)}
                     </td>
                     <td>
-                      {(item.meals.includes('D') && caExpenses.dinner) ||
-                        (item.meals.includes('E') && usExpenses.dinner + '*') ||
+                      {(item.meals.includes('D') &&
+                        '🇨🇦 ' + caExpenses.dinner) ||
+                        (item.meals.includes('E') &&
+                          '🇺🇸 ' + usExpenses.dinner) ||
                         (item.meals.includes('F') &&
-                          intlExpenses.dinner + '**')}
+                          '🇺🇳 ' + intlExpenses.dinner)}
                     </td>
                     <td>
-                      {(item.meals.includes('S') && caExpenses.snack) ||
-                        (item.meals.includes('T') && usExpenses.snack + '*') ||
-                        (item.meals.includes('U') && intlExpenses.snack + '**')}
+                      {(item.meals.includes('S') && '🇨🇦 ' + caExpenses.snack) ||
+                        (item.meals.includes('T') &&
+                          '🇺🇸 ' + usExpenses.snack) ||
+                        (item.meals.includes('U') &&
+                          '🇺🇳 ' + intlExpenses.snack)}
                     </td>
                   </tr>
                 )
@@ -184,7 +191,7 @@ const ExpensesTable = () => {
           <>
             <tr className="table-secondary">
               <td>CI/CO:</td>
-              <td colSpan={4}>{(numLayovers * 5.05).toFixed(2)}</td>
+              <td colSpan={4}>${(numLayovers * 5.05).toFixed(2)}</td>
             </tr>
 
             <tr className="table-primary">
@@ -194,14 +201,14 @@ const ExpensesTable = () => {
           </>
         )}
       </tbody>
-      <tfoot>
+      {/* <tfoot>
         <tr>
           <td colSpan={5}>* US meals shown in CAD</td>
         </tr>
         <tr>
           <td colSpan={5}>** Sun Destination meals shown in CAD</td>
         </tr>
-      </tfoot>
+      </tfoot> */}
     </table>
   );
 };

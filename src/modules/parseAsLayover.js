@@ -6,10 +6,10 @@ const parseAsLayover = (index, line) => {
 
   if (line[0].includes('DPG')) {
     newLayover.hotelInfo = line.slice(1, line.length - 1).join(' ');
-    newLayover.layoverMeals = line[line.length - 1];
+    newLayover.layoverMeals = line.at(-1);
   } else {
     newLayover.hotelInfo = line.slice(0, line.length - 1).join(' ');
-    newLayover.layoverMeals = line[line.length - 1];
+    newLayover.layoverMeals = line.at(-1);
   }
 
   // if (line.match('TBA')) {

@@ -5,7 +5,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import stringToTime from './stringToTime';
-import stringToDate from './stringToDate';
+// import stringToDate from './stringToDate';
 import includesMeal from './includesMeal';
 import includesMealLayover from './includesMealLayover';
 import canadian_airport_codes from '../data/canadian_airport_codes';
@@ -30,7 +30,8 @@ export default async function getMealsFromSequenceDom(
   }
 
   const base = '2000-01-01';
-  // const defaultTZ = 'America/Toronto';
+  const dTZ = 'America/Toronto';
+  const dF = 'DD HH:mm';
 
   console.log(`${pIdentifier}`);
 
@@ -41,59 +42,10 @@ export default async function getMealsFromSequenceDom(
     timezones[sequence[0].departureAirport],
   );
 
+  let prevArrival;
   const seq = sequence.map((item, i, arr) => {
-    if (i === 0) {
-      const deptTime = elapsedTime;
-      const arrTime = deptTime
-        .add(item.flightTime.slice(0, -2), 'hours')
-        .add(item.flightTime.slice(-2), 'minutes');
-      // .tz(timezones[item.departureAirport], true);
-      elapsedTime = arrTime;
-      return {
-        ...item,
-        departureTime: deptTime,
-        // arrivalTime: arrTime,
-        arrivalTime: arrTime
-          .set(item.arrivalTime.slice(0, -2), 'hour')
-          .set(item.arrivalTime.slice(-2), 'minute'),
-      };
-    } else if (
-      item.type === 'flight' &&
-      arr[i + 1] &&
-      arr[i + 1].type === 'flight'
-    ) {
-      // const deptTime = elapsedTime.tz(timezones[item.departureAirport], true);
-      const deptTime = elapsedTime;
-      let arrTime = deptTime
-        .add(item.flightTime.slice(0, -2), 'hours')
-        .add(item.flightTime.slice(-2), 'minutes');
-      // .tz(timezones[item.arrivalAirport], false);
-      if (item.isDeadhead) {
-        arrTime = deptTime
-          .add(item.flightTime.slice(0, -2), 'hours')
-          .add(item.flightTime.slice(-2), 'minutes');
-        // .tz(timezones[item.arrivalAirport], false);
-      }
-      const start = arrTime;
-      const sitStart = dayjs(
-        `${base} ${arr[i].arrivalTime.slice(0, -2)}:${arr[i].arrivalTime.slice(-2)}`,
-      );
-      const sitEnd = dayjs(
-        `${base} ${arr[i + 1].departureTime.slice(0, -2)}:${arr[i + 1].departureTime.slice(-2)}`,
-      );
-
-      const end = start.add(sitEnd.diff(sitStart, 'minutes', true), 'minutes');
-      elapsedTime = end;
-      return {
-        ...item,
-        departureTime: deptTime,
-        // arrivalTime: arrTime,
-        arrivalTime: arrTime
-          .set(item.arrivalTime.slice(0, -2), 'hour')
-          .set(item.arrivalTime.slice(-2), 'minute'),
-      };
-    } else if (item.type === 'flight') {
-      // const deptTime = elapsedTime.tz(timezones[item.departureAirport], true);
+    // First in sequence
+    if (i === 0 && !arr[i + 1]) {
       const deptTime = elapsedTime;
       let arrTime = deptTime
         .add(item.flightTime.slice(0, -2), 'hours')
@@ -104,23 +56,78 @@ export default async function getMealsFromSequenceDom(
           .add(item.flightTime.slice(-2), 'minutes');
       }
       elapsedTime = arrTime;
+      arrTime = arrTime
+        .set('hour', item.arrivalTime.slice(0, -2))
+        .set('minute', item.arrivalTime.slice(-2));
+      prevArrival = arrTime;
       return {
         ...item,
         departureTime: deptTime,
-        // arrivalTime: arrTime,
+        arrivalTime: arrTime,
+      };
+      // flight and sit
+    } else if (
+      item.type !== 'layover' &&
+      arr[i + 1] &&
+      arr[i + 1].type === 'flight'
+    ) {
+      const deptTime = elapsedTime;
+      let arrTime = deptTime
+        .add(item.flightTime.slice(0, -2), 'hours')
+        .add(item.flightTime.slice(-2), 'minutes');
+      if (item.isDeadhead) {
+        arrTime = deptTime
+          .add(item.flightTime.slice(0, -2), 'hours')
+          .add(item.flightTime.slice(-2), 'minutes');
+      }
+      arrTime = arrTime
+        .set('hour', item.arrivalTime.slice(0, -2))
+        .set('minute', item.arrivalTime.slice(-2));
+      const start = arrTime; //dayjs with date
+      const sitStart = dayjs(
+        `${base} ${arr[i].arrivalTime.slice(0, -2)}:${arr[i].arrivalTime.slice(-2)}`,
+      ); // generic date for calculating diff
+      const sitEnd = dayjs(
+        `${base} ${arr[i + 1].departureTime.slice(0, -2)}:${arr[i + 1].departureTime.slice(-2)}`,
+      );
+      const end = start.add(sitEnd.diff(sitStart, 'minutes', true), 'minutes');
+      elapsedTime = end;
+      prevArrival = arrTime;
+      return {
+        ...item,
+        departureTime: deptTime,
+        arrivalTime: arrTime,
+      };
+      // flight
+    } else if (item.type === 'flight') {
+      const deptTime = elapsedTime;
+      let arrTime = deptTime
+        .add(item.flightTime.slice(0, -2), 'hours')
+        .add(item.flightTime.slice(-2), 'minutes');
+      if (item.isDeadhead) {
+        arrTime = arrTime
+          .add(item.flightTime.slice(0, -2), 'hours')
+          .add(item.flightTime.slice(-2), 'minutes');
+      }
+      elapsedTime = arrTime;
+      prevArrival = arrTime;
+      return {
+        ...item,
+        departureTime: deptTime,
         arrivalTime: arrTime
           .set('hour', item.arrivalTime.slice(0, -2))
           .set('minute', item.arrivalTime.slice(-2)),
       };
+      //layover
     } else if (item.type === 'layover') {
       const layoverStart = dayjs(
-        `${base} ${item.layoverStart.slice(0, -2)}:${item.layoverStart.slice(-2)}`,
+        `${prevArrival.tz(dTZ).format('YYYY-MM-DD')} ${item.layoverStart.slice(0, -2)}:${item.layoverStart.slice(-2)}`,
       );
       const layoverEnd = layoverStart
         .add(item.layoverLength.slice(0, -2), 'hours')
         .add(item.layoverLength.slice(-2), 'minutes')
         .add(1, 'hour')
-        .add(15, 'minutes');
+        .add(15, 'minutes'); //-------------- DH LOGIC
       elapsedTime = layoverEnd;
       return {
         ...item,
@@ -129,6 +136,17 @@ export default async function getMealsFromSequenceDom(
       };
     }
   });
+
+  // seq.forEach((s) => {
+  //   s.type === 'flight' &&
+  //     console.log(
+  //       `!F ${JSON.stringify(s.departureTime.tz(dTZ).format(dF))}-${JSON.stringify(s.arrivalTime.tz(dTZ).format(dF))}`,
+  //     );
+  //   s.type === 'layover' &&
+  //     console.log(
+  //       `\n!L ${JSON.stringify(s.layoverStart.tz(dTZ).format(dF))}-${JSON.stringify(s.layoverEnd.tz(dTZ).format(dF))}`,
+  //     );
+  // });
 
   const meals = [];
   let station = 'YYZ';
@@ -144,8 +162,6 @@ export default async function getMealsFromSequenceDom(
 
   const canOrUsFlight = (deptTime, meal, startLoc, endLoc) => {
     // if (!deptTime || !meal || !startLoc || !endLoc) return;
-
-    console.log(`! ${deptTime} | ${meal.canChar} | ${startLoc} | ${endLoc}`);
     const time = deptTime;
     const test = stringToTime(meal.test);
 
@@ -314,14 +330,11 @@ export default async function getMealsFromSequenceDom(
       .add(tafb.slice(0, -2), 'hours')
       .add(tafb.slice(-2), 'minutes');
 
-    //   console.log(
-    //   `dutyStart: ${dutyStart.tz('America/New_York').format('YYYY-MM-DD HH:mm')}`,
-    // );
-    console.log(`dutyStart: ${dutyStart}`); //-----------------------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+    console.log(`dutyStart: ${dutyStart.tz(dTZ).format('YYYY-MM-DD HH:mm')}`); //-----------------------FIX WITH PARSEASFLIGHT LOGIC FOR A/C
+    console.log(`dutyStart: ${dutyEnd.tz(dTZ).format('YYYY-MM-DD HH:mm')}`);
     // CONTINUOUS DUTY DAY CDD PAIRINGS
     if (seq.length === 2) {
-      const start = stringToDate(seq[0].departureTime, seq[0].dutyDay);
+      const start = seq[0].departureTime;
       const end = start
         .add(tafb.slice(0, -2), 'hour')
         .add(tafb.slice(-2), 'minute')
@@ -333,35 +346,27 @@ export default async function getMealsFromSequenceDom(
       const earliestEnd = end.isBefore(checkEnd) ? end : checkEnd;
       const overlap = earliestEnd.diff(latestStart, 'hours', false);
 
-      console.log(
-        `CDD || latestStart: ${latestStart.format('HH:mm')} start: ${start.format('HH:mm')} end: ${end.format('HH:mm')} | earliestEnd: ${earliestEnd.format('HH:mm')} | overlap: ${overlap}`,
-      );
+      // console.log(
+      //   `CDD || latestStart: ${latestStart.format('HH:mm')} start: ${start.format('HH:mm')} end: ${end.format('HH:mm')} | earliestEnd: ${earliestEnd.format('HH:mm')} | overlap: ${overlap}`,
+      // );
 
       if (!start.isSame(end, 'day') && Number(tafb) > 600 && overlap >= 4) {
-        console.log(`! ${pIdentifier} night flight`);
+        // console.log(`! ${pIdentifier} night flight`);
         pushMeal('DS');
         return { meals: meals, station: station };
       }
     }
 
     // OTHER PAIRINGS
-
+    let firstDutyDept = 0;
     seq.forEach((curr, i, arr) => {
-      if (curr.type === 'flight') {
-        console.log(`Duty Day: ${curr.dutyDay}`);
-      }
-
-      let day = curr.dutyDay;
       const prev = arr[i - 1] || null;
       const next = arr[i + 1] || null;
-      const firstDutyDay = i === 0;
-      const lastDutyDay = arr[arr.length - 1].dutyDay;
       const last = i === arr.length - 1;
-
-      const startLoc = curr.departureAirport;
-      const endLoc = curr.arrivalAirport;
+      let startLoc = curr.departureAirport;
+      let endLoc = curr.arrivalAirport;
       const firstDept = arr[0].departureTime;
-      const lastArr = arr[arr.length - 1].arrivalTime;
+      const lastArr = seq.at(-1).arrivalTime;
 
       //--- FLIGHT
       if (curr.type === 'flight') {
@@ -369,64 +374,87 @@ export default async function getMealsFromSequenceDom(
         const end = curr.arrivalTime;
 
         console.log(
-          `flight: ${start.tz(timezones[curr.departureAirport], true).format('HH:mm')} end: ${end.tz('America/Toronto', true).format('HH:mm')}`,
+          `\nflight: ${start.tz(timezones[curr.departureAirport], true).format('HH:mm')} end: ${end.tz(dTZ, true).format('HH:mm')}`,
         );
 
         mealsK.forEach((meal) => {
           if (
             includesMeal(
               meal,
-              day,
               dutyStart,
               firstDept,
               start,
               end,
               lastArr,
               dutyEnd,
-              firstDutyDay,
-              lastDutyDay,
-              startLoc,
-              endLoc,
             )
           ) {
-            console.log(
-              `! ${start} | ${meal.canChar} | ${startLoc} | ${endLoc}`,
-            );
+            if (meal.canChar === 'B') {
+              startLoc = seq[firstDutyDept].departureAirport;
+              endLoc = startLoc;
+            }
             mealStr += canOrUsFlight(start, meal, startLoc, endLoc) || '';
             console.log(`mealStr: ${mealStr}`);
-            if (mealStr && mealStr[mealStr.length - 1] === 'S') {
+            const snackCheck =
+              mealStr.at(-1) === 'S' ||
+              mealStr.at(-1) === 'T' ||
+              mealStr.at(-1) === 'U';
+            if (mealStr && snackCheck) {
               pushMeal(mealStr);
               mealStr = '';
             }
           }
         });
 
+        //--- AIRPORT SIT
         if (next && next.type === 'flight') {
-          //checks time between flights (airport sit)
-          // const sitDay = curr.dutyDay;
           const sitStart = curr.arrivalTime;
           const sitEnd = next.departureTime;
-          const sitStation = curr.arrivalAirport;
+          let sitStation = curr.arrivalAirport;
           console.log(
-            `sit ${sitStart.tz('America/Toronto').format('HH:mm')} - ${sitEnd.tz('America/Toronto').format('HH:mm')} at ${sitStation}`,
+            `\nsit ${sitStart.tz(dTZ).format('HH:mm')} - ${sitEnd.tz(dTZ).format('HH:mm')} at ${sitStation}`,
           );
 
           mealsK.forEach((meal) => {
-            if (includesMealLayover(meal, 0, sitStart, sitEnd, sitStation)) {
-              mealStr += canOrUsLayoverOrSit(meal, sitStation) || '';
-              if (mealStr && mealStr[mealStr.length - 1] === 'S') {
+            if (
+              includesMeal(
+                meal,
+                dutyStart,
+                firstDept,
+                sitStart,
+                sitEnd,
+                lastArr,
+                dutyEnd,
+              )
+            ) {
+              mealStr +=
+                canOrUsLayoverOrSit(
+                  meal,
+                  meal.canChar === 'B'
+                    ? seq[firstDutyDept].departureAirport
+                    : sitStation,
+                ) || '';
+              const snackCheck =
+                mealStr.at(-1) === 'S' ||
+                mealStr.at(-1) === 'T' ||
+                mealStr.at(-1) === 'U';
+              if (mealStr && snackCheck) {
                 pushMeal(mealStr);
                 mealStr = '';
               }
             }
           });
         }
-      } else if (curr.type === 'layover') {
+      }
+
+      //--- LAYOVER
+      if (curr.type === 'layover') {
         const dhBefore = prev && prev.isDeadhead;
         const dhAfter = next && next.isDeadhead;
-        let lDay = prev.dutyDay;
         const lStart = curr.layoverStart;
         let lEnd = curr.layoverEnd;
+        firstDutyDept = next.index;
+        console.log(`setting firstDutyDept: ${firstDutyDept}`);
 
         if (dhBefore) {
           lEnd = lEnd.subtract(15, 'minute');
@@ -445,15 +473,19 @@ export default async function getMealsFromSequenceDom(
         );
 
         console.log(
-          `layover: s/${lStart.tz('America/Toronto').format('HH:mm')}, l/${curr.layoverLength} e/${lEnd.tz('America/Toronto').format('HH:mm')}`,
+          `\nlayover: ${lStart.tz(dTZ).format(dF)}-${lEnd.tz(dTZ).format(dF)}, length: ${curr.layoverLength}`,
         );
         const station = curr.layoverStation;
 
         for (let i = 0; i <= noDays; i++) {
           mealsK.forEach((meal) => {
-            if (includesMealLayover(meal, i, lStart, lEnd, station)) {
+            if (includesMealLayover(meal, i, lStart, lEnd)) {
               mealStr += canOrUsLayoverOrSit(meal, station) || '';
-              if (mealStr && mealStr[mealStr.length - 1] === 'S') {
+              const snackCheck =
+                mealStr.at(-1) === 'S' ||
+                mealStr.at(-1) === 'T' ||
+                mealStr.at(-1) === 'U';
+              if (mealStr && snackCheck) {
                 pushMeal(mealStr);
                 mealStr = '';
               }

@@ -1,7 +1,4 @@
-import stringToDate from './stringToDate.js';
-import timezones from '../data/timezones.js';
-
-const includesMealLayover = (meal, day, start, end, stn) => {
+const includesMealLayover = (meal, day, start, end) => {
   if (!meal || !start || !end) return;
 
   const defTZ = 'America/Toronto';

@@ -1,6 +1,4 @@
 import all_airports from '../data/all_airports';
-import american_airport_codes from '../data/american_airport_codes';
-import international_airport_codes from '../data/international_airport_codes';
 import parseAsFlight from '../modules/parseAsFlight';
 import parseAsLayover from '../modules/parseAsLayover';
 import addPairingToDB from '../modules/addPairingToDB';
@@ -100,7 +98,7 @@ const parse = (pairing, i) => {
         newPairing.cicoAmount = array[5]
           .replace('(INC-$', '')
           .replace('CICO)', '');
-        newPairing.totalAllowance = array[array.length - 1];
+        newPairing.totalAllowance = array.at(-1);
       } else if (array[2].includes('THG')) {
         newPairing.pairingDPG = undefined;
         newPairing.pairingTHG = array[3];
@@ -108,7 +106,7 @@ const parse = (pairing, i) => {
         newPairing.cicoAmount = array[5]
           .replace('(INC-$', '')
           .replace('CICO)', '');
-        newPairing.totalAllowance = array[array.length - 1];
+        newPairing.totalAllowance = array.at(-1);
       } else {
         newPairing.pairingDPG = undefined;
         newPairing.pairingTHG = undefined;
@@ -120,8 +118,8 @@ const parse = (pairing, i) => {
         } else {
           newPairing.cicoAmount = undefined;
         }
-        if (array[array.length - 1].match(/[0-9]{1,3}.[0-9]{2}/g)) {
-          newPairing.totalAllowance = array[array.length - 1];
+        if (array.at(-1).match(/[0-9]{1,3}.[0-9]{2}/g)) {
+          newPairing.totalAllowance = array.at(-1);
         } else {
           console.warn(`Error parsing totalAllowance: ${errorPairingNumber}`);
         }
@@ -278,26 +276,6 @@ const parse = (pairing, i) => {
         pairingSequence[i].layoverStation =
           pairingSequence[i - 1].arrivalAirport;
       }
-      // if (
-      //   international_airport_codes.includes(pairingSequence[i].layoverStation)
-      // ) {
-      //   newPairing.isInt = true;
-      //   newPairing.isUsa = false;
-      //   pairingSequence[i].isInt = true;
-      //   pairingSequence.isUsa = false;
-      // } else if (
-      //   american_airport_codes.includes(pairingSequence[i].layoverStation)
-      // ) {
-      //   newPairing.isInt = false;
-      //   newPairing.isUsa = true;
-      //   pairingSequence[i].isInt = false;
-      //   pairingSequence[i].isUsa = true;
-      // } else {
-      //   pairing.isInt = false;
-      //   pairing.isUsa = false;
-      //   pairingSequence[i].isInt = false;
-      //   pairingSequence[i].isUsa = false;
-      // }
     }
   } catch (err) {
     console.warn(
@@ -342,7 +320,7 @@ const parse = (pairing, i) => {
   }
 
   // add dutyEnd to last dutyDay flights
-  const lastDutyDay = pairingSequence[pairingSequence.length - 1].dutyDay; // what about spans midnight?
+  const lastDutyDay = pairingSequence.at(-1).dutyDay; // what about spans midnight?
   for (let i = 0; i < pairingSequence.length; i++) {
     if (pairingSequence[i].type === 'flight' && !pairingSequence[i].dutyDay) {
       console.log(
@@ -356,7 +334,7 @@ const parse = (pairing, i) => {
     if (pairingSequence[i].dutyDay === lastDutyDay) {
       if (
         stringToTime(
-          pairingSequence[pairingSequence.length - 1].arrivalTime, // change to isSameDay?
+          pairingSequence.at(-1).arrivalTime, // change to isSameDay?
         ).isBetween(
           stringToTime('00:00'),
           stringToTime('07:31'),
@@ -366,8 +344,7 @@ const parse = (pairing, i) => {
       ) {
         // skip
       } else {
-        pairingSequence[i].dutyEnd =
-          pairingSequence[pairingSequence.length - 1].dutyEnd;
+        pairingSequence[i].dutyEnd = pairingSequence.at(-1).dutyEnd;
       }
     }
   }
