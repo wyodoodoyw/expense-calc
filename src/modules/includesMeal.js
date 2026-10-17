@@ -41,10 +41,10 @@ const includesMeal = (
   }
 
   if (
-    dutyStart.isBefore(mealStart) &&
-    firstDept.isBefore(deptTest) &&
-    lastArr.isAfter(arrTest) &&
-    dutyEnd.isAfter(mealEnd) &&
+    dutyStart.isBefore(mealStart, 'minutes') &&
+    firstDept.isBefore(deptTest, 'minutes') &&
+    lastArr.isAfter(arrTest, 'minutes') &&
+    dutyEnd.isAfter(mealEnd, 'minutes') &&
     mealTest.isBetween(start, end, 'minute', '[]')
   ) {
     check = true;
@@ -53,16 +53,16 @@ const includesMeal = (
   }
 
   console.log(
-    `checking ${meal.canChar} || dS: ${dutyStart.isBefore(mealStart)} || fD: ${firstDept.isBefore(deptTest)} || s: ${start.tz(defTZ).format(f)} - ${mealTest.tz(defTZ).format(f)} - e: ${end.tz(defTZ).format(f)} || lA: ${lastArr.format(f)} ${lastArr.isAfter(arrTest)} || dE: ${dutyEnd.isAfter(mealEnd)} || inc? ${
+    `checking ${meal.canChar} || dS: ${dutyStart.isBefore(mealStart, 'minutes')} || fD: ${firstDept.isBefore(deptTest, 'minutes')} || s: ${start.tz(defTZ).format(f)} - ${mealTest.tz(defTZ).format(f)} - e: ${end.tz(defTZ).format(f)} || lA: ${lastArr.format(f)} ${lastArr.isAfter(arrTest, 'minutes')} || dE: ${dutyEnd.isAfter(mealEnd, 'minutes')} || inc? ${
       check ? 'yes' : 'no'
     }`,
   );
 
   if (
-    dutyStart.isBefore(mealStart) &&
-    firstDept.isBefore(deptTest) &&
-    lastArr.isAfter(arrTest) &&
-    dutyEnd.isAfter(mealEnd) &&
+    dutyStart.isBefore(mealStart, 'minutes') &&
+    firstDept.isBefore(deptTest, 'minutes') &&
+    lastArr.isAfter(arrTest, 'minutes') &&
+    dutyEnd.isAfter(mealEnd, 'minutes') &&
     mealTest.isBetween(start, end, 'minute', '[]')
   ) {
     return true;

@@ -29,9 +29,9 @@ export default async function getMealsFromSequenceDom(
     return { meals: [], station: null };
   }
 
-  const base = '2000-01-01';
+  const base = '2025-08-01';
   const dTZ = 'America/Toronto';
-  const dF = 'DD HH:mm';
+  const dF = 'DD HH:mm ZZ';
 
   console.log(`${pIdentifier}`);
 
@@ -43,22 +43,21 @@ export default async function getMealsFromSequenceDom(
   );
 
   let prevArrival;
+
   const seq = sequence.map((item, i, arr) => {
     // First in sequence
     if (i === 0 && !arr[i + 1]) {
       const deptTime = elapsedTime;
       let arrTime = deptTime
         .add(item.flightTime.slice(0, -2), 'hours')
-        .add(item.flightTime.slice(-2), 'minutes');
+        .add(item.flightTime.slice(-2), 'minutes')
+        .tz(timezones[item.arrivalAirport], false);
       if (item.isDeadhead) {
         arrTime = arrTime
           .add(item.flightTime.slice(0, -2), 'hours')
           .add(item.flightTime.slice(-2), 'minutes');
       }
       elapsedTime = arrTime;
-      arrTime = arrTime
-        .set('hour', item.arrivalTime.slice(0, -2))
-        .set('minute', item.arrivalTime.slice(-2));
       prevArrival = arrTime;
       return {
         ...item,
@@ -74,15 +73,13 @@ export default async function getMealsFromSequenceDom(
       const deptTime = elapsedTime;
       let arrTime = deptTime
         .add(item.flightTime.slice(0, -2), 'hours')
-        .add(item.flightTime.slice(-2), 'minutes');
+        .add(item.flightTime.slice(-2), 'minutes')
+        .tz(timezones[item.arrivalAirport], false);
       if (item.isDeadhead) {
         arrTime = deptTime
           .add(item.flightTime.slice(0, -2), 'hours')
           .add(item.flightTime.slice(-2), 'minutes');
       }
-      arrTime = arrTime
-        .set('hour', item.arrivalTime.slice(0, -2))
-        .set('minute', item.arrivalTime.slice(-2));
       const start = arrTime; //dayjs with date
       const sitStart = dayjs(
         `${base} ${arr[i].arrivalTime.slice(0, -2)}:${arr[i].arrivalTime.slice(-2)}`,
@@ -103,7 +100,8 @@ export default async function getMealsFromSequenceDom(
       const deptTime = elapsedTime;
       let arrTime = deptTime
         .add(item.flightTime.slice(0, -2), 'hours')
-        .add(item.flightTime.slice(-2), 'minutes');
+        .add(item.flightTime.slice(-2), 'minutes')
+        .tz(timezones[item.arrivalAirport], false);
       if (item.isDeadhead) {
         arrTime = arrTime
           .add(item.flightTime.slice(0, -2), 'hours')
@@ -114,15 +112,11 @@ export default async function getMealsFromSequenceDom(
       return {
         ...item,
         departureTime: deptTime,
-        arrivalTime: arrTime
-          .set('hour', item.arrivalTime.slice(0, -2))
-          .set('minute', item.arrivalTime.slice(-2)),
+        arrivalTime: arrTime,
       };
       //layover
     } else if (item.type === 'layover') {
-      const layoverStart = dayjs(
-        `${prevArrival.tz(dTZ).format('YYYY-MM-DD')} ${item.layoverStart.slice(0, -2)}:${item.layoverStart.slice(-2)}`,
-      );
+      const layoverStart = prevArrival;
       const layoverEnd = layoverStart
         .add(item.layoverLength.slice(0, -2), 'hours')
         .add(item.layoverLength.slice(-2), 'minutes')
@@ -140,11 +134,11 @@ export default async function getMealsFromSequenceDom(
   // seq.forEach((s) => {
   //   s.type === 'flight' &&
   //     console.log(
-  //       `!F ${JSON.stringify(s.departureTime.tz(dTZ).format(dF))}-${JSON.stringify(s.arrivalTime.tz(dTZ).format(dF))}`,
+  //       `!F ${JSON.stringify(s.departureTime.format(dF))}-${JSON.stringify(s.arrivalTime.format(dF))}`,
   //     );
   //   s.type === 'layover' &&
   //     console.log(
-  //       `\n!L ${JSON.stringify(s.layoverStart.tz(dTZ).format(dF))}-${JSON.stringify(s.layoverEnd.tz(dTZ).format(dF))}`,
+  //       `\n!L ${JSON.stringify(s.layoverStart.format(dF))}-${JSON.stringify(s.layoverEnd.format(dF))}\n `,
   //     );
   // });
 
@@ -216,63 +210,63 @@ export default async function getMealsFromSequenceDom(
     }
   };
 
-  const getFlightDays = (s, e, len, isDH, startStation, endStation) => {
-    if (!s || !e || !len || !startStation || !endStation) return 0;
+  // const getFlightDays = (s, e, len, isDH, startStation, endStation) => {
+  //   if (!s || !e || !len || !startStation || !endStation) return 0;
 
-    // start time (departure)
-    const startHH = Number(s.slice(0, -2));
-    const startMM = Number(s.slice(-2));
-    // const startTZ = getTimezone(startStation);
-    const startTZ = timezones[startStation];
-    const startTime = dayjs()
-      .set('hour', startHH)
-      .set('minute', startMM)
-      .tz(startTZ, true);
-    // end time (arrival)
-    const endHH = Number(e.slice(0, -2));
-    const endMM = Number(e.slice(-2));
-    // const endTZ = getTimezone(endStation);
-    const endTZ = timezones[endStation];
-    const endTime = dayjs()
-      .set('hour', endHH)
-      .set('minute', endMM)
-      .tz(endTZ, true);
-    const offset = startTime.$offset - endTime.$offset;
+  //   // start time (departure)
+  //   const startHH = Number(s.slice(0, -2));
+  //   const startMM = Number(s.slice(-2));
+  //   // const startTZ = getTimezone(startStation);
+  //   const startTZ = timezones[startStation];
+  //   const startTime = dayjs()
+  //     .set('hour', startHH)
+  //     .set('minute', startMM)
+  //     .tz(startTZ, true);
+  //   // end time (arrival)
+  //   const endHH = Number(e.slice(0, -2));
+  //   const endMM = Number(e.slice(-2));
+  //   // const endTZ = getTimezone(endStation);
+  //   const endTZ = timezones[endStation];
+  //   const endTime = dayjs()
+  //     .set('hour', endHH)
+  //     .set('minute', endMM)
+  //     .tz(endTZ, true);
+  //   const offset = startTime.$offset - endTime.$offset;
 
-    // flight time
-    const durHH = Number(len.slice(0, -2));
-    const durMM = Number(len.slice(-2));
+  //   // flight time
+  //   const durHH = Number(len.slice(0, -2));
+  //   const durMM = Number(len.slice(-2));
 
-    let calculatedFlightTime;
+  //   let calculatedFlightTime;
 
-    if (endTime.isBefore(startTime)) {
-      calculatedFlightTime = dayjs
-        .duration({ hours: 24 })
-        .subtract({ hours: startHH, minutes: startMM })
-        .add({ hours: endHH, minutes: endMM });
-    } else {
-      calculatedFlightTime = dayjs
-        .duration(endTime.diff(startTime))
-        .subtract({ minutes: offset });
-    }
+  //   if (endTime.isBefore(startTime)) {
+  //     calculatedFlightTime = dayjs
+  //       .duration({ hours: 24 })
+  //       .subtract({ hours: startHH, minutes: startMM })
+  //       .add({ hours: endHH, minutes: endMM });
+  //   } else {
+  //     calculatedFlightTime = dayjs
+  //       .duration(endTime.diff(startTime))
+  //       .subtract({ minutes: offset });
+  //   }
 
-    let flightLength = dayjs.duration({ hours: durHH, minutes: durMM });
+  //   let flightLength = dayjs.duration({ hours: durHH, minutes: durMM });
 
-    if (isDH) {
-      // double to flight length to complesate for 1/2 credit
-      flightLength.add({ hours: durHH, minutes: durMM });
-    }
+  //   if (isDH) {
+  //     // double to flight length to complesate for 1/2 credit
+  //     flightLength.add({ hours: durHH, minutes: durMM });
+  //   }
 
-    const lengthDayOne = dayjs
-      .duration({ hours: 24 })
-      .subtract({ hours: startHH, minutes: startMM });
+  //   const lengthDayOne = dayjs
+  //     .duration({ hours: 24 })
+  //     .subtract({ hours: startHH, minutes: startMM });
 
-    if (lengthDayOne > calculatedFlightTime) {
-      return 0;
-    } else {
-      return 1;
-    }
-  };
+  //   if (lengthDayOne > calculatedFlightTime) {
+  //     return 0;
+  //   } else {
+  //     return 1;
+  //   }
+  // };
 
   const getLayoverDays = (s, e, len, dhBefore, dhAfter, loc) => {
     if (!s || !e || !len) return;
@@ -330,8 +324,9 @@ export default async function getMealsFromSequenceDom(
       .add(tafb.slice(0, -2), 'hours')
       .add(tafb.slice(-2), 'minutes');
 
-    console.log(`dutyStart: ${dutyStart.tz(dTZ).format('YYYY-MM-DD HH:mm')}`); //-----------------------FIX WITH PARSEASFLIGHT LOGIC FOR A/C
-    console.log(`dutyStart: ${dutyEnd.tz(dTZ).format('YYYY-MM-DD HH:mm')}`);
+    console.log(`dutyStart: ${dutyStart.tz(dTZ).format(dF)}`); //-----------------------FIX WITH PARSEASFLIGHT LOGIC FOR A/C
+    console.log(`dutyStart: ${dutyEnd.tz(dTZ).format(dF)}`);
+
     // CONTINUOUS DUTY DAY CDD PAIRINGS
     if (seq.length === 2) {
       const start = seq[0].departureTime;
@@ -370,11 +365,11 @@ export default async function getMealsFromSequenceDom(
 
       //--- FLIGHT
       if (curr.type === 'flight') {
-        const start = curr.departureTime;
-        const end = curr.arrivalTime;
+        const start = curr.departureTime.tz(timezones['YYZ'], true);
+        const end = curr.arrivalTime.tz(timezones['YYZ'], true);
 
         console.log(
-          `\nflight: ${start.tz(timezones[curr.departureAirport], true).format('HH:mm')} end: ${end.tz(dTZ, true).format('HH:mm')}`,
+          `\nflight: ${start.format('HH:mm')} end: ${end.format('HH:mm')}`,
         );
 
         mealsK.forEach((meal) => {
@@ -408,8 +403,8 @@ export default async function getMealsFromSequenceDom(
 
         //--- AIRPORT SIT
         if (next && next.type === 'flight') {
-          const sitStart = curr.arrivalTime;
-          const sitEnd = next.departureTime;
+          const sitStart = curr.arrivalTime.tz(timezones['YYZ'], true);
+          const sitEnd = next.departureTime.tz(timezones['YYZ'], true);
           let sitStation = curr.arrivalAirport;
           console.log(
             `\nsit ${sitStart.tz(dTZ).format('HH:mm')} - ${sitEnd.tz(dTZ).format('HH:mm')} at ${sitStation}`,
@@ -451,8 +446,8 @@ export default async function getMealsFromSequenceDom(
       if (curr.type === 'layover') {
         const dhBefore = prev && prev.isDeadhead;
         const dhAfter = next && next.isDeadhead;
-        const lStart = curr.layoverStart;
-        let lEnd = curr.layoverEnd;
+        const lStart = curr.layoverStart.tz(timezones['YYZ'], true);
+        let lEnd = curr.layoverEnd.tz(timezones['YYZ'], true);
         firstDutyDept = next.index;
         console.log(`setting firstDutyDept: ${firstDutyDept}`);
 
