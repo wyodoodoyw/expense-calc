@@ -140,50 +140,59 @@ const parseAsFlight = (pairingSequence, array, index, isLastFlight) => {
           .subtract(1, 'hour')
           .subtract(10, 'minute')
           .format('HHmm');
+        newFlight.dutyOffset = '110';
         break;
       case '788':
         newFlight.dutyStart = time
           .subtract(1, 'hour')
           .subtract(10, 'minute')
           .format('HHmm');
+        newFlight.dutyOffset = '110';
         break;
       case '330':
         newFlight.dutyStart = time
           .subtract(1, 'hour')
           .subtract(15, 'minute')
           .format('HHmm');
+        newFlight.dutyOffset = '115';
         break;
       case '789':
         newFlight.dutyStart = time
           .subtract(1, 'hour')
           .subtract(15, 'minute')
           .format('HHmm');
+        newFlight.dutyOffset = '115';
         break;
       case '772':
         newFlight.dutyStart = time
           .subtract(1, 'hour')
           .subtract(15, 'minute')
           .format('HHmm');
+        newFlight.dutyOffset = '115';
         break;
       case '773':
         newFlight.dutyStart = time
           .subtract(1, 'hour')
           .subtract(20, 'minute')
           .format('HHmm');
+        newFlight.dutyOffset = '120';
         break;
       case '77P':
         newFlight.dutyStart = time
           .subtract(1, 'hour')
           .subtract(25, 'minute')
           .format('HHmm');
+        newFlight.dutyOffset = '125';
         break;
       default:
         newFlight.dutyStart = time.subtract(1, 'hour').format('HHmm');
+        newFlight.dutyOffset = '100';
         break;
     }
   } else if (index === 0 && newFlight.isDeadhead) {
     const time = stringToTime(newFlight.departureTime);
     newFlight.dutyStart = time.subtract(30, 'minute').format('HHmm');
+    newFlight.dutyOffset = '30';
   }
 
   // calculate duty end for last flight of pairing

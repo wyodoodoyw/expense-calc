@@ -23,10 +23,6 @@ const l = {
 const d = {
   start: '1800',
   end: '1830',
-  // deptStart: '1800',
-  // deptEnd: '1930',
-  // arrStart: '1700',
-  // arrEnd: '1830',
   deptTest: '1800',
   arrTest: '1830',
   test: '1730',

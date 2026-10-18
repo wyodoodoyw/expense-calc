@@ -10,10 +10,10 @@ const includesMealLayover = (meal, day, start, end) => {
     .add(day, 'day');
 
   console.log(
-    `checking ${meal.canChar} || day: ${day} || start: x${start.tz(defTZ).format(f)} || test: ${mealTest.tz(defTZ).format(f)} ||end: x${end.tz(defTZ).format(f)} ${mealTest.isBetween(start, end, 'minute', '[]') ? 'yes' : 'no'}`,
+    `checking ${meal.canChar} || day: ${day} || start: x${start.tz(defTZ).format(f)} || test: ${mealTest.tz(defTZ).format(f)} ||end: x${end.tz(defTZ).format(f)} ${mealTest.isBetween(start, end, 'minute', '[)') ? 'YES' : 'no'}`,
   );
 
-  if (mealTest.isBetween(start, end, 'minute', '()')) {
+  if (mealTest.isBetween(start, end, 'minute', '[])')) {
     return true;
   }
 };

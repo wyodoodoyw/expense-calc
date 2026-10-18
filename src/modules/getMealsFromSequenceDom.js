@@ -131,17 +131,6 @@ export default async function getMealsFromSequenceDom(
     }
   });
 
-  // seq.forEach((s) => {
-  //   s.type === 'flight' &&
-  //     console.log(
-  //       `!F ${JSON.stringify(s.departureTime.format(dF))}-${JSON.stringify(s.arrivalTime.format(dF))}`,
-  //     );
-  //   s.type === 'layover' &&
-  //     console.log(
-  //       `\n!L ${JSON.stringify(s.layoverStart.format(dF))}-${JSON.stringify(s.layoverEnd.format(dF))}\n `,
-  //     );
-  // });
-
   const meals = [];
   let station = 'YYZ';
 
@@ -156,8 +145,14 @@ export default async function getMealsFromSequenceDom(
 
   const canOrUsFlight = (deptTime, meal, startLoc, endLoc) => {
     // if (!deptTime || !meal || !startLoc || !endLoc) return;
-    const time = deptTime;
-    const test = stringToTime(meal.test);
+
+    const test = deptTime
+      .set('hour', meal.test.slice(0, -2))
+      .set('minute', meal.test.slice(-2));
+
+    console.log(
+      `!! ${deptTime.format(dF)} | ${test.format(dF)} | ${startLoc} | ${endLoc} || ${deptTime.isBefore(test, 'minutes')} || ${deptTime.isSameOrAfter(test, 'minutes')}`,
+    );
 
     if (meal.canChar === 'B') {
       // Breakfast is always paid at the rate of the country of departure.
@@ -171,23 +166,24 @@ export default async function getMealsFromSequenceDom(
       }
     } else {
       // If flight departs prior to [test] the [meal] is paid at the rate of the country of destination.
-      if (time.isBefore(test, 'minutes')) {
+      if (deptTime.isBefore(test, 'minutes')) {
         if (canadian_airport_codes.includes(endLoc)) {
           return meal.canChar;
         } else if (american_airport_codes.includes(endLoc)) {
           return meal.usChar;
         } else if (sun_domestic_airport_codes.includes(endLoc)) {
           station = endLoc;
+          console.log(`!!! ${meal.intChar}`);
           return meal.intChar;
         }
         // If flight departas at [test] or later, the [meal] is paid at the rate of the country of departure.
-      } else if (time.isSameOrAfter(test, 'minutes')) {
+      } else if (deptTime.isSameOrAfter(test, 'minutes')) {
         if (canadian_airport_codes.includes(startLoc)) {
           return meal.canChar;
         } else if (american_airport_codes.includes(startLoc)) {
           return meal.usChar;
-        } else if (sun_domestic_airport_codes.includes(endLoc)) {
-          station = endLoc;
+        } else if (sun_domestic_airport_codes.includes(startLoc)) {
+          station = startLoc;
           return meal.intChar;
         }
       }
@@ -196,6 +192,7 @@ export default async function getMealsFromSequenceDom(
 
   const canOrUsLayoverOrSit = (meal, stn) => {
     if (!meal || !station) return;
+
     if (canadian_airport_codes.includes(stn)) {
       return meal.canChar;
     } else if (american_airport_codes.includes(stn)) {
@@ -209,64 +206,6 @@ export default async function getMealsFromSequenceDom(
       return meal.intChar;
     }
   };
-
-  // const getFlightDays = (s, e, len, isDH, startStation, endStation) => {
-  //   if (!s || !e || !len || !startStation || !endStation) return 0;
-
-  //   // start time (departure)
-  //   const startHH = Number(s.slice(0, -2));
-  //   const startMM = Number(s.slice(-2));
-  //   // const startTZ = getTimezone(startStation);
-  //   const startTZ = timezones[startStation];
-  //   const startTime = dayjs()
-  //     .set('hour', startHH)
-  //     .set('minute', startMM)
-  //     .tz(startTZ, true);
-  //   // end time (arrival)
-  //   const endHH = Number(e.slice(0, -2));
-  //   const endMM = Number(e.slice(-2));
-  //   // const endTZ = getTimezone(endStation);
-  //   const endTZ = timezones[endStation];
-  //   const endTime = dayjs()
-  //     .set('hour', endHH)
-  //     .set('minute', endMM)
-  //     .tz(endTZ, true);
-  //   const offset = startTime.$offset - endTime.$offset;
-
-  //   // flight time
-  //   const durHH = Number(len.slice(0, -2));
-  //   const durMM = Number(len.slice(-2));
-
-  //   let calculatedFlightTime;
-
-  //   if (endTime.isBefore(startTime)) {
-  //     calculatedFlightTime = dayjs
-  //       .duration({ hours: 24 })
-  //       .subtract({ hours: startHH, minutes: startMM })
-  //       .add({ hours: endHH, minutes: endMM });
-  //   } else {
-  //     calculatedFlightTime = dayjs
-  //       .duration(endTime.diff(startTime))
-  //       .subtract({ minutes: offset });
-  //   }
-
-  //   let flightLength = dayjs.duration({ hours: durHH, minutes: durMM });
-
-  //   if (isDH) {
-  //     // double to flight length to complesate for 1/2 credit
-  //     flightLength.add({ hours: durHH, minutes: durMM });
-  //   }
-
-  //   const lengthDayOne = dayjs
-  //     .duration({ hours: 24 })
-  //     .subtract({ hours: startHH, minutes: startMM });
-
-  //   if (lengthDayOne > calculatedFlightTime) {
-  //     return 0;
-  //   } else {
-  //     return 1;
-  //   }
-  // };
 
   const getLayoverDays = (s, e, len, dhBefore, dhAfter, loc) => {
     if (!s || !e || !len) return;
@@ -322,10 +261,7 @@ export default async function getMealsFromSequenceDom(
       .subtract(1, 'hour');
     const dutyEnd = dutyStart
       .add(tafb.slice(0, -2), 'hours')
-      .add(tafb.slice(-2), 'minutes');
-
-    console.log(`dutyStart: ${dutyStart.tz(dTZ).format(dF)}`); //-----------------------FIX WITH PARSEASFLIGHT LOGIC FOR A/C
-    console.log(`dutyStart: ${dutyEnd.tz(dTZ).format(dF)}`);
+      .add(tafb.slice(-2), 'minutes'); //-----------------------FIX WITH PARSEASFLIGHT LOGIC FOR A/C
 
     // CONTINUOUS DUTY DAY CDD PAIRINGS
     if (seq.length === 2) {
@@ -341,9 +277,9 @@ export default async function getMealsFromSequenceDom(
       const earliestEnd = end.isBefore(checkEnd) ? end : checkEnd;
       const overlap = earliestEnd.diff(latestStart, 'hours', false);
 
-      // console.log(
-      //   `CDD || latestStart: ${latestStart.format('HH:mm')} start: ${start.format('HH:mm')} end: ${end.format('HH:mm')} | earliestEnd: ${earliestEnd.format('HH:mm')} | overlap: ${overlap}`,
-      // );
+      console.log(
+        `CDD || latestStart: ${latestStart.format('HH:mm')} start: ${start.format('HH:mm')} end: ${end.format('HH:mm')} | earliestEnd: ${earliestEnd.format('HH:mm')} | overlap: ${overlap}`,
+      );
 
       if (!start.isSame(end, 'day') && Number(tafb) > 600 && overlap >= 4) {
         // console.log(`! ${pIdentifier} night flight`);
@@ -386,9 +322,10 @@ export default async function getMealsFromSequenceDom(
           ) {
             if (meal.canChar === 'B') {
               startLoc = seq[firstDutyDept].departureAirport;
-              endLoc = startLoc;
+              mealStr += canOrUsFlight(start, meal, startLoc, startLoc) || '';
+            } else {
+              mealStr += canOrUsFlight(start, meal, startLoc, endLoc) || '';
             }
-            mealStr += canOrUsFlight(start, meal, startLoc, endLoc) || '';
             console.log(`mealStr: ${mealStr}`);
             const snackCheck =
               mealStr.at(-1) === 'S' ||
@@ -404,7 +341,9 @@ export default async function getMealsFromSequenceDom(
         //--- AIRPORT SIT
         if (next && next.type === 'flight') {
           const sitStart = curr.arrivalTime.tz(timezones['YYZ'], true);
-          const sitEnd = next.departureTime.tz(timezones['YYZ'], true);
+          const sitEnd = next.departureTime
+            // .subtract(1, 'minute')
+            .tz(timezones['YYZ'], true);
           let sitStation = curr.arrivalAirport;
           console.log(
             `\nsit ${sitStart.tz(dTZ).format('HH:mm')} - ${sitEnd.tz(dTZ).format('HH:mm')} at ${sitStation}`,
