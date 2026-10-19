@@ -10,7 +10,11 @@ const getExpensesFromDB = (code, setter) => {
 
     request2.onsuccess = () => {
       const res = request2.result.expenses;
+      if (request2.result.bracelet_provided) {
+        return false;
+      }
       setter(res);
+      return true;
     };
 
     request2.onerror = (event) => {

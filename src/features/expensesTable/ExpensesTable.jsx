@@ -48,7 +48,7 @@ const ExpensesTable = () => {
         setStation(station);
         if (na_sun_airports.includes(station)) {
           const intlExp = getExpensesFromDB(station, setIntlExpenses);
-          if (typeof intlExp === 'undefined') {
+          if (intlExp) {
             getExpensesFromDB('YYZ', setIntlExpenses);
           }
           // console.log(

@@ -48,29 +48,7 @@ export const pairingSlice = createSlice({
 
     processSequence: (state, action) => {
       for (let i = 0; i < action.payload.length; i++) {
-        // if (action.payload[i].type === 'flight') {
-        //   let f = action.payload[i];
-        //   const deptTZ = timezones[f.departureAirport];
-        //   const arrTZ = timezones[f.arrivalAirport];
-        //   f.departureTime = stringToDate(f.departureTime, f.dutyDay)
-        //     .tz(deptTZ, true)
-        //     .format('x');
-        //   // f.arrivalTime = f.departureTime
-        //   //   .add(f.flightTime.slice(0, -2), 'hour')
-        //   //   .add(f.flightTime.slice(-2), 'minute')
-        //   //   .tz(arrTZ, true);
-        //   // if (f.isDeadhead) {
-        //   //   f.arrivalTime = f.arrivalTime
-        //   //     .add(f.flightTime.slice(0, -2), 'hour')
-        //   //     .add(f.flightTime.slice(-2), 'minute');
-        //   // }
-        //   f.arrivalTime = stringToDate(f.arrivalTime, f.dutyDay)
-        //     .tz(arrTZ, true)
-        //     .format('x');
-        //   state.sequence.push(f);
-        // } else {
         state.sequence.push(action.payload[i]);
-        // }
       }
       state.layoverCount = numLayovers(state.sequence);
     },

@@ -151,16 +151,18 @@ export default function getMealsFromSequence(seq = []) {
   }
 
   //--- STEP 3: Calculate meals for international layover.
-  // console.log(`! ${intLayoverIndex}`);
-  const station = seq[intLayoverIndex].layoverStation || 'LHR';
-
-  const layoverMeals = calcMealsIntLayover(
-    seq[intLayoverIndex].layoverStart,
-    seq[intLayoverIndex].layoverEnd,
-    seq[intLayoverIndex].layoverLength,
-  );
-
-  layoverMeals && pushMeals(layoverMeals);
+  let station;
+  if (intLayoverIndex && seq[intLayoverIndex].layoverStation) {
+    station = seq[intLayoverIndex].layoverStation || 'LHR';
+    const layoverMeals = calcMealsIntLayover(
+      seq[intLayoverIndex].layoverStart,
+      seq[intLayoverIndex].layoverEnd,
+      seq[intLayoverIndex].layoverLength,
+    );
+    layoverMeals && pushMeals(layoverMeals);
+  } else if (seq && seq.length === 2) {
+    station = seq[0].arrivalAirport;
+  }
 
   //--- STEP 4: Loop through domestic segment following international arrival to determine start time, end time, and length,
   //--- then calculate meals for the segment.
