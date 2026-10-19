@@ -1,8 +1,9 @@
 import getMealsFromSequence from '../modules/getMealsFromSequence';
 import getMealsFromSequenceDom from '../modules/getMealsFromSequenceDom';
 import calculateDisplayTotal from '../modules/calcDisplayTotal';
+import na_sun_airports from '../data/na_sun_airports';
 import international_airport_codes from '../data/international_airport_codes';
-import ignoreList from '../data/ignoreList';
+import sun_domestic_airport_codes from '../data/sun_domestic_airport_codes';
 
 const calcNumLayovers = (s) => {
   let layoverCount = 0;
@@ -147,9 +148,9 @@ export async function runCheckAllPairings(min, max) {
     p.sequence.forEach((s) => {
       if (s.type === 'flight') arrivalStations.push(s.arrivalAirport);
     });
-    // if (!ignoreList.includes(p.pairingIdentifier)) {
-    numberOfTests++;
+
     if (p.pairingIdentifier >= min && p.pairingIdentifier <= max) {
+      numberOfTests++;
       try {
         if (
           arrivalStations.some((s) => international_airport_codes.includes(s))
@@ -164,8 +165,8 @@ export async function runCheckAllPairings(min, max) {
           const calc = calculateDisplayTotal(
             meals || [],
             caRates || {},
-            null, //usRates
-            intlRates || {},
+            usRates || {},
+            intlRates || caRates,
             numLayovers || undefined,
           );
           const calcRounded = Number(calc);
@@ -182,20 +183,24 @@ export async function runCheckAllPairings(min, max) {
               )}`,
             );
           }
-        } else if (p.pairingNumber >= 7000) {
+        } else if (arrivalStations.every((s) => na_sun_airports.includes(s))) {
           const seq = p.sequence || [];
           const numLayovers = calcNumLayovers(seq) || 0;
           const parsedAllowance = asNumber(p.totalAllowance);
-          const { meals, station: usStation } = await getMealsFromSequenceDom(
+          const { meals: meals, station: stn } = await getMealsFromSequenceDom(
             p.pairingIdentifier,
             seq || [],
             p.tafb,
           );
+          let intlRates = caRates;
+          if (sun_domestic_airport_codes.includes(stn)) {
+            intlRates = await fetchExpensesForStation(stn);
+          }
           const calc = calculateDisplayTotal(
             meals || [],
             caRates || {},
             usRates || {},
-            null, // intlRates
+            intlRates,
             numLayovers || undefined,
           );
           const calcRounded = Number(calc);
