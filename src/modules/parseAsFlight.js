@@ -94,7 +94,14 @@ const parseAsFlight = (pairingSequence, array, index, isLastFlight) => {
     if (array[6] && array[6].match(/[0-9]{3,4}/g)) {
       newFlight.dutyTime = array[6];
     } else if (array[6] && array[6].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
-      newFlight.mealsOnboard = array.slice(6, array.length);
+      newFlight.mealsOnboard = [];
+      for (let i = 6; i < array.length; i++) {
+        if (array[i].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
+          newFlight.mealsOnboard += array[i];
+        } else {
+          continue;
+        }
+      }
     } else if (
       array[6] &&
       array[6].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
@@ -108,7 +115,14 @@ const parseAsFlight = (pairingSequence, array, index, isLastFlight) => {
     if (array[7] && array[7].match(/[0-9]{3,4}/g)) {
       newFlight.layoverLength = array[7];
     } else if (array[7] && array[7].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
-      newFlight.mealsOnboard = array.slice(7, array.length);
+      newFlight.mealsOnboard = [];
+      for (let i = 7; i < array.length; i++) {
+        if (array[i].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
+          newFlight.mealsOnboard += array[i];
+        } else {
+          continue;
+        }
+      }
     } else if (
       array[7] &&
       array[7].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)
@@ -120,7 +134,14 @@ const parseAsFlight = (pairingSequence, array, index, isLastFlight) => {
 
     // array[8]: meal allowance OR meals onboard
     if (array[8] && array[8].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
-      newFlight.mealsOnboard = array.slice(8, array.length);
+      newFlight.mealsOnboard = [];
+      for (let i = 8; i < array.length; i++) {
+        if (array[i].match(/(HB|CB|HL|HD|FB|SS|PP|MS)/g)) {
+          newFlight.mealsOnboard += array[i];
+        } else {
+          continue;
+        }
+      }
     } else if (
       array[8] &&
       array[8].match(/^(?!HB)(?!CB)(?!HL)(?!HD)(?!SS)[BLDS]+/g)

@@ -9,12 +9,22 @@ const getExpensesFromDB = (code, setter) => {
     const request2 = airportCodesIndex.get(code);
 
     request2.onsuccess = () => {
-      const res = request2.result.expenses;
       if (request2.result.bracelet_provided) {
         return false;
+      } else if (request2.result.expenses) {
+        setter(request2.result.expenses);
+        return true;
+      } else {
+        return false;
       }
-      setter(res);
-      return true;
+      // const res = request2.result.expenses;
+      // console.log(JSON.stringify(request2.result));
+      // if (request2.result.bracelet_provided) {
+      //   return false;
+      // } else if (res) {
+      //   setter(res);
+      //   return true;
+      // }
     };
 
     request2.onerror = (event) => {

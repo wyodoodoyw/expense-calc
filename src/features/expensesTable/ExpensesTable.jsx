@@ -48,12 +48,9 @@ const ExpensesTable = () => {
         setStation(station);
         if (na_sun_airports.includes(station)) {
           const intlExp = getExpensesFromDB(station, setIntlExpenses);
-          if (intlExp) {
+          if (!intlExp) {
             getExpensesFromDB('YYZ', setIntlExpenses);
           }
-          // console.log(
-          //   `intlExp: ${JSON.stringify(intlExpenses)} for ${station}`,
-          // );
         }
       };
 
@@ -102,6 +99,15 @@ const ExpensesTable = () => {
     );
 
     setDisplayTotal(total.toFixed(2));
+    // if (total !== p.totalAllowance) {
+    // console.log(
+    //   `Mismatch: Pairing ${
+    //     p.pairingIdentifier
+    //   } -> parsed: ${p.totalAllowance}, calculated: ${total}, diff: ${(
+    //     p.totalAllowance - total
+    //   ).toFixed(2)}`,
+    // );
+    // }
   }, [meals, caExpenses, usExpenses, intlExpenses, numLayovers]);
 
   return (
@@ -201,14 +207,6 @@ const ExpensesTable = () => {
           </>
         )}
       </tbody>
-      {/* <tfoot>
-        <tr>
-          <td colSpan={5}>* US meals shown in CAD</td>
-        </tr>
-        <tr>
-          <td colSpan={5}>** Sun Destination meals shown in CAD</td>
-        </tr>
-      </tfoot> */}
     </table>
   );
 };

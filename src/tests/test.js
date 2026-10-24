@@ -75,7 +75,6 @@ async function fetchExpensesForStation(station) {
             const idx = tx.objectStore(s).index(idxName);
             const req = idx.get(station);
             req.onsuccess = () => {
-              // console.log(`by station: ${JSON.stringify(req.result)}`);
               resolve(req.result);
             };
             req.onerror = () => resolve(undefined);
